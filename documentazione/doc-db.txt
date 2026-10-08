@@ -1,0 +1,378 @@
+
+// TABELLA PER REGISTRARE USER
+Tabella User:
+id -> Uuid
+name
+surname
+email
+password
+email_verified
+last_login_at
+created_at
+updated_at
+softDelete 
+rememberToken
+
+// ======================================================================================
+
+
+// TABELLA PER PASSWORD RESET TOKEN
+Tabella Pass_reset_Token
+email 
+token 
+created_at
+
+// ======================================================================================
+
+
+// TABELLA 'COMPANIES' - Rappresenta il Tenant(singola azienda)
+// ESSO VERRà COLLEGATO A USER TRAMITE TABELLA PIVOT COMPANIES_USER 
+id -> Uuid
+name -> nome azienda
+legal_name -> ragione sociale ()
+vat_number -> partita iva 
+tax_code -> codice fiscale 
+address -> indirizzo tenant/azienda 
+postal_code -> CAP 
+city -> città azienda 
+province -> provincia azienda 
+email -> email aziendale 
+phone -> telefono aziendale 
+website -> sito web (se disponibile) 
+logo_path -> percorso di path per immagine logo 
+timestamps -> created e updated_at
+INDEX: vat_number, email
+
+// ======================================================================================
+
+//TABELLA COMPANIES_USER 
+// TABELLA PIVOT CHE COLLEGA COMPANIES A USERS
+
+
+ID -> UUID 
+company_id -> id di company -> foreignKey con ID di companies ->chiave constrained
+user_id -> id dello user -> foreign key con ID di user -> chiave constrained
+role -> ruolo dell'user 
+joined_at -> quando l'utente è stato 'collegato'
+timestamps -> created_at e updated_at
+
+//NOTE
+Perché usare una pivot?
+
+Anche se inizialmente ogni utente potrebbe appartenere a una sola azienda, una relazione molti-a-molti permette di supportare successivamente:
+
+User
+ ├── Company A
+ └── Company B
+
+senza dover rifare completamente il modello dati.
+
+È una scelta orientata alla scalabilità del dominio.
+
+// ======================================================================================
+
+//TABELLA COMPANY_SETTINGS
+// TABELLA PER LE IMPOSTAZIONI DELLA COMPANY/AZIENDA/TENANT CHE VERRANNO SEPARATE DALLA TABELLA COMPANIES 
+id -> uuid 
+company_id -> foreign key -> collegamento 1->1 poichè l'azienda ha un solo settaggio 
+quote_prefix -> string -> come l'azienda vuole impostare prefisso del preventivo (es. PREV-0001 oppure AZI-0002) 
+quote-start-number -> da quale numero partire coi preventivo (es. 100 si parte con PREV-100) 
+default_vat_rate -> aliquota iva predefinita dall'azienda
+quote_validity_days -> per quanti giorni vale un preventivo (scadenze imposte dall'azienda)
+default_currency -> indica la valuta (EUR,USD,ecc)
+default_note -> note che si possono automaticamente aggiungere ai preventivi
+default_terms -> condizioni generali predefinite per i preventivi (quotes)
+timestamps -> created_at e updated_at
+
+
+// ======================================================================================
+
+// TABELLA CLIENTS
+// TABELLA CHE RAPPRESENTA I CLIENTI DELL'AZIENDA
+name,surname,company_name,tax_code e vat_number saranno nullable poichè un azienda non continee nome e cognome e una persona può non avere vat_number
+
+id-> uuid 
+company_id -> collegamento a company_id con foreign_key
+type -> che tipo di cliente? PERSON = utente fisico , AZIENDA = cliente è un azienda
+name -> nome cliente -> nullable
+surname -> cognome cliente -> nullable
+company_name -> nome azienda cliente -> nullable
+email -> email cliente 
+phone -> telefono cliente 
+address -> indirizzo cliente 
+postal_code -> CAP cliente 
+province -> provincia cliente (RM,NA,MI)
+city -> città cliente 
+tax_code -> codice fiscale -> nullable 
+vat_number -> p.iva cliente (se in possesso) -> nullable() 
+notes -> note del cliente 
+timestamps -> created_at e updated_at 
+
+INDIICI TABELLA:
+index (company_id,email) -> unique // evitiamo duplicazioni cliente con company_id
+index(company_id,phone)
+index (company_id,lastname)
+
+// ======================================================================================
+
+//TABELLA PRODUCT_CATEGORIES
+// tabella per le categorie di prodotti (es. Termoidraulica ha come categorie Caldaie,Climatizzatori,Manodopera,)
+
+id -> uuid
+company_id -> collegamento alla company -> foreignkey 
+name -> nome categoria (es. Manodopera,Caldaie,Climatizzatori)
+description -> descrizioen categoria (es. Caldaie: Caldaie murali, a condensazione e relativi accessori per il riscaldamento.)
+timestamps -> created_at e updated_at 
+deleted_at -> in caso di soft delete 
+
+// ======================================================================================
+
+//TABELLA PRODUCTS 
+// tabella per i prodotti in magazzino 
+
+id -> uuid 
+company_id -> foreignKey con company -> nullable();
+category_id -> foreign_key con tabell products_categories -> nullable()
+code -> codice del prodotto 
+name -> nome preodotto 
+description -> descrizione del prodotto 
+unit -> unità del prodotto (es. al pezzo:pz, al metro:m, ecc.) (una caldaia ha un unit di pz poichè parlaimo di pezzi);
+sale_price -> prezzo al pubblico 
+cost_price -> prezzo di acquisto dell'azienda (es: Caldaio ha un cost_price di 400 e sale_price di 600)
+vat_rate -> iva sul prodotto 
+is_active -> se prodotto è attivo o in magazzino 
+timestamps -> created_at e updated_at
+deleted_at -> soft delete
+
+//INDEX
+index(company_id,category_id)
+index(company_id,name)
+
+//NOTE:
+È utile distinguere:
+
+cost_price
+sale_price
+
+Esempio:
+
+Costo aziendale:     € 800
+Prezzo vendita:     € 1.100
+
+Il cliente deve vedere:
+
+€ 1.100
+
+ma non:
+
+€ 800
+
+cost_price è quindi un dato interno.
+
+Questo permette in futuro di calcolare:
+
+Margine = Prezzo vendita - Costo
+
+La funzionalità avanzata di analisi del margine può essere implementata successivamente.
+
+// ======================================================================================
+// TABELLA QUOTES (PREVENTIVI)
+
+id -> uuid 
+company_id -> foreign_key che collega a tenant 
+client_id -> foreign_key che collega al cliente 
+created_by -> foreign_key che lo collega a user (chi ha creato questo preventivo)
+number -> numero commerciale preventivo preventivo (es. PREV-2026-001) 
+version -> versione preventivo -> (es. invio preventivo versione 1, se dopo aggiungo modifiche passa a version 2)
+status -> stato preventivo ('inviato','accettato','rifiutato',ecc)
+title -> titolo preventivo (es. Sostituzione caldaia)
+description -> descrizione più dettagliata del lavoro (es. Fornitura e installazione di una nuova caldaia a condensazione, compreso adeguamento dei collegamenti idraulici e collaudo finale.) 
+subtotal -> totale del prezzo dei prodotti senza scontistica (es. caldaia 1000 + manodopera 500 = subtotal 1500)
+discount_total -> prezzo finale con sconto -> (es. caldaia 1000 + mano d'opera 5000 = subtotal 1500 + sconto 50% = discount_total 750)
+taxable_amount -> importo in cui viene calcolata l'iva (es. caldaia 1500 + manodopera 500 + no sconti = 1500 di prezzo da tassare)
+tax_total -> totale iva (quanto si è pagato di iva per quel preventivo es. preventivo viene 1500 euro e di tax_total sarà il 22%(esempio) di 1500)
+total -> prezzo finale del preventivo (compreso di tutto anche di iva)
+currency -> valuta (es. EUR,USD)
+valida_until -> preventivo valido fino a 
+sent_at -> quando è stato inviato il preventivo 
+viewed_at -> quando il cliente ha visualizzato preventivo 
+accepted_at -> quando il preventivo è stato accettato 
+rejected_at -> quando il preventivo è stato rifiutato 
+timestamps -> created_at e updated_at 
+deleted_at -> softDelete
+
+//INDEX 
+
+//CONSTRAINED 
+unique(company_id,number) // evitiamo duplicazioni con company e numero preventivo
+index (compnay__id,staus)
+index('company_id','client_id')
+
+// ======================================================================================
+//TABELLA QUOTES ITEM
+// tabella per ogni item (voce) del preventivo
+
+id -> uuid 
+quote_id -> collegamento al quote (preventivo) -> foreignKey con quote relazione N->1 (una quote ha tanti item)
+product_id -> collegamento al product -> foreignkey con products -> nullable poichè in un preventivo può non esserci qualcosa (es. consulenza) 
+description -> descrizione item (es. inserimento del nome del prodotto es. Caldaia Vailant 24kw, se domani cambiamo product qui non cambia) (è come uno storico degli item)
+unit -> unità di misura dell'item (es. metri:m,pezzi:pz,ore:h)
+quantity -> quanti pezzi stai vendendo (es. caldaia 2 quantity)
+unit_price -> prezzo per ogni singola unità (es. tubo 15$ al m)
+discount_type -> indica come viene applicato lo sconto (es. percentuale o sconto fisso) -> nullable
+discount_values -> valore dello sconto (es. se type è percentiual e value è 10 allora si applicherà sconto del 10% se fixed allora sconto di 10 $)
+vat_race -> iva applicata al singolo pezzo (item)
+tax_amount -> importo iva da pagare per ogni singolo pezzo 
+total -> prezzo finale compreso di scontistica e iva 
+sort_order -> ordine dell'item su preventivo (es. caldaia sort_order 1, tubo sort_order 2,ecc)
+timestamps() -> created_at e updated_at 
+
+//index 
+
+
+//---------->NOTE
+Potrebbe sembrare ridondante avere:
+
+products.name
+products.sale_price
+
+e contemporaneamente:
+
+quote_items.description
+quote_items.unit_price
+
+Ma è necessario per lo snapshot storico.
+
+Il prodotto può cambiare.
+
+Il preventivo no.
+
+Esempio:
+
+PRODUCT
+sale_price = 1500
+
+Al momento della creazione:
+
+QUOTE_ITEM
+unit_price = 1350
+description = "Caldaia a condensazione..."
+
+Il valore del preventivo rimane quindi indipendente dal catalogo corrente.
+
+
+// ======================================================================================
+//TABELLA QUOTE_STATUS_HISTORY
+// TABELLA CHE REGISTRA GLI STATI DI UNA QUOTE (STORICO)
+
+id -> uuid()
+quote_id -> foreignkey che collega a quote 
+from_status -> stato precedente 
+to_status -> stato passato 
+changed_by -> foreignKey che collega a user (chi ha cambiato lo stato del preventivo)
+reason -> motivo -> nullable() 
+timestamps -> created_at e updated_at 
+
+//-----------> NOTE 
+Non è sufficiente avere:
+
+quotes.status
+
+perché perderemmo la storia.
+
+Con quote_status_history possiamo sapere:
+
+10:01 → DRAFT
+10:04 → SENT
+10:12 → VIEWED
+14:30 → ACCEPTED
+
+Questo permette successivamente di calcolare:
+
+tempo medio di risposta;
+tempo medio fino all'accettazione;
+conversione;
+comportamento clienti;
+performance commerciali.
+
+// ======================================================================================
+//TABELLA QUOTE_VERSION
+//TABELLA DI STORICO DELLE VERSIONI DEI QUOTE (PREVENTIVI) 
+
+ID -> uuid() 
+quote_id -> foreignKey con quote -> relazione N->1 
+version_number -> numero versione preventivo 
+created_by -> foreignKey con users 
+snapshot -> json con tutti i dati di quella versione del preventivo
+created_at -> data di creazione versione 
+
+// --------> NOTE 
+snapshot ha un json contentene tutte le info di quella versione di preventivo es:
+{
+    "title": "Installazione caldaia",
+    "description": "Fornitura e installazione",
+    "currency": "EUR",
+    "subtotal": 1400,
+    "tax_total": 300,
+    "total": 1700,
+    "items": [
+        {
+            "description": "Caldaia Vaillant 24 kW",
+            "quantity": 1,
+            "unit": "pz",
+            "unit_price": 1200,
+            "vat_rate": 10,
+            "total": 1320
+        },
+        {
+            "description": "Tubazioni",
+            "quantity": 10,
+            "unit": "m",
+            "unit_price": 30,
+            "vat_rate": 22,
+            "total": 366
+        }
+    ]
+}
+
+
+// ======================================================================================
+//TABELLA QUOTE_PUBLIC_LINK
+// tabella dove vengono salvati i token e link del preventivo da inviare al cliente (così utente vede pagina con preventivo senza invio pdf forzato (può scaricarselo))
+
+id -> uuid 
+quote_id -> foreignKey che collega a quote -> relazione N->1
+token_hash -> token hashato da salvare 
+expires_at -> scadenza token quindi scadenza accesso al sito di quote inviata al cliente
+revoked_at -> scadenza inserita manualmente da owner o admin
+last_accessed_at -> segna ultima volta che link è stato utilizzato 
+timestamps -> created_at e updated_at 
+
+//index 
+index(quote_id)
+unique('hash_token')
+
+//------> NOTE
+Questa tabella serve per salvare i token per i bearer Token.
+
+
+// ======================================================================================
+// TABELLA AUDIT lOG 
+//tabella per traccia azioni storici operazioni piattaforma 
+
+id -> uuid() 
+company_id -> foreignKey che collega a companies/tenant -> nullable() -> compagnai /tenant che esegue azione
+user_id -> foreignKey che collega a user -> nullable() -> chi ha eseguito l'azione
+action -> azione effettuata -> es. owner.created (owner di company 108 ha creato)
+resource_type -> tipo di risorsa coinvolta (es. quote)
+resource_id -> id della risorsa coinvolta (es. Quote con id 109)
+metadata -> json -> serve a salvare info aggiuntive senza dover creare altre colonne
+ip_address -> memorizza ip da dove è stata effettuata l'operazione 
+user_agent -> con quale agent è stato fatta quell'azione (es. Mozilla Firefox o Opera Studio)
+created_at -> quando è stata effettuata quell azione 
+
+// index 
+index(company_id,created_at);
+index('user_id,creted_at)
+index(resource_type,resource_id)
+index(action,created_at)
