@@ -1,28 +1,38 @@
+# Environment e credenziali
+
+.env
+.env.*
+!.env.example
+
+# Laravel backend
+
+/Backend/vendor/
+/Backend/.env
+/Backend/storage/*.key
+/Backend/bootstrap/cache/*.php
+/Backend/storage/framework/views/
+
+# Next.js frontend
+
+/front-end/node_modules/
+/front-end/.next/
+/front-end/out/
+/front-end/coverage/
+
+# Log e file temporanei
+
 *.log
 .DS_Store
-.env
-.env.backup
-.env.production
-.phpactor.json
-.phpunit.result.cache
-/.codex
-/.cursor/
-/.idea
-/.nova
-/.phpunit.cache
-/.vscode
-/.zed
-/auth.json
-/node_modules
-/public/build
-/public/fonts-manifest.dev.json
-/public/hot
-/public/storage
-/storage/*.key
-/storage/pail
-/vendor
-_ide_helper.php
-Homestead.json
-Homestead.yaml
 Thumbs.db
-/documentazione/
+
+# IDE e strumenti
+
+.idea/
+.vscode/
+.cursor/
+.codex/
+
+# File temporanei e di sistema
+
+*.tmp
+*.swp
