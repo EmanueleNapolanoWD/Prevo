@@ -24,7 +24,7 @@ return new class extends Migration
             $table->decimal('vat_rate', 5,2);
             $table->boolean('is_active')->default(true);
             $table->timestamps();
-            $table->timestamp('deleted_at')->nullable();
+            $table->softDeletes();
 
             // indici
             $table->index(['company_id','category_id']);

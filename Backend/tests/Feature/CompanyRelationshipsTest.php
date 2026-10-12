@@ -91,16 +91,45 @@ class CompanyRelationshipsTest extends TestCase
         $suffix = Str::lower(Str::random(10));
 
         return Company::create([
-            'name' => 'Azienda ' . $suffix,
-            'legal_name' => 'Azienda Test ' . $suffix,
-            'vat_number' => 'IT' . $suffix,
-            'tax_code' => 'CF' . $suffix,
+            'name' => 'Azienda '.$suffix,
+            'legal_name' => 'Azienda Test '.$suffix,
+            'vat_number' => 'IT'.$suffix,
+            'tax_code' => 'CF'.$suffix,
             'address' => 'Via Roma 10',
             'postal_code' => '80100',
             'city' => 'Napoli',
             'province' => 'NA',
-            'email' => $suffix . '@example.com',
-            'phone' => '3' . $suffix,
+            'email' => $suffix.'@example.com',
+            'phone' => '3'.$suffix,
         ]);
+    }
+
+    public function test_switching_tenant_changes_the_current_company(): void
+    {
+        $companyA = $this->createCompany();
+        $companyB = $this->createCompany();
+
+        try {
+            $companyA->makeCurrent();
+
+            $this->assertSame(
+                (string) $companyA->getKey(),
+                (string) Company::current()->getKey()
+            );
+
+            $companyB->makeCurrent();
+
+            $this->assertSame(
+                (string) $companyB->getKey(),
+                (string) Company::current()->getKey()
+            );
+
+            $this->assertTrue($companyB->isCurrent());
+            $this->assertFalse($companyA->isCurrent());
+        } finally {
+            Company::forgetCurrent();
+        }
+
+        $this->assertFalse(Company::checkCurrent());
     }
 }

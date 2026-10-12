@@ -27,6 +27,7 @@ return new class extends Migration
             $table->decimal('total',12,2);
             $table->integer('sort_order')->default(0);
             $table->timestamps();
+            $table->softDeletes();
 
             //index
             $table->index(['quote_id','sort_order']);

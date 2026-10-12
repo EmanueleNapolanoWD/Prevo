@@ -26,6 +26,7 @@ return new class extends Migration
             $table->string('website', 255)->nullable(); // eventuale sito azienda
             $table->string('logo_path', 500)->nullable(); // path del logo azienda
             $table->timestamps();
+            $table->softDeletes();
 
         });
     }

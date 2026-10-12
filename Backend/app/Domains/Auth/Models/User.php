@@ -6,6 +6,7 @@ namespace App\Domains\Auth\Models;
 
 use App\Domains\Companies\Models\Company;
 use App\Domains\Companies\Models\CompanyUser;
+use App\Domains\Quotes\Models\Quote;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -63,5 +64,11 @@ class User extends Authenticatable
     public function companyUsers(): HasMany
     {
         return $this->hasMany(CompanyUser::class, 'user_id');
+    }
+
+    // collegamento a quotes
+    public function quotes(): HasMany
+    {
+        return $this->hasMany(Quote::class, 'created_by');
     }
 }

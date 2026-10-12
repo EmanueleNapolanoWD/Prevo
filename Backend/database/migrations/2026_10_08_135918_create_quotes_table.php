@@ -33,7 +33,7 @@ return new class extends Migration
             $table->timestamp('accepted_at')->nullable();
             $table->timestamp('rejected_at')->nullable();
             $table->timestamps();
-            $table->timestamp('deleted_at')->nullable();
+            $table->softDeletes();
 
             //index
             $table->unique(['company_id','number']);
