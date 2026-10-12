@@ -4,8 +4,12 @@ namespace App\Providers;
 
 use App\Domains\Clients\Models\Client;
 use App\Policies\ClientPolicy;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Validation\Rules\Password;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -22,7 +26,28 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // GATES
+
+        // Politica password unica per tutta l'app
+        Password::defaults(fn () => app()->isProduction()
+            ? Password::min(12)->mixedCase()->numbers()->symbols()->uncompromised()
+            : Password::min(8));
+
+        /*
+         ======================> GATES
+        */
         Gate::policy(Client::class, ClientPolicy::class);
+
+        /*
+        ======================> RATE LIMITING
+        */
+
+        // Limite di richieste per il login: 10 richieste al minuto per email e IP
+        RateLimiter::for('login', fn (Request $r) => Limit::perMinute(10)->by($r->email.$r->ip()));
+
+        // Limite di richieste per la registrazione: 5 richieste al minuto per IP
+        RateLimiter::for('sign-up', fn (Request $r) => [
+            Limit::perHour(5)->by($r->ip()),
+            Limit::perDay(20)->by($r->ip()),
+        ]);
     }
 }

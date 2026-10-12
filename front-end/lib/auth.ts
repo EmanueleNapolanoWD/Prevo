@@ -9,17 +9,19 @@ import {
 } from "@/types/auth";
 import { api } from "./api";
 import { SignUpFormValues } from "./Validations/auth";
+import { redirect } from "next/navigation";
 
 export async function initializeCsrf(): Promise<void> {
   await api.get("/sanctum/csrf-cookie");
 }
 
 // SIGN-UP
-export async function registerUser(credentials: SignUpFormValues): Promise<SignUpResponse>
-{
+export async function registerUser(
+  credentials: SignUpFormValues,
+): Promise<SignUpResponse> {
   await initializeCsrf();
 
-  const response = await api.post("/api/register",credentials);
+  const response = await api.post("/api/register", credentials);
 
   return response.data;
 }
@@ -42,5 +44,10 @@ export async function getCurrentUser(): Promise<AuthUser> {
 
 // Logout
 export async function logout(): Promise<void> {
-  await api.post("/api/logout");
+  try {
+    await api.post("/api/logout");
+  } finally {
+    // Ricaricamento completo per pulire lo stato di React e le cache
+    window.location.href = "/login";
+  }
 }
