@@ -8,6 +8,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { loginSchema, type LoginFormValues } from "@/lib/Validations/auth";
+import { AuthError } from "@/lib/Api/auth";
 
 //componenti UI
 import { Button } from "@/components/ui/button";
@@ -25,7 +26,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { login } from "@/lib/auth";
+import { login } from "@/lib/Api/auth";
 
 // TYPES E INTERFACES
 interface LaravelValidatorError {
@@ -48,7 +49,7 @@ export function LoginForm({
     Partial<Record<keyof LoginFormValues, string>>
   >({});
   const [error, setError] = useState("");
-  const [isSubmitting, setIssubmitting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -71,42 +72,18 @@ export function LoginForm({
 
     setFieldErrors({});
     setError("");
-    setIssubmitting(true);
+    setIsSubmitting(true);
 
     try {
       await login(result.data);
 
-      router.replace("/dashboard");
+      router.push("/dashboard");
       router.refresh();
     } catch (err: unknown) {
-      if (axios.isAxiosError<LaravelValidatorError>(err)) {
-        const response = err.response;
-
-        if (response?.status === 422) {
-          const validationErrors = response.data?.errors;
-          const firstError = validationErrors
-            ? Object.values(validationErrors).flat()[0]
-            : undefined;
-
-          setError(
-            firstError ??
-              response.data?.message ??
-              "Le Credenziali inserite non sono valide.",
-          );
-        } else if (response?.status === 419) {
-          setError("La sessione di sicurezza è scaduta. Riprova.");
-        } else if (response) {
-          setError("Impossibile effettuare il login. Riprova!");
-        } else {
-          setError(
-            "Non riesco a contattare il server. Verifica la connessione.",
-          );
-        }
-      } else {
-        setError("Si è verificato un errore imprevisto.");
-      }
-    } finally {
-      setIssubmitting(false);
+    setError(err instanceof AuthError ? err.message : "Errore imprevisto.");
+    setIsSubmitting(false);
+  } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -156,7 +133,7 @@ export function LoginForm({
                 <div className="flex items-center">
                   <FieldLabel htmlFor="password">Password</FieldLabel>
                   <Link
-                    href="#"
+                    href="/forgot-password"
                     className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
                   >
                     Password Dimenticata?
@@ -214,7 +191,7 @@ export function LoginForm({
                   Login with Google
                 </Button>
                 <FieldDescription className="text-center">
-                  Non hai un account? <Link href="#">Registrati</Link>
+                  Non hai un account? <Link href="/sign-up">Registrati</Link>
                 </FieldDescription>
 
                 <FieldDescription className="text-center">

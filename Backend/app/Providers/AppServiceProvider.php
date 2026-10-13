@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Domains\Clients\Models\Client;
 use App\Policies\ClientPolicy;
+use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -31,6 +32,12 @@ class AppServiceProvider extends ServiceProvider
         Password::defaults(fn () => app()->isProduction()
             ? Password::min(12)->mixedCase()->numbers()->symbols()->uncompromised()
             : Password::min(8));
+
+        // Override del link di reset password per il frontend
+        ResetPassword::createUrlUsing(function ($user, string $token) {
+            return config('app.frontend_url')
+            .'/reset-password?token='.$token.'&email='.$user->getEmailForPasswordReset();
+        });
 
         /*
          ======================> GATES

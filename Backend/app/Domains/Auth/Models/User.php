@@ -17,13 +17,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 #[Fillable(['name', 'surname', 'email', 'password', 'last_login_at'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, HasUuids, Notifiable, SoftDeletes;
+    use HasApiTokens, HasFactory, HasUuids, Notifiable, SoftDeletes;
 
     /**
      * Get the attributes that should be cast.

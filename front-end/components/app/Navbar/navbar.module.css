@@ -1,0 +1,80 @@
+
+    
+  
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.94);
+  border-bottom: 1px solid #e8efeb;
+  backdrop-filter: blur(14px);
+}
+
+.navbar {
+  display: flex;
+  align-items: center;
+  max-width: 1180px;
+  height: 76px;
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: #1a4d3a;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.06em;
+  text-decoration: none;
+}
+
+.brandMark {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  color: #fff;
+  background: #1a4d3a;
+  border-radius: 9px;
+}
+
+.brandMark svg { width: 21px; height: 21px; fill: currentColor; }
+
+.desktopNav { display: flex; align-items: center; gap: 34px; margin: 0 auto; }
+.desktopNav a, .mobileMenu a { color: #1a4d3a; font-size: 14px; font-weight: 600; text-decoration: none; transition: color 180ms ease; }
+.desktopNav a { position: relative; padding: 8px 0; }
+.desktopNav a::after { position: absolute; right: 0; bottom: 2px; left: 0; height: 2px; content: ''; background: #4caf50; transform: scaleX(0); transform-origin: right; transition: transform 180ms ease; }
+.desktopNav a:hover, .desktopNav a:focus-visible { color: #4caf50; }
+.desktopNav a:hover::after, .desktopNav a:focus-visible::after { transform: scaleX(1); transform-origin: left; }
+
+.desktopCta, .mobileCta { display: inline-flex; align-items: center; justify-content: center; gap: 10px; color: #fff !important; background: #4caf50; border-radius: 999px; font-size: 14px; font-weight: 700 !important; text-decoration: none; transition: background 180ms ease, transform 180ms ease, box-shadow 180ms ease; }
+.desktopCta { min-width: 132px; padding: 13px 18px; }
+.desktopCta:hover, .mobileCta:hover, .desktopCta:focus-visible, .mobileCta:focus-visible { background: #388e3c; box-shadow: 0 8px 18px rgba(76, 175, 80, 0.22); transform: translateY(-1px); }
+
+.menuButton { display: none; border: 0; color: #1a4d3a; background: transparent; cursor: pointer; }
+.menuIcon { display: grid; gap: 5px; }
+.menuIcon span { display: block; width: 22px; height: 2px; background: currentColor; border-radius: 2px; }
+.closeIcon { display: block; font-size: 31px; font-weight: 300; line-height: 20px; }
+.mobileMenu { display: none; }
+
+@media (max-width: 760px) {
+  .navbar { height: 68px; padding: 0 20px; }
+  .brand { font-size: 22px; }
+  .brandMark { width: 30px; height: 30px; border-radius: 8px; }
+  .desktopNav, .desktopCta { display: none; }
+  .menuButton { display: grid; place-items: center; width: 42px; height: 42px; margin-left: auto; border-radius: 50%; }
+  .menuButton:hover, .menuButton:focus-visible { background: #f0f7f1; outline: none; }
+  .mobileMenu { display: grid; grid-template-rows: 0fr; overflow: hidden; transition: grid-template-rows 220ms ease; }
+  .mobileMenu nav { min-height: 0; padding: 0 20px; }
+  .mobileMenuOpen { grid-template-rows: 1fr; border-top: 1px solid #e8efeb; }
+  .mobileMenuOpen nav { padding: 10px 20px 24px; }
+  .mobileMenu nav a { display: flex; align-items: center; justify-content: space-between; padding: 16px 0; border-bottom: 1px solid #edf3ee; }
+  .mobileCta { margin-top: 14px; padding: 14px 18px; border: 0 !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .desktopNav a, .desktopNav a::after, .desktopCta, .mobileCta, .mobileMenu { transition: none; }
+}

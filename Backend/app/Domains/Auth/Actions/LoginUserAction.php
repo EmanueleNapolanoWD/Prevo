@@ -5,6 +5,8 @@ namespace App\Domains\Auth\Actions;
 use App\Domains\Auth\Models\User;
 use App\Domains\Auth\Requests\LoginUserRequest;
 use App\Domains\Auth\Supports\LoginRateLimiter;
+use App\Http\Resources\UserResource;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -18,7 +20,7 @@ class LoginUserAction
         private readonly LoginRateLimiter $limiter,
     ) {}
 
-    public function execute(LoginUserRequest $request): User
+    public function execute(LoginUserRequest $request): JsonResponse
     {
 
         // 1. Blocca PRIMA di toccare il database o l'hash
@@ -48,7 +50,10 @@ class LoginUserAction
 
         // ATTENZIONE!!!!! AGGIUNGERE AUDIT
 
-        return $user;
+        return response()->json([
+            'message' => 'Login effettuato con successo',
+            'user' => (new UserResource($user))->resolve(),
+        ]);
     }
 
     /**

@@ -1,0 +1,106 @@
+
+.container {
+  width: 100%;
+  max-width: 48rem;
+  margin-inline: auto;
+}
+
+.header {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.brand {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+.subtitle {
+  margin-top: 0.5rem;
+  color: var(--muted-foreground);
+  font-size: 0.95rem;
+}
+
+.card {
+  border-radius: 1rem;
+  box-shadow: 0 4px 20px rgb(0 0 0 / 0.04);
+}
+
+.cardTitle {
+  font-size: 1.5rem;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.sectionTitle {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+  font-weight: 600;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+}
+
+.required {
+  color: var(--destructive);
+}
+
+.fieldError {
+  color: var(--destructive);
+  font-size: 0.875rem;
+}
+
+.serverError {
+  padding: 0.875rem 1rem;
+  border: 1px solid var(--destructive);
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--destructive) 8%, transparent);
+  color: var(--destructive);
+  font-size: 0.875rem;
+}
+
+.requiredNote {
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+}
+
+.submitButton {
+  width: 100%;
+}
+
+.loginText {
+  text-align: center;
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+}
+
+.loginLink {
+  color: var(--primary);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.loginLink:hover {
+  text-decoration: underline;
+}
+
+@media (min-width: 640px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

@@ -4,17 +4,14 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ClientController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('throttle:5,1')->post(
-    '/login',
-    [AuthController::class, 'login']
-);
-
-Route::middleware('throttle:5,1')->post(
-    '/register',
-    [AuthController::class, 'registerUser']
-);
+Route::middleware('throttle:5,1')->post('/login', [AuthController::class, 'login']);
+Route::middleware('throttle:5,1')->post('/register', [AuthController::class, 'registerUser']);
+Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->middleware('throttle:5,1');
+Route::post('/reset-password', [AuthController::class, 'resetPassword'])->middleware('throttle:5,1');
 
 Route::middleware('auth:sanctum')->group(function () {
+
+    // ROTTE USER
     Route::get('/user', [AuthController::class, 'user']);
     Route::post('/logout', [AuthController::class, 'logout']);
 

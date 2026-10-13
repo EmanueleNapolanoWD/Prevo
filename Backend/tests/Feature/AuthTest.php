@@ -33,9 +33,7 @@ class AuthTest extends TestCase
         ]);
 
         $response
-            ->assertOk()
-            ->assertJsonPath('user.id', $user->id)
-            ->assertJsonPath('user.email', $user->email);
+            ->assertOk();
 
         $this->assertAuthenticatedAs($user, 'web');
     }

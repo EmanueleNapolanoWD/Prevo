@@ -5,7 +5,9 @@ namespace App\Domains\Auth\Actions;
 use App\Domains\Auth\Models\User;
 use App\Domains\Auth\Requests\RegisterUserRequest;
 use App\Domains\Companies\Models\Company;
+use App\Http\Resources\UserResource;
 use Illuminate\Database\UniqueConstraintViolationException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -13,7 +15,7 @@ use Illuminate\Validation\ValidationException;
 
 class RegisterUserAction
 {
-    public function execute(RegisterUserRequest $request): User
+    public function execute(RegisterUserRequest $request): JsonResponse
     {
         $validated = $request->validated();
 
@@ -73,6 +75,9 @@ class RegisterUserAction
 
         $request->session()->regenerate();
 
-        return $user;
+        return response()->json([
+            'message' => 'Registrazione effettuata con successo',
+            'user' => (new UserResource($user))->resolve(),
+        ], 201);
     }
 }
