@@ -1,5 +1,7 @@
 import "server-only";
+import { serverApi } from "./server-api";
 import type { AuthUser } from "@/types/auth";
+import axios from "axios";
 
 export async function getSessionUser(
   cookieHeader: string | null,
@@ -7,31 +9,24 @@ export async function getSessionUser(
   if (!cookieHeader) return null;
 
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user`, {
+    const res = await serverApi.get("/api/user", {
       headers: {
-        cookie: cookieHeader,
-        accept: "application/json",
-        origin: process.env.FRONTEND_URL!,
-        referer: `${process.env.FRONTEND_URL}/`,
+        Cookie: cookieHeader,
       },
-      cache: "no-store",
-      redirect: "manual",
-      signal: AbortSignal.timeout(3000),
     });
 
-    if (!res.ok) {
-      const responseBody = await res.text();
+    if (res.status !== 200) return null;
 
-      console.error("[getSessionUser] Errore API", {
-        status: res.status,
-        statusText: res.statusText,
-        body: responseBody,
+    return res.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error("[getSessionUser]", {
+        status: error.response?.status,
+        message: error.message,
       });
-
-      return null;
+    } else {
+      console.error("[getSessionUser] Errore inatteso", error);
     }
-    return (await res.json()) as AuthUser;
-  } catch {
     return null;
   }
 }

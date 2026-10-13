@@ -6,20 +6,26 @@ const SESSION_COOKIE = process.env.SESSION_COOKIE_NAME ?? "laravel-session";
 export async function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
 
-  const isAuthenticated = request.cookies.get("laravel-session");
-
   const isAuthPage =
     pathname.startsWith("/login") ||
     pathname.startsWith("/sign-up") ||
     pathname.startsWith("/forgot-password");
   const isProtected = pathname.startsWith("/dashboard");
 
-  // soft control - se non ha cookie non parte richiesta
   const hasCookie = request.cookies.has(SESSION_COOKIE);
+
+  const cookie = request.headers.get("cookie");
+
   const user = hasCookie
-    ? await getSessionUser(request.headers.get("cookie"))
+    ? await getSessionUser(cookie)
     : null;
 
+  console.log("[proxy]", pathname, {
+    cookies: request.cookies.getAll().map((c) => c.name),
+    expected: SESSION_COOKIE,
+    hasCookie,
+    user: !!user,
+  });
   if (isAuthPage && user) {
     return NextResponse.redirect(new URL("/", request.url));
   }
@@ -34,5 +40,10 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/login/:path*", "/sign-up/:path*", "/dashboard/:path*"],
+  matcher: [
+    "/login/:path*",
+    "/sign-up/:path*",
+    "/forgot-password/:path*",
+    "/dashboard/:path*",
+  ],
 };
