@@ -32,7 +32,7 @@ services:
     mysql:
         image: 'mysql:8.4'
         ports:
-            - '${FORWARD_DB_PORT:-3306}:3306'
+            - '3307:3306'
         environment:
             MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
             MYSQL_ROOT_HOST: '%'
@@ -123,6 +123,8 @@ services:
             SESSION_COOKIE_NAME: ${SESSION_COOKIE_NAME:-prevo_session}
         depends_on:
             - laravel.test
+        networks:
+            - sail
 networks:
     sail:
         driver: bridge

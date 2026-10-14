@@ -33,7 +33,7 @@ const data = {
       ),
     },
     {
-      title: "Lifecycle",
+      title: "Preventivi",
       url: "#",
       icon: (
         <ListIcon
@@ -41,7 +41,7 @@ const data = {
       ),
     },
     {
-      title: "Analytics",
+      title: "Clienti",
       url: "#",
       icon: (
         <ChartBarIcon
@@ -49,7 +49,7 @@ const data = {
       ),
     },
     {
-      title: "Projects",
+      title: "Catalogo",
       url: "#",
       icon: (
         <FolderIcon
@@ -57,12 +57,36 @@ const data = {
       ),
     },
     {
+      title: "Assistente AI",
+      url: "#",
+      icon: (
+        <UsersIcon
+        />
+      ),      
+    },
+    {
+      title: "Report",
+      url: "#",
+      icon: (
+        <UsersIcon
+        />
+      ),      
+    },
+    {
       title: "Team",
       url: "#",
       icon: (
         <UsersIcon
         />
-      ),
+      ),      
+    },
+    {
+      title: "Integrazioni",
+      url: "#",
+      icon: (
+        <UsersIcon
+        />
+      ),      
     },
   ],
   navClouds: [

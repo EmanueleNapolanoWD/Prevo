@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Domains\Clients\Models\Client;
+use App\Domains\Clients\Requests\StoreClientRequest;
+use App\Domains\Companies\Models\Company;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -26,6 +28,28 @@ class ClientController extends Controller
             ->paginate(15);
 
         return response()->json($clients);
+    }
+
+    public function store(
+        StoreClientRequest $request,
+        string $companyId
+    ): JsonResponse {
+        $this->ensureCompanyMembership($request, $companyId);
+
+        $this->authorize('create', [
+            Client::class,
+            $companyId
+        ]);
+
+        $company = Company::query()
+            ->findOrFail($companyId);
+
+        $client = $company->clients()->create($request->validated());
+
+        return response()->json([
+            'message' => 'Cliente creato correttamente',
+            'data' => $client,
+        ], 201);
     }
 
     public function show(

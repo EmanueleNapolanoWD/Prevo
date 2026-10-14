@@ -1,13 +1,23 @@
-import { AppSidebar } from "@/components/app/DashboardUI/app-sidebar"
-import { ChartAreaInteractive } from "@/components/app/DashboardUI/chart-area-interactive"
-import { DataTable } from "@/components/app/DashboardUI/data-table"
-import { SectionCards } from "@/components/app/DashboardUI/section-cards"
-import { SiteHeader } from "@/components/app/DashboardUI/site-header"
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
+import { AppSidebar } from "@/components/app/DashboardUI/app-sidebar";
+import { ChartAreaInteractive } from "@/components/app/DashboardUI/chart-area-interactive";
+import { DataTable } from "@/components/app/DashboardUI/data-table";
+import { SectionCards } from "@/components/app/DashboardUI/section-cards";
+import { SiteHeader } from "@/components/app/DashboardUI/site-header";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
-import data from "./data.json"
+import data from "./data.json";
 
-export default function Page() {
+type CompanyDashboardPageProps = {
+  params: Promise<{
+    slug: string;
+  }>;
+};
+
+export default async function CompanyDashboardPage({
+  params,
+}: CompanyDashboardPageProps) {
+  const { slug } = await params;
+
   return (
     <SidebarProvider
       style={
@@ -33,5 +43,5 @@ export default function Page() {
         </div>
       </SidebarInset>
     </SidebarProvider>
-  )
+  );
 }

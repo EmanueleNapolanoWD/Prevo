@@ -1,3 +1,5 @@
+import { Company } from "./company";
+
 //TYPER PER REGISTER
 export interface SignUpResponse {
     message: string;
@@ -10,10 +12,12 @@ export interface AuthUser {
     name: string;
     surname: string;
     email: string;
+    companies?: Array<Company>;
     last_login_at: string|null;
     created_at: string;
     updated_at: string;
 }
+
 
 export interface AuthResponse {
     message: string;
@@ -48,3 +52,4 @@ export interface RegisterUser {
     surname: string;
     email: string;
 }
+

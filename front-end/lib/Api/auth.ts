@@ -52,7 +52,9 @@ function toAuthError(
 }
 
 export async function initializeCsrf(): Promise<void> {
-  await api.get("/sanctum/csrf-cookie");
+  const csrf = await api.get("/sanctum/csrf-cookie");
+
+  console.log("csrf token: ", csrf);
 }
 
 // SIGN-UP

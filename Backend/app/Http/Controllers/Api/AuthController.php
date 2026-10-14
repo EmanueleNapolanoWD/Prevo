@@ -7,11 +7,11 @@ use App\Domains\Auth\Actions\LoginUserAction;
 use App\Domains\Auth\Actions\LogoutUserAction;
 use App\Domains\Auth\Actions\RegisterUserAction;
 use App\Domains\Auth\Actions\ResetPasswordAction;
-use App\Domains\Auth\Models\User;
 use App\Domains\Auth\Requests\ForgotPasswordRequest;
 use App\Domains\Auth\Requests\LoginUserRequest;
 use App\Domains\Auth\Requests\RegisterUserRequest;
 use App\Domains\Auth\Requests\ResetPasswordRequest;
+use App\Domains\Companies\Requests\CompanyRequest;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
 use Illuminate\Http\JsonResponse;
@@ -29,17 +29,25 @@ class AuthController extends Controller
 
     // registrazione
     public function registerUser(
-        RegisterUserRequest $request,
+        RegisterUserRequest $userRequest,
+        CompanyRequest $companyRequest,
         RegisterUserAction $action
     ) {
-        $user = $action->execute($request);
+        $user = $action->execute($userRequest, $companyRequest);
     }
 
-    // recupero user
+    // Recupero dell'utente autenticato con le sue aziende associate
     public function user(Request $request): JsonResponse
     {
+        $user = $request->user();
+
+        // Carica la relazione solo se non è già stata caricata
+        if (!$user->relationLoaded('companies')) {
+            $user->load('companies');
+        }
+
         return response()->json([
-            'user' => (new UserResource($request->user()))->resolve(),
+            'user' => new UserResource($user),
         ]);
     }
 

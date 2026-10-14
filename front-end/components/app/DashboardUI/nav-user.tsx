@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -35,16 +36,18 @@ export function NavUser({
   };
 }) {
   const { isMobile } = useSidebar();
-
+  const router = useRouter();
 
   // HANDLE PER LOGOUT
-   async function handleLogOut(
-    event: MouseEvent<HTMLDivElement>
+  async function handleLogOut(
+    event: MouseEvent<HTMLDivElement>,
   ): Promise<void> {
     event.preventDefault();
     await logout();
-  }
 
+    router.push("/");
+    router.refresh();
+  }
 
   // VIEW
   return (
@@ -102,7 +105,7 @@ export function NavUser({
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <BellIcon />
-                Notifications
+                Notifiche
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />

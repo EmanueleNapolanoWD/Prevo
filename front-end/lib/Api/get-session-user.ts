@@ -15,9 +15,11 @@ export async function getSessionUser(
       },
     });
 
+    console.log("Res in getSessionuser: ", res.data.user);
+
     if (res.status !== 200) return null;
 
-    return res.data;
+    return res.data.user;
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.error("[getSessionUser]", {
@@ -30,3 +32,5 @@ export async function getSessionUser(
     return null;
   }
 }
+
+
