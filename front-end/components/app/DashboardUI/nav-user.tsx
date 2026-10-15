@@ -17,7 +17,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { logout } from "@/lib/Api/auth";
+import { logout } from "@/lib/Api/Services/auth";
 import {
   EllipsisVerticalIcon,
   CircleUserRoundIcon,

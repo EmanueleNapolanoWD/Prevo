@@ -1,6 +1,25 @@
 "use client"
 
 import * as React from "react"
+import { useParams } from "next/navigation"
+import {
+  LayoutDashboardIcon,
+  FileTextIcon,
+  UsersIcon,
+  PackageIcon,
+  SparklesIcon,
+  ChartBarIcon,
+  UsersRoundIcon,
+  PlugIcon,
+  Settings2Icon,
+  CircleHelpIcon,
+  SearchIcon,
+  DatabaseIcon,
+  FileChartColumnIcon,
+  FileIcon,
+  CommandIcon,
+} from "lucide-react"
+import Link from "next/link"
 
 import { NavDocuments } from "@/components/app/DashboardUI/nav-documents"
 import { NavMain } from "@/components/app/DashboardUI/nav-main"
@@ -15,191 +34,43 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { LayoutDashboardIcon, ListIcon, ChartBarIcon, FolderIcon, UsersIcon, CameraIcon, FileTextIcon, Settings2Icon, CircleHelpIcon, SearchIcon, DatabaseIcon, FileChartColumnIcon, FileIcon, CommandIcon } from "lucide-react"
 
-const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
-  navMain: [
-    {
-      title: "Dashboard",
-      url: "#",
-      icon: (
-        <LayoutDashboardIcon
-        />
-      ),
-    },
-    {
-      title: "Preventivi",
-      url: "#",
-      icon: (
-        <ListIcon
-        />
-      ),
-    },
-    {
-      title: "Clienti",
-      url: "#",
-      icon: (
-        <ChartBarIcon
-        />
-      ),
-    },
-    {
-      title: "Catalogo",
-      url: "#",
-      icon: (
-        <FolderIcon
-        />
-      ),
-    },
-    {
-      title: "Assistente AI",
-      url: "#",
-      icon: (
-        <UsersIcon
-        />
-      ),      
-    },
-    {
-      title: "Report",
-      url: "#",
-      icon: (
-        <UsersIcon
-        />
-      ),      
-    },
-    {
-      title: "Team",
-      url: "#",
-      icon: (
-        <UsersIcon
-        />
-      ),      
-    },
-    {
-      title: "Integrazioni",
-      url: "#",
-      icon: (
-        <UsersIcon
-        />
-      ),      
-    },
-  ],
-  navClouds: [
-    {
-      title: "Capture",
-      icon: (
-        <CameraIcon
-        />
-      ),
-      isActive: true,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Proposal",
-      icon: (
-        <FileTextIcon
-        />
-      ),
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Prompts",
-      icon: (
-        <FileTextIcon
-        />
-      ),
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-  ],
-  navSecondary: [
-    {
-      title: "Settings",
-      url: "#",
-      icon: (
-        <Settings2Icon
-        />
-      ),
-    },
-    {
-      title: "Get Help",
-      url: "#",
-      icon: (
-        <CircleHelpIcon
-        />
-      ),
-    },
-    {
-      title: "Search",
-      url: "#",
-      icon: (
-        <SearchIcon
-        />
-      ),
-    },
-  ],
-  documents: [
-    {
-      name: "Data Library",
-      url: "#",
-      icon: (
-        <DatabaseIcon
-        />
-      ),
-    },
-    {
-      name: "Reports",
-      url: "#",
-      icon: (
-        <FileChartColumnIcon
-        />
-      ),
-    },
-    {
-      name: "Word Assistant",
-      url: "#",
-      icon: (
-        <FileIcon
-        />
-      ),
-    },
-  ],
+// Dati statici (senza slug) possono restare fuori dal componente
+const user = {
+  name: "shadcn",
+  email: "m@example.com",
+  avatar: "/avatars/shadcn.jpg",
 }
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+
+export function AppSidebar({
+  ...props
+}: React.ComponentProps<typeof Sidebar>) {
+  const { slug } = useParams<{ slug: string }>()
+  const base = `/${slug}`
+
+  const navMain = [
+    { title: "Dashboard", url: base, icon: <LayoutDashboardIcon /> },
+    { title: "Preventivi", url: `${base}/preventivi`, icon: <FileTextIcon /> },
+    { title: "Clienti", url: `${base}/clienti`, icon: <UsersIcon /> },
+    { title: "Catalogo", url: `${base}/catalogo`, icon: <PackageIcon /> },
+    { title: "Assistente AI", url: `${base}/assistente`, icon: <SparklesIcon /> },
+    { title: "Report", url: `${base}/report`, icon: <ChartBarIcon /> },
+    { title: "Team", url: `${base}/team`, icon: <UsersRoundIcon /> },
+    { title: "Integrazioni", url: `${base}/integrazioni`, icon: <PlugIcon /> },
+  ]
+
+  const navSecondary = [
+    { title: "Impostazioni", url: `${base}/settings`, icon: <Settings2Icon /> },
+    { title: "Aiuto", url: "#", icon: <CircleHelpIcon /> },
+    { title: "Cerca", url: "#", icon: <SearchIcon /> },
+  ]
+
+  const documents = [
+    { name: "Data Library", url: "#", icon: <DatabaseIcon /> },
+    { name: "Reports", url: "#", icon: <FileChartColumnIcon /> },
+    { name: "Word Assistant", url: "#", icon: <FileIcon /> },
+  ]
+
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -207,7 +78,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <SidebarMenuButton
               className="data-[slot=sidebar-menu-button]:p-1.5!"
-              render={<a href="#" />}
+              render={<Link href={base} />}
             >
               <CommandIcon className="size-5!" />
               <span className="text-base font-semibold">Acme Inc.</span>
@@ -216,12 +87,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
-        <NavDocuments items={data.documents} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+        <NavMain items={navMain} />
+        <NavDocuments items={documents} />
+        <NavSecondary items={navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={user} />
       </SidebarFooter>
     </Sidebar>
   )

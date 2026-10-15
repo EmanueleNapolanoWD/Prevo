@@ -4,7 +4,7 @@
 import { useState, type FormEvent } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 
-import { resetPassword } from "@/lib/Api/auth";
+import { resetPassword } from "@/lib/Api/Services/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {

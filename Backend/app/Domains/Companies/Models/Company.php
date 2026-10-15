@@ -2,6 +2,7 @@
 
 namespace App\Domains\Companies\Models;
 
+use App\Domains\Audit\Models\Audit;
 use App\Domains\Auth\Models\User;
 use App\Domains\Clients\Models\Client;
 use App\Domains\Companies\Enums\CompanyStatus;
@@ -178,6 +179,12 @@ class Company extends Model implements IsTenant
     public function clients(): HasMany
     {
         return $this->hasMany(Client::class);
+    }
+
+    // collegamento ad audit
+    public function audits(): HasMany 
+    {
+        return $this->hasMany(Audit::class);
     }
 
 

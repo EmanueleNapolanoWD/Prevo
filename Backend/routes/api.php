@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ClientController;
+use App\Http\Controllers\Api\CompanyController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('throttle:5,1')->post('/login', [AuthController::class, 'login']);
@@ -14,6 +15,22 @@ Route::middleware('auth:sanctum')->group(function () {
     // ROTTE USER
     Route::get('/user', [AuthController::class, 'user']);
     Route::post('/logout', [AuthController::class, 'logout']);
+
+    //ROTTE PER COMPANY
+    Route::prefix('companies/{company:slug}')
+        ->middleware('company.member')
+        ->scopeBindings()
+        ->group(function () {
+            //ROTTE PER COMPANY
+            Route::put('',[CompanyController::class, 'updateCompanyData']);
+            
+            //ROTTE PER COMPNAY SETTINGS
+            Route::get('settings', [CompanyController::class, 'getCompanySettings']);
+            Route::put('settings', [CompanyController::class, 'updateCompanySettings']);
+        });
+
+
+
 
     // Clients
     Route::get('/companies/{companyId}/clients', [ClientController::class, 'index']);

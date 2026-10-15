@@ -1,5 +1,5 @@
 import "server-only";
-import { serverApi } from "./server-api";
+import { serverApi } from "../server-api";
 import type { AuthUser } from "@/types/auth";
 import axios from "axios";
 
@@ -14,8 +14,6 @@ export async function getSessionUser(
         Cookie: cookieHeader,
       },
     });
-
-    console.log("Res in getSessionuser: ", res.data.user);
 
     if (res.status !== 200) return null;
 

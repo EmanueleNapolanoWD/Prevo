@@ -4,6 +4,8 @@ namespace App\Domains\Auth\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
+use App\Domains\Audit\Models\Audit;
+use App\Domains\Audit\Models\AuditLog;
 use App\Domains\Companies\Models\Company;
 use App\Domains\Companies\Models\CompanyUser;
 use App\Domains\Quotes\Models\Quote;
@@ -71,5 +73,11 @@ class User extends Authenticatable
     public function quotes(): HasMany
     {
         return $this->hasMany(Quote::class, 'created_by');
+    }
+
+    // collegamento ad audit
+    public function audits(): HasMany 
+    {
+        return $this->hasMany(AuditLog::class);
     }
 }

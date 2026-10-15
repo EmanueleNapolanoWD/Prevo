@@ -5,8 +5,8 @@ import {
   AuthResponse,
   SignUpResponse,
 } from "@/types/auth";
-import { api } from "./api";
-import { SignUpFormValues } from "../Validations/auth";
+import { api } from "../api";
+import { SignUpFormValues } from "../../Validations/auth";
 import { isAxiosError } from "axios";
 
 export class AuthError extends Error {

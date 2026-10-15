@@ -1,5 +1,6 @@
 import "server-only";
 import axios from "axios";
+import { cookies } from "next/headers";
 
 const baseURL = process.env.API_URL;
 const frontEndURL = process.env.FRONTEND_URL;
@@ -19,3 +20,8 @@ export const serverApi = axios.create({
   maxRedirects: 0,
   validateStatus: (status) => (status >= 200 && status < 300) || status === 401,
 });
+
+/** Cookie della richiesta corrente, da passare a ogni chiamata. */
+export async function authHeaders() {
+  return { Cookie: (await cookies()).toString() };
+}

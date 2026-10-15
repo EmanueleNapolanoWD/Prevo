@@ -4,7 +4,7 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 
-import { registerUser } from "@/lib/Api/auth";
+import { registerUser } from "@/lib/Api/Services/auth";
 import { registerSchema, type SignUpFormValues } from "@/lib/Validations/auth";
 
 import { Button } from "@/components/ui/button";

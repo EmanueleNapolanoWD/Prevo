@@ -1,7 +1,31 @@
-import { LayoutProps } from "next/dist/lib/metadata/metadata-resolution-primitives";
+import { Suspense } from "react";
 
-export default function DashboardLayout({
+import { AppSidebar } from "@/components/app/DashboardUI/app-sidebar";
+import { SiteHeader } from "@/components/app/DashboardUI/site-header";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+
+export default function AppLayout({
   children,
-}: LayoutProps<"/dashboard">) {
-  return (<body className="min-h-full flex flex-col">{children}</body>)
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <SidebarProvider
+      style={
+        {
+          "--sidebar-width": "calc(var(--spacing) * 72)",
+          "--header-height": "calc(var(--spacing) * 12)",
+        } as React.CSSProperties
+      }
+    >
+      {/* useParams() in un client component richiede Suspense con Cache Components */}
+      <Suspense fallback={null}>
+        <AppSidebar variant="inset" />
+      </Suspense>
+      <SidebarInset>
+        <SiteHeader />
+        {children}
+      </SidebarInset>
+    </SidebarProvider>
+  );
 }

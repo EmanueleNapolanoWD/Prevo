@@ -8,7 +8,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { loginSchema, type LoginFormValues } from "@/lib/Validations/auth";
-import { AuthError } from "@/lib/Api/auth";
+import { AuthError } from "@/lib/Api/Services/auth";
 
 //componenti UI
 import { Button } from "@/components/ui/button";
@@ -26,7 +26,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { login } from "@/lib/Api/auth";
+import { login } from "@/lib/Api/Services/auth";
 
 // TYPES E INTERFACES
 interface LaravelValidatorError {
