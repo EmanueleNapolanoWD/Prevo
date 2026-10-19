@@ -1,6 +1,15 @@
 "use client";
 
+import { useTransition } from "react";
 import { useRouter } from "next/navigation";
+import {
+  EllipsisVerticalIcon,
+  CircleUserRoundIcon,
+  CreditCardIcon,
+  BellIcon,
+  LogOutIcon,
+} from "lucide-react";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -17,39 +26,50 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { logout } from "@/lib/Api/Services/auth";
-import {
-  EllipsisVerticalIcon,
-  CircleUserRoundIcon,
-  CreditCardIcon,
-  BellIcon,
-  LogOutIcon,
-} from "lucide-react";
+import { logout } from "@/lib/Api/Auth/auth";
+import type { SidebarUser } from "@/types/auth";
 
-export function NavUser({
+function getInitials(name: string): string {
+  const initials = name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0].toUpperCase())
+    .join("");
+
+  return initials || "?";
+}
+
+function UserAvatar({
   user,
+  className,
 }: {
-  user: {
-    name: string;
-    email: string;
-    avatar: string;
-  };
+  user: SidebarUser;
+  className?: string;
 }) {
+  return (
+    <Avatar className={className}>
+      <AvatarImage src={user.avatar ?? undefined} alt={user.name} />
+      <AvatarFallback className="rounded-lg">
+        {getInitials(user.name)}
+      </AvatarFallback>
+    </Avatar>
+  );
+}
+
+export function NavUser({ user }: { user: SidebarUser }) {
   const { isMobile } = useSidebar();
   const router = useRouter();
+  const [pending, startTransition] = useTransition();
 
-  // HANDLE PER LOGOUT
-  async function handleLogOut(
-    event: MouseEvent<HTMLDivElement>,
-  ): Promise<void> {
-    event.preventDefault();
-    await logout();
-
-    router.push("/");
-    router.refresh();
+  function handleLogOut() {
+    startTransition(async () => {
+      await logout();
+      router.replace("/login");
+      router.refresh();
+    });
   }
 
-  // VIEW
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -59,10 +79,7 @@ export function NavUser({
               <SidebarMenuButton size="lg" className="aria-expanded:bg-muted" />
             }
           >
-            <Avatar className="size-8 rounded-lg grayscale">
-              <AvatarImage src={user.avatar} alt={user.name} />
-              <AvatarFallback className="rounded-lg">CN</AvatarFallback>
-            </Avatar>
+            <UserAvatar user={user} className="size-8 rounded-lg grayscale" />
             <div className="grid flex-1 text-left text-sm leading-tight">
               <span className="truncate font-medium">{user.name}</span>
               <span className="truncate text-xs text-foreground/70">
@@ -71,6 +88,7 @@ export function NavUser({
             </div>
             <EllipsisVerticalIcon className="ml-auto size-4" />
           </DropdownMenuTrigger>
+
           <DropdownMenuContent
             className="min-w-56"
             side={isMobile ? "bottom" : "right"}
@@ -80,10 +98,7 @@ export function NavUser({
             <DropdownMenuGroup>
               <DropdownMenuLabel className="p-0 font-normal">
                 <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                  <Avatar className="size-8">
-                    <AvatarImage src={user.avatar} alt={user.name} />
-                    <AvatarFallback className="rounded-lg">CN</AvatarFallback>
-                  </Avatar>
+                  <UserAvatar user={user} className="size-8" />
                   <div className="grid flex-1 text-left text-sm leading-tight">
                     <span className="truncate font-medium">{user.name}</span>
                     <span className="truncate text-xs text-muted-foreground">
@@ -93,7 +108,9 @@ export function NavUser({
                 </div>
               </DropdownMenuLabel>
             </DropdownMenuGroup>
+
             <DropdownMenuSeparator />
+
             <DropdownMenuGroup>
               <DropdownMenuItem>
                 <CircleUserRoundIcon />
@@ -108,10 +125,12 @@ export function NavUser({
                 Notifiche
               </DropdownMenuItem>
             </DropdownMenuGroup>
+
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogOut}>
+
+            <DropdownMenuItem onClick={handleLogOut} disabled={pending}>
               <LogOutIcon />
-              Log out
+              {pending ? "Uscita…" : "Log out"}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

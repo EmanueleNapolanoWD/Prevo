@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { api } from "@/lib/Api/api";
+import { api } from "@/lib/Api/Services/api";
 import Navbar from "@/components/app/Navbar/Navbar";
 
 export default function Home() {

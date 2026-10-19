@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSessionUser } from "./lib/Api/Services/get-session-user";
+import { getSessionUser } from "./lib/Api/Auth/get-session-user";
 import { Company } from "./types/company";
 
 const SESSION_COOKIE = process.env.SESSION_COOKIE_NAME ?? "prevo_session";
@@ -28,7 +28,6 @@ export async function proxy(request: NextRequest) {
       const hasCookie = request.cookies.has(SESSION_COOKIE);
       if (hasCookie) {
         const user = await getSessionUser(request.headers.get("cookie"));
-        console.log('user quando hasCookie: ',user);
         // Se ha un'azienda principale, potresti reindirizzarlo a user.companies[0].slug
         if (user && user.companies?.[0]) {
           return NextResponse.redirect(new URL(`/${user.companies[0].slug}`, request.url));

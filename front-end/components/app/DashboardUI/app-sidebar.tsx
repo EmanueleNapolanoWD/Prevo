@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useParams } from "next/navigation"
+import Link from "next/link"
 import {
   LayoutDashboardIcon,
   FileTextIcon,
@@ -19,7 +19,6 @@ import {
   FileIcon,
   CommandIcon,
 } from "lucide-react"
-import Link from "next/link"
 
 import { NavDocuments } from "@/components/app/DashboardUI/nav-documents"
 import { NavMain } from "@/components/app/DashboardUI/nav-main"
@@ -34,25 +33,22 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import type { SidebarCompany, SidebarUser } from "@/types/auth"
 
-// Dati statici (senza slug) possono restare fuori dal componente
-const user = {
-  name: "shadcn",
-  email: "m@example.com",
-  avatar: "/avatars/shadcn.jpg",
+type AppSidebarProps = React.ComponentProps<typeof Sidebar> & {
+  slug: string
+  user: SidebarUser
+  company: SidebarCompany
 }
 
-export function AppSidebar({
-  ...props
-}: React.ComponentProps<typeof Sidebar>) {
-  const { slug } = useParams<{ slug: string }>()
+export function AppSidebar({ slug, user, company, ...props }: AppSidebarProps) {
   const base = `/${slug}`
 
   const navMain = [
     { title: "Dashboard", url: base, icon: <LayoutDashboardIcon /> },
-    { title: "Preventivi", url: `${base}/preventivi`, icon: <FileTextIcon /> },
-    { title: "Clienti", url: `${base}/clienti`, icon: <UsersIcon /> },
-    { title: "Catalogo", url: `${base}/catalogo`, icon: <PackageIcon /> },
+    { title: "Preventivi", url: `${base}/quotes`, icon: <FileTextIcon /> },
+    { title: "Clienti", url: `${base}/clients`, icon: <UsersIcon /> },
+    { title: "Catalogo", url: `${base}/products`, icon: <PackageIcon /> },
     { title: "Assistente AI", url: `${base}/assistente`, icon: <SparklesIcon /> },
     { title: "Report", url: `${base}/report`, icon: <ChartBarIcon /> },
     { title: "Team", url: `${base}/team`, icon: <UsersRoundIcon /> },
@@ -81,7 +77,9 @@ export function AppSidebar({
               render={<Link href={base} />}
             >
               <CommandIcon className="size-5!" />
-              <span className="text-base font-semibold">Acme Inc.</span>
+              <span className="truncate text-base font-semibold">
+                {company.name}
+              </span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

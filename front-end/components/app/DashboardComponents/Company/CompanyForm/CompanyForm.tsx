@@ -1,37 +1,9 @@
 "use client";
 
 import { useActionState } from "react";
-import styles from "./CompanyForm.module.css";
-
-export type CompanyValues = {
-  name?: string;
-  legal_name?: string | null;
-  legal_form?: string | null;
-  country_code?: string;
-  vat_number?: string;
-  tax_code?: string | null;
-  tax_regime?: string | null;
-  sdi_code?: string | null;
-  pec?: string | null;
-  rea_office?: string | null;
-  rea_number?: string | null;
-  share_capital?: string | number | null;
-  ateco_code?: string | null;
-  iban?: string | null;
-  address?: string | null;
-  postal_code?: string | null;
-  city?: string | null;
-  province?: string | null;
-  email?: string;
-  phone?: string | null;
-  website?: string | null;
-};
-
-export type CompanyFormState = {
-  ok: boolean;
-  message?: string;
-  errors?: Record<string, string[]>;
-};
+import { updateCompanyDataAction } from "@/lib/Api/Company/company.action";
+import type { CompanyFormState, CompanyValues } from "@/types/company";
+import styles from "./companyform.module.css";
 
 type Props = {
   slug: string;
@@ -95,18 +67,18 @@ function Field({
 
 export default function CompanyForm({ slug, initialValues }: Props) {
   const [state, formAction, pending] = useActionState(
-    handleSubmit,
+    updateCompanyDataAction.bind(null, slug),
     initialState,
   );
 
-  async function handleSubmit() {
-    console.log("ciao");
-  }
-
-  const common = { values: initialValues, errors: state.errors };
+  // dopo un 422 riusa i valori inviati, così l'utente non perde ciò che ha scritto
+  const common = {
+    values: state.values ?? initialValues,
+    errors: state.errors,
+  };
 
   return (
-    <form action={formAction} className={styles.form} noValidate>
+    <form action={formAction} className={styles.form}>
       <fieldset className={styles.section}>
         <legend className={styles.legend}>Anagrafica</legend>
         <Field name="name" label="Nome commerciale" required {...common} />
@@ -120,6 +92,7 @@ export default function CompanyForm({ slug, initialValues }: Props) {
           name="country_code"
           label="Paese (ISO)"
           maxLength={2}
+          required
           {...common}
         />
         <Field name="vat_number" label="Partita IVA" required {...common} />
@@ -165,6 +138,7 @@ export default function CompanyForm({ slug, initialValues }: Props) {
         <Field
           name="address"
           label="Indirizzo"
+          required
           className={styles.fullWidth}
           {...common}
         />
@@ -173,10 +147,17 @@ export default function CompanyForm({ slug, initialValues }: Props) {
           label="CAP"
           maxLength={5}
           inputMode="numeric"
+          required
           {...common}
         />
-        <Field name="city" label="Città" {...common} />
-        <Field name="province" label="Provincia" maxLength={2} {...common} />
+        <Field name="city" label="Città" required {...common} />
+        <Field
+          name="province"
+          label="Provincia"
+          maxLength={2}
+          required
+          {...common}
+        />
       </fieldset>
 
       <fieldset className={styles.section}>
@@ -208,7 +189,10 @@ export default function CompanyForm({ slug, initialValues }: Props) {
 
       <div className={styles.footer}>
         {state.message && (
-          <p role="status" className={state.ok ? styles.success : styles.error}>
+          <p
+            role={state.ok ? "status" : "alert"}
+            className={state.ok ? styles.success : styles.error}
+          >
             {state.message}
           </p>
         )}

@@ -1,13 +1,12 @@
-
-import {
+import { isAxiosError } from "axios";
+import type {
+  AuthResponse,
   AuthUser,
   LoginCredentials,
-  AuthResponse,
   SignUpResponse,
 } from "@/types/auth";
-import { api } from "../api";
-import { SignUpFormValues } from "../../Validations/auth";
-import { isAxiosError } from "axios";
+import type { SignUpFormValues } from "../../Validations/auth";
+import { api } from "../Services/api";
 
 export class AuthError extends Error {
   constructor(
@@ -20,41 +19,52 @@ export class AuthError extends Error {
   }
 }
 
-// Trasforma qualsiasi errore di rete/HTTP in un AuthError con messaggi per l'utente
-function toAuthError(
-  error: unknown,
-  messages: { invalid: string; fallback: string },
-): AuthError {
-  if (isAxiosError(error)) {
-    const status = error.response?.status;
+type ErrorMessages = { invalid: string; fallback: string };
 
-    if (status === 401 || status === 422) {
+// Trasforma qualsiasi errore di rete/HTTP in un AuthError con messaggi per l'utente
+function toAuthError(error: unknown, messages: ErrorMessages): AuthError {
+  if (!isAxiosError(error)) return new AuthError(messages.fallback);
+
+  // nessuna risposta: server spento o rete assente
+  if (!error.response) {
+    return new AuthError("Server non raggiungibile. Controlla la connessione.");
+  }
+
+  const { status, data } = error.response;
+
+  switch (status) {
+    case 401:
+    case 422:
+      return new AuthError(messages.invalid, status, data?.errors);
+    case 403:
       return new AuthError(
-        messages.invalid,
+        data?.message ?? "Accesso non consentito.",
         status,
-        error.response?.data?.errors,
       );
-    }
-    if (status === 419) {
+    case 419:
       return new AuthError(
         "Sessione scaduta. Ricarica la pagina e riprova.",
         status,
       );
-    }
-    if (status === 429) {
+    case 429:
       return new AuthError(
         "Troppi tentativi. Riprova tra qualche minuto.",
         status,
       );
-    }
+    default:
+      return new AuthError(messages.fallback, status);
   }
-  return new AuthError(messages.fallback);
 }
 
 export async function initializeCsrf(): Promise<void> {
-  const csrf = await api.get("/sanctum/csrf-cookie");
+  await api.get("/sanctum/csrf-cookie");
+}
 
-  console.log("csrf token: ", csrf);
+// POST con cookie CSRF di Sanctum
+async function postWithCsrf<T>(url: string, body?: unknown): Promise<T> {
+  await initializeCsrf();
+  const { data } = await api.post<T>(url, body);
+  return data;
 }
 
 // SIGN-UP
@@ -62,12 +72,7 @@ export async function registerUser(
   credentials: SignUpFormValues,
 ): Promise<SignUpResponse> {
   try {
-    await initializeCsrf();
-    const { data } = await api.post<SignUpResponse>(
-      "/api/register",
-      credentials,
-    );
-    return data;
+    return await postWithCsrf<SignUpResponse>("/api/register", credentials);
   } catch (error) {
     throw toAuthError(error, {
       invalid: "Controlla i dati inseriti.",
@@ -79,8 +84,7 @@ export async function registerUser(
 // LOGIN
 export async function login(credentials: LoginCredentials): Promise<AuthUser> {
   try {
-    await initializeCsrf();
-    const { data } = await api.post<AuthResponse>("/api/login", credentials);
+    const data = await postWithCsrf<AuthResponse>("/api/login", credentials);
     return data.user;
   } catch (error) {
     throw toAuthError(error, {
@@ -90,22 +94,10 @@ export async function login(credentials: LoginCredentials): Promise<AuthUser> {
   }
 }
 
-// CURRENT USER: null se non autenticato
-export async function getCurrentUser(): Promise<AuthUser | null> {
-  try {
-    const { data } = await api.get<AuthUser>("/api/user");
-    return data;
-  } catch (error) {
-    if (isAxiosError(error) && error.response?.status === 401) return null;
-    throw error;
-  }
-}
-
-// FORGOTPASSWORD
+// FORGOT PASSWORD
 export async function forgotPassword(email: string): Promise<void> {
   try {
-    await initializeCsrf();
-    await api.post("/api/forgot-password", { email });
+    await postWithCsrf("/api/forgot-password", { email });
   } catch (error) {
     throw toAuthError(error, {
       invalid: "Inserisci un indirizzo email valido.",
@@ -114,7 +106,7 @@ export async function forgotPassword(email: string): Promise<void> {
   }
 }
 
-// Reset Password
+// RESET PASSWORD
 export async function resetPassword(data: {
   token: string;
   email: string;
@@ -122,14 +114,7 @@ export async function resetPassword(data: {
   password_confirmation: string;
 }): Promise<void> {
   try {
-    await initializeCsrf();
-
-    await api.post("/api/reset-password", {
-      token: data.token,
-      email: data.email,
-      password: data.password,
-      password_confirmation: data.password_confirmation,
-    });
+    await postWithCsrf("/api/reset-password", data);
   } catch (error) {
     throw toAuthError(error, {
       invalid: "Il link non è valido o è scaduto. Richiedine uno nuovo.",

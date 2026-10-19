@@ -53,7 +53,7 @@ class InsertCompanyAction
     // funzione che serve a generare slug univoco per le company
     private function generateUniqueSlug(string $name): string
     {
-        $base = Str::slug(mb_substr($name, 0, 80)) ?: 'azienda';
+        $base = Str::slug(mb_substr($name, 0, 80)) ?: 'company';
         $slug = $base;
         $i = 2;
 

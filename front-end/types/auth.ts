@@ -53,3 +53,15 @@ export interface RegisterUser {
     email: string;
 }
 
+// @/types/user.ts
+export type SidebarCompany = {
+  slug: string;
+  name: string;
+  logo: string | null;
+  role: string;
+};
+
+export type SidebarUser = { name: string; email: string; avatar: string | null };
+
+export type CurrentUser = SidebarUser & { companies: SidebarCompany[] };
+

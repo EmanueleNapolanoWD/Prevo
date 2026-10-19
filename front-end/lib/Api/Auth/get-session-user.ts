@@ -1,5 +1,5 @@
 import "server-only";
-import { serverApi } from "../server-api";
+import { serverApi } from "../Services/server-api";
 import type { AuthUser } from "@/types/auth";
 import axios from "axios";
 

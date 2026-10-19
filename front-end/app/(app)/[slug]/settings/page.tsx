@@ -1,9 +1,10 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import getCompanySettings from "@/lib/Api/Services/Company/company.server";
-import getCompany from "@/lib/Api/Services/Company/company.server"; // TODO: adatta al tuo service
-import SettingsForm from "@/components/app/DashboardComponents/CompanySettings/SettingsForm";
-//import CompanyForm from "@/components/app/DashboardComponents/CompanySettings/CompanyForm"; // TODO: adatta al tuo form
+import getCompanySettings, {
+  getCompany,
+} from "@/lib/Api/Company/company.server";
+import SettingsForm from "@/components/app/DashboardComponents/Company/CompanySettings/SettingsForm";
+import CompanyForm from "@/components/app/DashboardComponents/Company/CompanyForm/CompanyForm";
 import styles from "./page.module.css";
 
 const TABS = [
@@ -13,16 +14,35 @@ const TABS = [
 
 type TabId = (typeof TABS)[number]["id"];
 
+type Params = Promise<{ slug: string }>;
+type SearchParams = Promise<{ tab?: string }>;
+
 type CompanySettingsPageProps = {
-  params: Promise<{ slug: string }>;
-  searchParams: Promise<{ tab?: string }>;
+  params: Params;
+  searchParams: SearchParams;
 };
 
 function resolveTab(value?: string): TabId {
-  return TABS.some((t) => t.id === value) ? (value as TabId) : "azienda";
+  return TABS.find((t) => t.id === value)?.id ?? "azienda";
 }
 
-export default async function CompanySettingsPage({
+// Nessun await qui: la shell (titolo + fallback) viene prerenderizzata
+export default function CompanySettingsPage({
+  params,
+  searchParams,
+}: CompanySettingsPageProps) {
+  return (
+    <div className={styles.page}>
+      <h1 className={styles.title}>Impostazioni</h1>
+
+      <Suspense fallback={<SettingsSkeleton />}>
+        <SettingsTabs params={params} searchParams={searchParams} />
+      </Suspense>
+    </div>
+  );
+}
+
+async function SettingsTabs({
   params,
   searchParams,
 }: CompanySettingsPageProps) {
@@ -30,9 +50,7 @@ export default async function CompanySettingsPage({
   const activeTab = resolveTab(tab);
 
   return (
-    <div className={styles.page}>
-      <h1 className={styles.title}>Impostazioni</h1>
-
+    <>
       <nav className={styles.tabs} aria-label="Sezioni impostazioni">
         {TABS.map(({ id, label }) => (
           <Link
@@ -57,20 +75,18 @@ export default async function CompanySettingsPage({
           )}
         </Suspense>
       </section>
-    </div>
+    </>
   );
 }
 
 async function CompanyContent({ slug }: { slug: string }) {
   const company = await getCompany(slug);
-
-  return <>Ciao</>
-  // return <CompanyForm slug={slug} initialValues={company ?? undefined} />;
+  return <CompanyForm slug={slug} initialValues={company} />;
 }
 
 async function QuotesContent({ slug }: { slug: string }) {
   const settings = await getCompanySettings(slug);
-  return <SettingsForm slug={slug} initialValues={settings ?? undefined} />;
+  return <SettingsForm slug={slug} initialValues={settings} />;
 }
 
 function SettingsSkeleton() {

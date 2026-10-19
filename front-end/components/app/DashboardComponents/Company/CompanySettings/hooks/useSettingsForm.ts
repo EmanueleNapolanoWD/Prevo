@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { isAxiosError } from "axios";
 import type { CompanySettingsData } from "@/types/company";
-import { updateCompanySettings } from "@/lib/Api/Services/Company/company";
+import { updateCompanySettings } from "@/lib/Api/Company/company.client";
 import { DEFAULT_SETTINGS } from "@/lib/Consts/CompanySettingsConsts";
 
 export type SetField = <K extends keyof CompanySettingsData>(
@@ -59,8 +59,6 @@ export function useSettingsForm(
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<Message>(null);
 
-  console.log('slug entrato in useSettingsForm: ', slug);
-
   const set: SetField = (key, value) => {
     setValues((prev) => ({ ...prev, [key]: value }));
     setMessage(null);
@@ -69,9 +67,7 @@ export function useSettingsForm(
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
-    console.log('prima della validazione');
     const error = validate(values);
-    console.log('superata la validazione');
 
     if (error) {
       setMessage({ type: "error", text: error });

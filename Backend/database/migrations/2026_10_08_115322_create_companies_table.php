@@ -16,7 +16,7 @@ return new class extends Migration {
             $table->string('name', 150); // nome azienda/tenant 
             $table->string('legal_name', 255); // ragione sociale 
             $table->string('legal_form', 30)->nullable(); // SRL,SPA
-            $table->string('slug', 100)->nullable()->unique(); //
+            $table->string('slug', 100)->unique(); //
 
             //Dayti fiscali
             $table->char('country_code', 2)->default('IT');

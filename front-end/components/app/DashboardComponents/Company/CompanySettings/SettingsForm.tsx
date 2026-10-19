@@ -6,7 +6,7 @@ import LocalizationSection from "./LocalizationSection";
 import NumberingSection from "./NumberingSection";
 import TaxSection from "./TaxSection";
 import TermsSection from "./TermsSection";
-import { useSettingsForm } from "./useSettingsForm";
+import { useSettingsForm } from "./hooks/useSettingsForm";
 
 export default function SettingsForm({
   slug,
@@ -15,7 +15,6 @@ export default function SettingsForm({
   slug: string,
   initialValues?: Partial<CompanySettingsData>;
 }) {
-  console.log('slug entrato in settingsForm: ',slug);
   const { values, set, saving, message, handleSubmit } = useSettingsForm(slug, initialValues);
 
   return (

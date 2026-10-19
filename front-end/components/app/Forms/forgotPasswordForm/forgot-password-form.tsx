@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { forgotPassword } from "@/lib/Api/Services/auth";
+import { forgotPassword } from "@/lib/Api/Auth/auth";
 
 type Status = "idle" | "submitting" | "sent" | "error";
 

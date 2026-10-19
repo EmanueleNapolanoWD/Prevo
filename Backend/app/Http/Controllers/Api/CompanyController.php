@@ -14,6 +14,18 @@ use App\Http\Controllers\Controller;
 class CompanyController extends Controller
 {
 
+
+    /**
+     * Recupero dati azienda.
+     */
+    public function getCompanyData(
+        Company $company
+    ): CompanyResource {
+
+        $this->authorize('viewCompanyData', $company);
+        return new CompanyResource($company);
+    }
+
     /**
      * Modifica dati azienda.
      */

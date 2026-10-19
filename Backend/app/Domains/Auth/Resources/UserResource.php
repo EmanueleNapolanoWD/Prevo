@@ -2,7 +2,6 @@
 
 namespace App\Domains\Auth\Resources;
 
-use App\Domains\Companies\Resources\CompanyResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -24,7 +23,16 @@ class UserResource extends JsonResource
             'created_at' => $this->created_at->toIso8601String(),
             'updated_at' => $this->updated_at->toIso8601String(),
             //Company se caricate
-            'companies' => CompanyResource::collection($this->whenLoaded('companies')),
+            'companies' => $this->whenLoaded('companies', fn() => $this->companies
+                ->map(fn($company) => [
+                    'slug' => $company->slug,
+                    'name' => $company->name,
+                    'logo' => $company->logo_path,
+                    'role' => $company->pivot->role instanceof \BackedEnum
+                        ? $company->pivot->role->value
+                        : $company->pivot->role,
+                ])
+                ->values()),
         ];
     }
 }

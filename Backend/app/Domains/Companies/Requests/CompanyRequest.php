@@ -90,7 +90,7 @@ class CompanyRequest extends FormRequest
 
         return [
             // AZIENDA - anagrafica
-            'company_name' => ['required', 'string', 'max:150'],
+            'name' => ['required', 'string', 'max:150'],
             'legal_name' => ['required', 'string', 'max:255'],
             'legal_form' => ['nullable', 'string', Rule::in(self::LEGAL_FORMS)],
 
@@ -157,7 +157,7 @@ class CompanyRequest extends FormRequest
                 : ['required', 'string', 'max:100'],
 
             // AZIENDA - contatti
-            'company_email' => [
+            'email' => [
                 'required',
                 'email',
                 'max:255',
@@ -172,8 +172,8 @@ class CompanyRequest extends FormRequest
     {
         return [
             // Anagrafica
-            'company_name.required' => 'Il campo nome azienda è obbligatorio.',
-            'company_name.max' => 'Il nome azienda non può superare 150 caratteri.',
+            'name.required' => 'Il campo nome azienda è obbligatorio.',
+            'name.max' => 'Il nome azienda non può superare 150 caratteri.',
             'legal_name.required' => 'Il campo ragione sociale è obbligatorio.',
             'legal_name.max' => 'La ragione sociale non può superare 255 caratteri.',
             'legal_form.in' => 'La forma giuridica selezionata non è valida.',
@@ -209,9 +209,9 @@ class CompanyRequest extends FormRequest
             'province.alpha' => 'La provincia deve contenere solo lettere.',
 
             // Contatti
-            'company_email.required' => 'Il campo email aziendale è obbligatorio.',
-            'company_email.email' => 'Il campo email aziendale deve essere un indirizzo email valido.',
-            'company_email.unique' => 'L\'indirizzo email aziendale è già in uso.',
+            'email.required' => 'Il campo email aziendale è obbligatorio.',
+            'email.email' => 'Il campo email aziendale deve essere un indirizzo email valido.',
+            'email.unique' => 'L\'indirizzo email aziendale è già in uso.',
             'phone.required' => 'Il campo telefono aziendale è obbligatorio.',
             'phone.regex' => 'Il numero di telefono non è valido.',
             'website.url' => 'Il sito web deve essere un URL valido (es. https://esempio.it).',

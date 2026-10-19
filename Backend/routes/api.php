@@ -22,8 +22,9 @@ Route::middleware('auth:sanctum')->group(function () {
         ->scopeBindings()
         ->group(function () {
             //ROTTE PER COMPANY
+            Route::get('',[CompanyController::class, 'getCompanyData']);
             Route::put('',[CompanyController::class, 'updateCompanyData']);
-            
+
             //ROTTE PER COMPNAY SETTINGS
             Route::get('settings', [CompanyController::class, 'getCompanySettings']);
             Route::put('settings', [CompanyController::class, 'updateCompanySettings']);

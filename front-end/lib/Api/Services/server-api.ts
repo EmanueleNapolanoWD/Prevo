@@ -23,5 +23,17 @@ export const serverApi = axios.create({
 
 /** Cookie della richiesta corrente, da passare a ogni chiamata. */
 export async function authHeaders() {
-  return { Cookie: (await cookies()).toString() };
+  const cookieStore = await cookies();
+
+  const xsrfToken = cookieStore.get("XSRF-TOKEN")?.value;
+
+  return {
+    Cookie: cookieStore.toString(),
+
+    ...(xsrfToken
+      ? {
+          "X-XSRF-TOKEN": decodeURIComponent(xsrfToken),
+        }
+      : {}),
+  };
 }
