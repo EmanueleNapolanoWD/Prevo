@@ -2,6 +2,7 @@
 
 namespace App\Domains\Clients\Models;
 
+use App\Domains\Auth\Models\User;
 use App\Domains\Clients\Enums\ClientType;
 use App\Domains\Clients\Enums\Salutation;
 use App\Domains\Companies\Models\Company;
@@ -59,7 +60,7 @@ class Client extends Model
     {
         //display name è coerente con nome,cognome e ragione social
         static::saving(function (Client $client) {
-            $client->display_name = $client->computeDisplayName();
+            $client->display_name = $client->computedDisplayName();
         });
     }
 

@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Domains\Clients\Actions\CreateClientAction;
 use App\Domains\Clients\Models\Client;
 use App\Domains\Clients\Requests\StoreClientRequest;
+use App\Domains\Clients\Resources\ClientResources;
 use App\Domains\Companies\Models\Company;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
@@ -12,6 +14,7 @@ use Illuminate\Validation\Rule;
 
 class ClientController extends Controller
 {
+
     public function index(
         Request $request,
         string $companyId
@@ -32,24 +35,25 @@ class ClientController extends Controller
 
     public function store(
         StoreClientRequest $request,
-        string $companyId
+        CreateClientAction $action,
+        Company $company
     ): JsonResponse {
-        $this->ensureCompanyMembership($request, $companyId);
+        $this->ensureCompanyMembership($request, $company->id);
 
         $this->authorize('create', [
             Client::class,
-            $companyId
+            $company->id
         ]);
 
         $company = Company::query()
-            ->findOrFail($companyId);
+            ->findOrFail($company->id);
 
-        $client = $company->clients()->create($request->validated());
+        $client = $action->execute($company, $request->validated());
 
-        return response()->json([
-            'message' => 'Cliente creato correttamente',
-            'data' => $client,
-        ], 201);
+        return (new ClientResources($client))
+            ->additional(['message' => 'Cliente aggiunto correttamente'])
+            ->response()
+            ->setStatusCode(201);
     }
 
     public function show(

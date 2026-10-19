@@ -4,10 +4,10 @@ namespace App\Domains\Clients\Enums;
 
 enum Salutation: string
 {
-    case MR = 'MR';
-    case MRS = 'MRS';
-    case COUPLE = 'COUPLE';
-    case FAMILY = 'FAMILY';
+    case MR = 'Sig.';
+    case MRS = 'Sig.ra';
+    case COUPLE = 'Coniugi';
+    case FAMILY = 'Famiglia';
 
     public function label(): string
     {

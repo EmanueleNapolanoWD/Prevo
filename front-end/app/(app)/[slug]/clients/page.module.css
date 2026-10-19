@@ -1,0 +1,39 @@
+.title { font-size: 1.4rem; font-weight: 700; margin: 0 0 16px; }
+
+.toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+
+.search { display: flex; flex: 1 1 420px; flex-wrap: wrap; gap: 8px; max-width: 720px; }
+.input, .select { height: 38px; padding: 0 12px; font: inherit; font-size: .9rem; background: #fafafa; border: 1px solid #d9dce1; border-radius: 6px; }
+.input { flex: 1 1 220px; min-width: 0; }
+.input:focus-visible, .select:focus-visible { outline: 2px solid #1f8a5b; background: #fff; }
+
+.actions { display: flex; align-items: center; gap: 8px; }
+
+.primary, .secondary { display: inline-flex; align-items: center; height: 38px; padding: 0 14px; border-radius: 8px; font: inherit; font-size: .9rem; font-weight: 600; text-decoration: none; cursor: pointer; white-space: nowrap; }
+.primary { background: #1f8a5b; color: #fff; border: 0; }
+.primary:hover { filter: brightness(.95); }
+.secondary { background: #fff; color: #111827; border: 1px solid #d9dce1; }
+.secondary:hover { background: #f5f5f6; }
+.primary:focus-visible, .secondary:focus-visible { outline: 2px solid #1f8a5b; outline-offset: 2px; }
+
+.menu { position: relative; }
+.menu summary { list-style: none; }
+.menu summary::-webkit-details-marker { display: none; }
+.menuList { position: absolute; right: 0; top: calc(100% + 4px); z-index: 10; min-width: 190px; padding: 4px; background: #fff; border: 1px solid #d9dce1; border-radius: 8px; box-shadow: 0 6px 18px rgba(0, 0, 0, .08); }
+.menuItem { display: block; padding: 8px 10px; border-radius: 6px; font-size: .9rem; color: #111827; text-decoration: none; }
+.menuItem:hover { background: #f2f2f3; }
+
+.body { background: #fff; border: 1px solid #d9dce1; border-radius: 10px; overflow-x: auto; }
+
+.table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+.table th { text-align: left; padding: 10px 16px; font-weight: 600; color: #6b7280; border-bottom: 1px solid #ececef; white-space: nowrap; }
+.table td { padding: 12px 16px; border-bottom: 1px solid #f1f1f3; }
+.table tbody tr:hover { background: #fafafa; }
+
+.empty { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 48px 16px; text-align: center; }
+.emptyTitle { margin: 0; font-size: 1rem; font-weight: 600; }
+.emptyText { margin: 0 0 10px; color: #6b7280; font-size: .9rem; }
+
+@media (max-width: 640px) {
+  .actions { width: 100%; justify-content: space-between; }
+}

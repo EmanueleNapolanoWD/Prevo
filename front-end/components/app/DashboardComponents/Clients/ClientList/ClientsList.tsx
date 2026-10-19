@@ -1,4 +1,4 @@
-export default function ClientsForm(){
+export default function ClientsList() {
     return (
         <>
         </>
