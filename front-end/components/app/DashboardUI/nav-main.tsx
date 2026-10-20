@@ -10,16 +10,29 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { CirclePlusIcon, MailIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
 
-export function NavMain({
-  items,
-}: {
+interface NavMainProps {
   items: {
     title: string;
     url: string;
     icon?: React.ReactNode;
   }[];
-}) {
+  slug: string;
+}
+
+export function NavMain({ items, slug }: NavMainProps) {
+  const router = useRouter();
+
+  const handleClick = () => {
+    console.log("Click ricevuto! Navigazione verso:", `/${slug}/quotes/create`)
+    if (!slug) {
+      console.error("ATTENZIONE: Lo slug è vuoto o undefined!")
+      return
+    }
+    router.push(`/${slug}/quotes/create`)
+  }
+
   return (
     <SidebarGroup>
       <SidebarGroupContent className="flex flex-col gap-2">
@@ -28,6 +41,7 @@ export function NavMain({
             <SidebarMenuButton
               tooltip="Quick Create"
               className="min-w-8 bg-primary text-primary-foreground duration-200 ease-linear hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground"
+              onClick={handleClick}
             >
               <CirclePlusIcon />
               <span>Crea Preventivo</span>

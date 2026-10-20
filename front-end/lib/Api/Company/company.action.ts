@@ -79,7 +79,7 @@ export async function updateCompanyDataAction(
     };
   }
 
-  // invio i dati validati e normalizzati da Zod (non il payload grezzo)
+  // invio i dati validati e normalizzati da Zod
   const result = await updateCompany(
     slug,
     validation.data as Record<string, string | null>,

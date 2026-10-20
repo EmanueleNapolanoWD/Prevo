@@ -15,10 +15,6 @@ async function SidebarLoader({ params }: { params: Props["params"] }) {
   const { slug } = await params;
   const { companies, ...user } = await getCurrentUser();
 
-  console.log('slug: ', slug)
-  console.log('user: ', user)
-  console.log('comapnies: ', companies)
-
   const company = companies.find((c) => c.slug === slug);
   if (!company) notFound(); // non sei membro di questa azienda (o non esiste)
 
