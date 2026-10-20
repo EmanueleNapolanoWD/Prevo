@@ -10,6 +10,8 @@ use App\Domains\Clients\Models\ClientGroup;
 use App\Domains\Companies\Enums\CompanyStatus;
 use App\Domains\Companies\Models\CompanySettings;
 use App\Domains\Companies\Models\CompanyUser;
+use App\Domains\Products\Models\Product;
+use App\Domains\Products\Models\ProductCategory;
 use App\Domains\Quotes\Models\Quote;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -193,6 +195,17 @@ class Company extends Model implements IsTenant
     public function clientGroups(): HasMany
     {
         return $this->hasMany(ClientGroup::class);
+    }
+
+    // collegamento a products
+    public function products(): HasMany
+    {
+        return $this->hasMany(Product::class);
+    }
+
+    public function productCategories(): HasMany
+    {
+        return $this->hasMany(ProductCategory::class);
     }
 
 

@@ -12,9 +12,6 @@ use Throwable;
 
 class AuditLogger
 {
-    public function __construct(private readonly Request $request)
-    {
-    }
 
     public function log(
         string $event,
@@ -26,15 +23,10 @@ class AuditLogger
         array $metadata = [],
     ): void {
         try {
-            $companyId = $company?->getKey();
+            $companyId = $company?->getKey()
+                ?? ($auditable instanceof Company ? $auditable->getKey() : $auditable?->company_id);
 
-            if ($companyId === null && $auditable !== null) {
-                if ($auditable instanceof Company) {
-                    $companyId = $auditable->getKey();
-                } elseif (isset($auditable->company_id)) {
-                    $companyId = $auditable->company_id;
-                }
-            }
+            $request = request();
 
             AuditLog::create([
                 'company_id' => $companyId,
@@ -45,8 +37,8 @@ class AuditLogger
                 'old_values' => $old,
                 'new_values' => $new,
                 'metadata' => $metadata ?: null,
-                'ip_address' => $this->request->ip(),
-                'user_agent' => $this->request->userAgent(),
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
             ]);
         } catch (Throwable $e) {
             report($e);

@@ -4,8 +4,10 @@ namespace App\Providers;
 
 use App\Domains\Clients\Models\Client;
 use App\Domains\Companies\Models\Company;
+use App\Domains\Products\Models\Product;
 use App\Policies\ClientPolicy;
 use App\Policies\CompanyPolicy;
+use App\Policies\ProductPolicy;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -46,6 +48,7 @@ class AppServiceProvider extends ServiceProvider
         */
         Gate::policy(Client::class, ClientPolicy::class);
         Gate::policy(Company::class, CompanyPolicy::class);
+        Gate::policy(Product::class, ProductPolicy::class);
 
         /*
         ======================> RATE LIMITING

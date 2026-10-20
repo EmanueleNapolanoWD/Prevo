@@ -12,7 +12,6 @@ use App\Domains\Companies\Models\Company;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 
 class ClientController extends Controller
 {
