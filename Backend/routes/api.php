@@ -32,14 +32,17 @@ Route::middleware('auth:sanctum')->group(function () {
             // ROTTE PER CLIENTS
             Route::get('clients', [ClientController::class, 'index']);
             Route::post('clients', [ClientController::class, 'store']);
+            Route::get('clients/{clientId}', [ClientController::class, 'show']);
+            Route::put('clients/{clientId}', [ClientController::class, 'update']);
+            Route::patch('clients/{clientId}', [ClientController::class, 'update']);
+            Route::delete('clients/{clientId}', [ClientController::class, 'destroy']);
         });
 
 
 
 
     // Clients
-    Route::get('/companies/{companyId}/clients/{clientId}', [ClientController::class, 'show']);
-    Route::put('/companies/{companyId}/clients/{clientId}', [ClientController::class, 'update']);
-    Route::patch('/companies/{companyId}/clients/{clientId}', [ClientController::class, 'update']);
-    Route::delete('/companies/{companyId}/clients/{clientId}', [ClientController::class, 'destroy']);
+
+
+    
 });

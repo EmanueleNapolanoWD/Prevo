@@ -2,10 +2,10 @@
 
 import { Button } from "@/components/ui/button";
 import type { CompanySettingsData } from "@/types/company";
-import LocalizationSection from "./LocalizationSection";
-import NumberingSection from "./NumberingSection";
-import TaxSection from "./TaxSection";
-import TermsSection from "./TermsSection";
+import LocalizationSection from "./components/LocalizationSection";
+import NumberingSection from "./components/NumberingSection";
+import TaxSection from "./components/TaxSection";
+import TermsSection from "./components/TermsSection";
 import { useSettingsForm } from "./hooks/useSettingsForm";
 
 export default function SettingsForm({

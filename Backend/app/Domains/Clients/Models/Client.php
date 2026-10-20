@@ -34,7 +34,7 @@ class Client extends Model
         'vat_number',
         'sdi_code',
         'default_vat_rate',
-        'is_piblic_administration',
+        'is_public_administration',
         'payment_terms',
         'note',
     ];

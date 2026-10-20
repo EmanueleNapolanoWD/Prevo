@@ -1,4 +1,4 @@
-import z, { email } from "zod";
+import z from "zod";
 
 // COSTANTI
 export const CLIENT_TYPES = [
@@ -149,9 +149,15 @@ export const clientFormSchema = z
     const italy = v.country_code === "IT";
 
     // controllo P.IVA
-    if (
+    if (v.type === "COMPANY" && isBlank(v.vat_number)) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["vat_number"],
+        message: "La partita IVA è obbligatoria per le aziende",
+      });
+    } else if (
       italy &&
-      isBlank(v.vat_number) &&
+      !isBlank(v.vat_number) &&
       !/^(IT)?\d{11}$/i.test(v.vat_number.replace(/\s/g, ""))
     ) {
       ctx.addIssue({

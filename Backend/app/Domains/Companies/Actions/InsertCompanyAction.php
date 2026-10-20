@@ -17,10 +17,10 @@ class InsertCompanyAction
 
         // crea l'azienda (le company_settings le crea l'evento created del model)
         $company = Company::create([
-            'name'        => $data['company_name'],
+            'name'        => $data['name'],
             'legal_name'  => $data['legal_name'],
             'legal_form'  => $data['legal_form'] ?? null,
-            'slug'        => $this->generateUniqueSlug($data['company_name']),
+            'slug'        => $this->generateUniqueSlug($data['name']),
 
             'country_code' => $data['country_code'] ?? 'IT',
             'vat_number'   => $data['vat_number'],
@@ -34,7 +34,7 @@ class InsertCompanyAction
             'city'        => $data['city'],
             'province'    => $data['province'],
 
-            'email'   => $data['company_email'],
+            'email'   => $data['email'],
             'phone'   => $data['phone'],
             'website' => $data['website'] ?? null,
 

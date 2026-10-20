@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Domains\Clients\Actions\CreateClientAction;
+use App\Domains\Clients\Actions\UpdateClientAction;
 use App\Domains\Clients\Models\Client;
 use App\Domains\Clients\Requests\StoreClientRequest;
+use App\Domains\Clients\Requests\UpdateClientRequest;
 use App\Domains\Clients\Resources\ClientResources;
 use App\Domains\Companies\Models\Company;
 use App\Http\Controllers\Controller;
@@ -17,20 +19,30 @@ class ClientController extends Controller
 
     public function index(
         Request $request,
-        string $companyId
-    ): JsonResponse {
-        $this->ensureCompanyMembership($request, $companyId);
+        Company $company
+    ): ClientResources {
+        $this->ensureCompanyMembership($request, $company->id);
 
         $this->authorize('viewAny', [
             Client::class,
-            $companyId,
+            $company->id,
         ]);
 
-        $clients = Client::query()
-            ->where('company_id', $companyId)
-            ->paginate(15);
+        $clients = $company->clients()
+            ->with(['emails', 'phones', 'addresses'])
+            ->when($request->filled('q'), function ($query) use ($request) {
+                $term = '%' . $request->string('q')->trim() . '%';
+                $query->where(fn($q) => $q
+                    ->where('name', 'like', $term)
+                    ->orWhere('surname', 'like', $term)
+                    ->orWhere('company_name', 'like', $term));
+            })
+            ->when($request->filled('tipo'), fn($query) => $query->where('type', $request->string('tipo')))
+            ->latest()
+            ->paginate(15)
+            ->withQueryString();
 
-        return response()->json($clients);
+        return new ClientResources($clients);
     }
 
     public function store(
@@ -58,75 +70,45 @@ class ClientController extends Controller
 
     public function show(
         Request $request,
-        string $companyId,
+        Company $company,
         string $clientId
-    ): JsonResponse {
-        $this->ensureCompanyMembership($request, $companyId);
+    ): ClientResources {
+        $this->ensureCompanyMembership($request, $company->id);
 
-        $client = Client::query()
-            ->where('company_id', $companyId)
+        $client = $company->clients()
+            ->with(['emails', 'phones', 'addresses'])
             ->findOrFail($clientId);
 
         $this->authorize('view', $client);
 
-        return response()->json($client);
+        return new ClientResources($client);
     }
 
     public function update(
-        Request $request,
-        string $companyId,
+        UpdateClientRequest $request,
+        UpdateClientAction $action,
+        Company $company,
         string $clientId
-    ): JsonResponse {
-        $this->ensureCompanyMembership($request, $companyId);
+    ): ClientResources {
+        $this->ensureCompanyMembership($request, $company->id);
 
-        $client = Client::query()
-            ->where('company_id', $companyId)
-            ->findOrFail($clientId);
+        $client = $company->clients()->findOrFail($clientId);
 
         $this->authorize('update', $client);
 
-        $validated = $request->validate([
-            'type' => ['sometimes', 'required', 'string', 'max:30'],
-            'name' => ['sometimes', 'nullable', 'string', 'max:255'],
-            'surname' => ['sometimes', 'nullable', 'string', 'max:255'],
-            'company_name' => ['sometimes', 'nullable', 'string', 'max:255'],
-            'email' => [
-                'sometimes',
-                'nullable',
-                'email',
-                'max:255',
-                Rule::unique('clients', 'email')
-                    ->ignore($client->id)
-                    ->whereNull('deleted_at'),
-            ],
-            'phone' => ['sometimes', 'nullable', 'string', 'max:30'],
-            'address' => ['sometimes', 'required', 'string', 'max:255'],
-            'postal_code' => ['sometimes', 'required', 'string', 'max:10'],
-            'city' => ['sometimes', 'required', 'string', 'max:100'],
-            'province' => ['sometimes', 'required', 'string', 'size:2'],
-            'tax_code' => ['sometimes', 'nullable', 'string', 'max:20'],
-            'vat_number' => ['sometimes', 'nullable', 'string', 'max:20'],
-            'note' => ['sometimes', 'nullable', 'string'],
-        ]);
+        $client = $action->execute($client, $request->validated());
 
-        $client->update($validated);
-
-        return response()->json([
-            'message' => 'Cliente aggiornato correttamente.',
-            'data' => $client->fresh(),
-        ]);
+        return (new ClientResources($client))->additional(['message' => 'Cliente aggiornato con successo!']);
     }
 
     public function destroy(
         Request $request,
-        string $companyId,
+        Company $company,
         string $clientId
     ): JsonResponse {
-        $this->ensureCompanyMembership($request, $companyId);
+        $this->ensureCompanyMembership($request, $company->id);
 
-        $client = Client::query()
-            ->where('company_id', $companyId)
-            ->findOrFail($clientId);
+        $client = $company->clients()->findOrFail($clientId);
 
         $this->authorize('delete', $client);
 

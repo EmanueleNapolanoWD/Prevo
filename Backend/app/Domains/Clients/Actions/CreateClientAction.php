@@ -2,17 +2,17 @@
 
 namespace App\Domains\Clients\Actions;
 
+use App\Domains\Clients\Models\Client;
 use App\Domains\Companies\Models\Company;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 
 class CreateClientAction
 {
 
-    private const RELATIONS = ['emails', 'phones', 'addresses', 'websites', 'recipients'];
+    private const RELATIONS = ['emails', 'phones', 'addresses'];
 
-    public function execute(Company $company, array $data): JsonResponse
+    public function execute(Company $company, array $data): Client
     {
         return DB::transaction(function () use ($company, $data) {
             $children = Arr::only($data, self::RELATIONS);
