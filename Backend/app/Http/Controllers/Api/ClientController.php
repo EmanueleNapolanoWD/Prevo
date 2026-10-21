@@ -36,7 +36,7 @@ class ClientController extends Controller
                     ->orWhere('surname', 'like', $term)
                     ->orWhere('company_name', 'like', $term));
             })
-            ->when($request->filled('tipo'), fn($query) => $query->where('type', $request->string('tipo')))
+            ->when($request->filled('type'), fn($query) => $query->where('type', $request->string('type')))
             ->latest()
             ->paginate(15)
             ->withQueryString();

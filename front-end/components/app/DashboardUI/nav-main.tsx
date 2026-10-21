@@ -25,7 +25,6 @@ export function NavMain({ items, slug }: NavMainProps) {
   const router = useRouter();
 
   const handleClick = () => {
-    console.log("Click ricevuto! Navigazione verso:", `/${slug}/quotes/create`)
     if (!slug) {
       console.error("ATTENZIONE: Lo slug è vuoto o undefined!")
       return

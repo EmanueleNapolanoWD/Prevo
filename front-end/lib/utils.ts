@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
+import type { QuoteItem } from "@/types/quote";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -13,4 +14,20 @@ export function buildListHref(slug: string, filters: { q?: string; tipo?: string
   if (page && page > 1) params.set("page", String(page))
   const query = params.toString()
   return `/${slug}/clients${query ? `?${query}` : ""}`
+}
+
+// UTILS per QUOTE
+
+
+// Accetta anche la virgola decimale ("12,50"). Stringa vuota => NaN
+export function parseNumber(value: string): number {
+  const v = value.trim().replace(",", ".");
+  return v === "" ? NaN : Number(v);
+}
+
+export function calcLineTotal(
+  item: Pick<QuoteItem, "quantity" | "unit_price" | "discount">,
+): number {
+  const total = item.quantity * item.unit_price * (1 - item.discount / 100);
+  return Math.round(total * 100) / 100;
 }

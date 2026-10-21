@@ -3,12 +3,14 @@
 import { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import type { Client } from "@/types/client";
+import type { Client, ClientDetail } from "@/types/client";
 
 interface InfoClientSearchBarProps {
-  clients: Client[];
+  clients: ClientDetail[];
   isLoading: boolean;
   error: string | null;
+  selectedClient: ClientDetail | null,
+  setSelectedClient: (client: Client | null) => void;
   onQueryChange: (query: string) => void;
   onSelectClient?: (client: Client | null) => void;
 }
@@ -17,13 +19,14 @@ const MIN_CHARS = 2;
 
 export default function InfoClientSearchBar({
   clients,
+  selectedClient,
+  setSelectedClient,
   isLoading,
   error,
   onQueryChange,
   onSelectClient,
 }: InfoClientSearchBarProps) {
   const [search, setSearch] = useState("");
-  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [isOpen, setIsOpen] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
