@@ -13,7 +13,7 @@ export interface Product {
   name: string;
   description: string | null;
   unit: string;
-  sale_price: string; // Laravel restituisce i decimal come stringhe
+  sale_price: string; 
   cost_price: string | null;
   vat_rate: string;
   margin: number | null;

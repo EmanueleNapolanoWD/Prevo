@@ -1,0 +1,44 @@
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .grid {
+    grid-template-columns: 1fr 2fr;
+  }
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.fieldWide {
+  grid-column: 1 / -1;
+}
+
+.label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--qf-muted, #71717a);
+}
+
+.textarea {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  font: inherit;
+  font-size: 0.875rem;
+  color: inherit;
+  resize: vertical;
+  background: transparent;
+  border: 1px solid var(--qf-border, rgba(128, 128, 128, 0.35));
+  border-radius: 0.375rem;
+}
+
+.textarea:focus-visible {
+  outline: 2px solid var(--qf-muted, #71717a);
+  outline-offset: 1px;
+}

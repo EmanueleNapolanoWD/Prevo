@@ -37,10 +37,7 @@ function toAuthError(error: unknown, messages: ErrorMessages): AuthError {
     case 422:
       return new AuthError(messages.invalid, status, data?.errors);
     case 403:
-      return new AuthError(
-        data?.message ?? "Accesso non consentito.",
-        status,
-      );
+      return new AuthError(data?.message ?? "Accesso non consentito.", status);
     case 419:
       return new AuthError(
         "Sessione scaduta. Ricarica la pagina e riprova.",

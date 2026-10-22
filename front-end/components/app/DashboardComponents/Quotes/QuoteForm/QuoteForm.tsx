@@ -1,78 +1,169 @@
 "use client";
 
 import { useState } from "react";
-import { Input } from "@/components/ui/input";
-import type { ClientDetail } from "@/types/client";
-import type { QuoteItem } from "@/types/quote";
-import InfoClient, { type QuoteContact } from "./InfoClient/InfoClient";
+import { useParams } from "next/navigation";
+
+import InfoClient from "./InfoClient/InfoClient";
 import QuoteItems from "./QuoteItems/QuoteItems";
+import TaxQuoteSettings from "@/components/app/DashboardComponents/Quotes/QuoteForm/Tax/TaxQuoteSetting";
+import { QuoteHeader } from "./QuoteHeader/QuoteHeader";
+import QuoteTemplate from "./QuoteTemplate/QuoteTemplate";
+import { useQuoteForm } from "./hooks/useQuoteForm";
 import styles from "./quote-form.module.css";
 
 export default function QuoteForm() {
-  const [client, setClient] = useState<ClientDetail | null>(null);
-  const [contact, setContact] = useState<QuoteContact>({
-    email: null,
-    phone: null,
-    address: null,
-  });
-  const [number, setNumber] = useState("");
-  const [title, setTitle] = useState("");
-  const [items, setItems] = useState<QuoteItem[]>([]);
+  const { slug } = useParams<{ slug: string }>();
+
+  const {
+    settings,
+    settingsLoading,
+    settingsError,
+    currency,
+    money,
+    header,
+    tax,
+    appearance,
+    items,
+    totals,
+    setHeader,
+    setTax,
+    setAppearance,
+    setItems,
+    clients,
+    clientsLoading,
+    clientError,
+    setClientQuery,
+    selectedClient,
+    setSelectedClient,
+    selectedEmailId,
+    selectedPhoneId,
+    selectedAddressId,
+    setSelectedEmailId,
+    setSelectedPhoneId,
+    setSelectedAddressId,
+    submit,
+  } = useQuoteForm({ slug });
+
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  async function handleSubmit() {
+    setSubmitting(true);
+    setSubmitError(null);
+    const res = await submit();
+    if (!res.ok) setSubmitError(res.error ?? "Errore durante il salvataggio");
+    setSubmitting(false);
+  }
 
   return (
     <div className={styles.form}>
       {/* aspetto template preventivo */}
       <section className={styles.section}>
-        <h3 className={styles.sectionTitle}>Template</h3>
-        <p className={styles.placeholder}>Scelta template da settings</p>
+        <QuoteTemplate values={appearance} onChange={setAppearance} />
       </section>
 
       {/* info cliente */}
       <section className={styles.section}>
         <h3 className={styles.sectionTitle}>Cliente</h3>
-        <InfoClient onSelectClient={setClient} onContactChange={setContact} />
+        <InfoClient
+          clients={clients}
+          isLoading={clientsLoading}
+          error={clientError}
+          onQueryChange={setClientQuery}
+          selectedClient={selectedClient}
+          onSelectClient={setSelectedClient}
+          selectedEmailId={selectedEmailId}
+          selectedPhoneId={selectedPhoneId}
+          selectedAddressId={selectedAddressId}
+          onEmailChange={setSelectedEmailId}
+          onPhoneChange={setSelectedPhoneId}
+          onAddressChange={setSelectedAddressId}
+        />
       </section>
 
       {/* dati preventivo */}
       <section className={styles.section}>
         <h3 className={styles.sectionTitle}>Dati preventivo</h3>
-        <div className={styles.grid}>
-          <div className={styles.field}>
-            <label htmlFor="quote-number" className={styles.label}>
-              Numero preventivo
-            </label>
-            <Input
-              id="quote-number"
-              value={number}
-              onChange={(e) => setNumber(e.target.value)}
-            />
-          </div>
-          <div className={styles.field}>
-            <label htmlFor="quote-title" className={styles.label}>
-              Oggetto preventivo
-            </label>
-            <Input
-              id="quote-title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
-          </div>
-        </div>
+        <QuoteHeader
+          values={header}
+          onChange={setHeader}
+          disabled={settingsLoading}
+        />
       </section>
 
       {/* voci preventivo */}
       <section className={styles.section}>
         <h3 className={styles.sectionTitle}>Voci</h3>
-        <QuoteItems items={items} onItemsChange={setItems} />
+        <QuoteItems
+          items={items}
+          onItemsChange={setItems}
+          currency={currency}
+        />
       </section>
 
-      {/* tasse */}
+      {/* tasse, note e termini */}
       <section className={styles.section}>
-        <h3 className={styles.sectionTitle}>Tasse e note</h3>
-        <p className={styles.placeholder}>iva · valido fino a</p>
-        <p className={styles.placeholder}>maggiorazione · sconto</p>
-        <p className={styles.placeholder}>inserimento di note</p>
+        <h3 className={styles.sectionTitle}>Tasse, note e termini</h3>
+        {settingsError && (
+          <p role="alert" className={styles.error}>
+            {settingsError}
+          </p>
+        )}
+        <TaxQuoteSettings
+          values={tax}
+          onChange={setTax}
+          defaultNotes={settings?.default_notes}
+          defaultTerms={settings?.default_terms}
+          disabled={settingsLoading}
+        />
       </section>
+
+      {/* riepilogo */}
+      <section className={styles.section}>
+        <h3 className={styles.sectionTitle}>Riepilogo</h3>
+        {totals ? (
+          <dl className={styles.summary}>
+            <div className={styles.summaryRow}>
+              <dt>Subtotale</dt>
+              <dd>{money.format(totals.subtotal)}</dd>
+            </div>
+            <div className={styles.summaryRow}>
+              <dt>Sovrapprezzo</dt>
+              <dd>{money.format(totals.surcharge)}</dd>
+            </div>
+            <div className={styles.summaryRow}>
+              <dt>Imponibile</dt>
+              <dd>{money.format(totals.taxable)}</dd>
+            </div>
+            <div className={styles.summaryRow}>
+              <dt>IVA</dt>
+              <dd>{money.format(totals.vat)}</dd>
+            </div>
+            <div className={`${styles.summaryRow} ${styles.summaryTotal}`}>
+              <dt>Totale</dt>
+              <dd>{money.format(totals.total)}</dd>
+            </div>
+          </dl>
+        ) : (
+          <p className={styles.muted}>Aggiungi almeno una voce per vedere i totali.</p>
+        )}
+      </section>
+
+      <div className={styles.footer}>
+        {submitError && (
+          <p role="alert" className={styles.error}>
+            {submitError}
+          </p>
+        )}
+        <button
+          type="button"
+          onClick={handleSubmit}
+          disabled={submitting || settingsLoading}
+          className={styles.submit}
+        >
+          {submitting ? "Salvataggio…" : "Salva preventivo"}
+        </button>
+      </div>
     </div>
   );
 }

@@ -1,8 +1,7 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import getCompanySettings, {
-  getCompany,
-} from "@/lib/Api/Company/company.server";
+import getQuoteSettings from "@/lib/Api/Quote/quote.server";
+import { getCompany } from "@/lib/Api/Company/company.server";
 import SettingsForm from "@/components/app/DashboardComponents/Company/CompanySettings/SettingsForm";
 import CompanyForm from "@/components/app/DashboardComponents/Company/CompanyForm/CompanyForm";
 import styles from "./page.module.css";
@@ -85,7 +84,7 @@ async function CompanyContent({ slug }: { slug: string }) {
 }
 
 async function QuotesContent({ slug }: { slug: string }) {
-  const settings = await getCompanySettings(slug);
+  const settings = await getQuoteSettings(slug);
   return <SettingsForm slug={slug} initialValues={settings} />;
 }
 

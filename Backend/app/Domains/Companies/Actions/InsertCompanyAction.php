@@ -12,30 +12,30 @@ class InsertCompanyAction
     public function execute(
         User $user,
         array $data
-    ): Company
-    {
+    ): Company {
 
+        $companyName = trim($data['company_name']);
         // crea l'azienda (le company_settings le crea l'evento created del model)
         $company = Company::create([
-            'name'        => $data['name'],
-            'legal_name'  => $data['legal_name'],
-            'legal_form'  => $data['legal_form'] ?? null,
-            'slug'        => $this->generateUniqueSlug($data['name']),
+            'name' => $companyName,
+            'legal_name' => $data['legal_name'],
+            'legal_form' => $data['legal_form'] ?? null,
+            'slug' => $this->generateUniqueSlug($companyName),
 
             'country_code' => $data['country_code'] ?? 'IT',
-            'vat_number'   => $data['vat_number'],
-            'tax_code'     => $data['tax_code'] ?? null,
-            'tax_regime'   => $data['tax_regime'] ?? null,
-            'sdi_code'     => $data['sdi_code'] ?? null,
-            'pec'          => $data['pec'] ?? null,
+            'vat_number' => $data['vat_number'],
+            'tax_code' => $data['tax_code'] ?? null,
+            'tax_regime' => $data['tax_regime'] ?? null,
+            'sdi_code' => $data['sdi_code'] ?? null,
+            'pec' => $data['pec'] ?? null,
 
-            'address'     => $data['address'],
+            'address' => $data['address'],
             'postal_code' => $data['postal_code'],
-            'city'        => $data['city'],
-            'province'    => $data['province'],
+            'city' => $data['city'],
+            'province' => $data['province'],
 
-            'email'   => $data['email'],
-            'phone'   => $data['phone'],
+            'email' => $data['email'],
+            'phone' => $data['phone'],
             'website' => $data['website'] ?? null,
 
             'trial_ends_at' => now()->addDays(14),

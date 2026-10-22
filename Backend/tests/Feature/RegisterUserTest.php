@@ -105,10 +105,10 @@ class RegisterUserTest extends TestCase
         // Verifica la creazione delle impostazioni aziendali.
         $this->assertSame(
             1,
-            $company->companySettings()->count()
+            $company->QuoteSettings()->count()
         );
 
-        $settings = $company->companySettings;
+        $settings = $company->QuoteSettings;
 
         $this->assertNotNull($settings);
         $this->assertSame('PREV', $settings->quote_prefix);

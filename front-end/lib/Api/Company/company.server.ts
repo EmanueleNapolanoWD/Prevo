@@ -1,7 +1,7 @@
 import "server-only";
 
 import { serverApi, authHeaders } from "../Services/server-api";
-import { CompanySettingsData, UpdateCompanyResult } from "@/types/company";
+import { UpdateCompanyResult } from "@/types/company";
 import { CompanyValues } from "@/types/company";
 import { handleReadError, toApiFailure } from "../Services/errors";
 
@@ -37,24 +37,5 @@ export async function updateCompany(
   }
 }
 
-//==================COMPANYSETTINGS
 
-// recupero settaggi compnay
-export default async function getCompanySettings(
-  slug: string,
-): Promise<CompanySettingsData> {
-  try {
-    const res = await serverApi.get(`${companyUrl(slug)}/settings`, {
-      headers: await authHeaders(),
-    });
 
-    const settings = res.data.data ?? res.data;
-
-    return {
-      ...settings,
-      default_vat_rate: Number(settings.default_vat_rate),
-    };
-  } catch (error) {
-    handleReadError(error);
-  }
-}

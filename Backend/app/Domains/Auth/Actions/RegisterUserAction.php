@@ -50,7 +50,9 @@ class RegisterUserAction
         } catch (UniqueConstraintViolationException $e) {
             report($e);
             throw ValidationException::withMessages([
-                'email' => [__('Impossibile completare la registrazione con questi dati.')],
+                'registration' => [
+                    'Alcuni dati inseriti risultano già utilizzati. Controlla i campi e riprova.',
+                ],
             ]);
         }
 
@@ -88,7 +90,7 @@ class RegisterUserAction
             ],
             metadata: ['owner_role' => CompanyRole::OWNER->value],
         );
-        
+
 
         return response()->json([
             'message' => 'Registrazione effettuata con successo',

@@ -5,7 +5,7 @@ namespace Tests\Feature;
 use App\Domains\Auth\Models\User;
 use App\Domains\Companies\Enums\CompanyRole;
 use App\Domains\Companies\Models\Company;
-use App\Domains\Companies\Models\CompanySettings;
+use App\Domains\Quotes\Models\QuoteSettings;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Tests\TestCase;
@@ -64,7 +64,7 @@ class CompanyRelationshipsTest extends TestCase
     {
         $company = $this->createCompany();
 
-        $settings = CompanySettings::create([
+        $settings = QuoteSettings::create([
             'company_id' => $company->id,
             'quote_prefix' => 'PREV',
             'quote_start_number' => 1,
@@ -77,7 +77,7 @@ class CompanyRelationshipsTest extends TestCase
 
         $this->assertSame(
             $settings->id,
-            $company->companySettings->id
+            $company->QuoteSettings->id
         );
 
         $this->assertSame(

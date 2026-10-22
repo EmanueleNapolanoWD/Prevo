@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Domains\Companies\Requests;
+namespace App\Domains\Quotes\Requests;
 
+use App\Domains\Quotes\Enums\QuoteTemplate;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class CompanySettingsRequest extends FormRequest
+class QuoteSettingsRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,6 +25,10 @@ class CompanySettingsRequest extends FormRequest
     public function rules(): array
     {
         return [
+            // template
+            'default_quote_template' => ['sometimes', Rule::enum(QuoteTemplate::class)],
+            'quote_primary_color' => ['sometimes', 'regex:/^#[0-9A-Fa-f]{6}$/'],
+            'quote_accent_color' => ['sometimes', 'regex:/^#[0-9A-Fa-f]{6}$/'],
             // Numerazione preventivi
             'quote_prefix' => ['required', 'string', 'max:10'],
             'quote_start_number' => ['required', 'integer', 'min:1'],

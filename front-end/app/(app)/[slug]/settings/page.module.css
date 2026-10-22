@@ -1,69 +1,72 @@
 .page {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  width: 100%;
+  min-height: 100%;
 }
 
 .title {
+  margin: 0;
+  padding: 20px 24px 0;
   font-size: 1.5rem;
   font-weight: 600;
 }
 
 .tabs {
   display: flex;
-  gap: 0.25rem;
+  gap: 4px;
+  padding: 16px 24px 0;
   border-bottom: 1px solid var(--border, #e5e7eb);
-  overflow-x: auto;
 }
 
 .tab {
-  position: relative;
-  padding: 0.625rem 1rem;
+  padding: 10px 14px;
   font-size: 0.875rem;
-  font-weight: 500;
-  white-space: nowrap;
   color: var(--muted-foreground, #6b7280);
   border-bottom: 2px solid transparent;
-  margin-bottom: -1px;
-  transition: color 0.15s ease, border-color 0.15s ease;
+  margin-bottom: -1px; /* sovrappone il bordo del tab a quello della nav */
+  text-decoration: none;
+  transition: color 0.15s, border-color 0.15s;
 }
 
 .tab:hover {
   color: var(--foreground, #111827);
 }
 
-.tab:focus-visible {
-  outline: 2px solid var(--ring, #3b82f6);
-  outline-offset: -2px;
-  border-radius: 4px;
-}
-
 .tabActive {
   color: var(--foreground, #111827);
-  border-bottom-color: var(--primary, #111827);
+  font-weight: 500;
+  border-bottom-color: #15803d;
 }
 
+/* Il pannello prende tutta la larghezza: niente max-width, niente margin auto */
 .panel {
-  max-width: 48rem;
   width: 100%;
-  margin-inline: auto;
+  padding: 24px;
 }
 
 .skeletonWrap {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 24px;
+  width: 100%;
 }
 
 .skeleton {
-  height: 10rem;
-  border-radius: 0.375rem;
-  background: var(--muted, #f3f4f6);
-  animation: pulse 1.5s ease-in-out infinite;
+  height: 160px;
+  border-radius: 10px;
+  background: linear-gradient(
+    90deg,
+    #f3f4f6 25%,
+    #e5e7eb 50%,
+    #f3f4f6 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
 }
 
-@keyframes pulse {
-  50% {
-    opacity: 0.5;
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
   }
 }

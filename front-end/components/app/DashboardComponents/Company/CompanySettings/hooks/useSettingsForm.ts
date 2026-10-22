@@ -3,24 +3,24 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { isAxiosError } from "axios";
-import type { CompanySettingsData } from "@/types/company";
+import type { QuoteSettingsData } from "@/types/quote";
 import { updateCompanySettings } from "@/lib/Api/Company/company.client";
 import { DEFAULT_SETTINGS } from "@/lib/Consts/CompanySettingsConsts";
 
-export type SetField = <K extends keyof CompanySettingsData>(
+export type SetField = <K extends keyof QuoteSettingsData>(
   key: K,
-  value: CompanySettingsData[K],
+  value: QuoteSettingsData[K],
 ) => void;
 
 /** Props comuni a tutte le sezioni del form. */
 export type SectionProps = {
-  values: CompanySettingsData;
+  values: QuoteSettingsData;
   set: SetField;
 };
 
 type Message = { type: "ok" | "error"; text: string } | null;
 
-function validate(v: CompanySettingsData): string | null {
+function validate(v: QuoteSettingsData): string | null {
   if (!v.quote_prefix.trim())
     return "Il prefisso dei preventivi è obbligatorio.";
   if (v.quote_start_number < 1)
@@ -49,10 +49,10 @@ function getErrorMessage(err: unknown): string {
 
 export function useSettingsForm(
   slug: string,
-  initialValues?: Partial<CompanySettingsData>,
+  initialValues?: Partial<QuoteSettingsData>,
 ) {
   const router = useRouter();
-  const [values, setValues] = useState<CompanySettingsData>({
+  const [values, setValues] = useState<QuoteSettingsData>({
     ...DEFAULT_SETTINGS,
     ...initialValues,
   });

@@ -1,67 +1,56 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { useParams } from "next/navigation";
 import InfoClientSearchBar from "./InfoClientSearchBar";
 import InfoClientDetail from "./InfoClientDetail";
-import { useClientInfo } from "./useClientInfo";
 import type { ClientDetail } from "@/types/client";
 
-export interface QuoteContact {
-  email: string | null;
-  phone: string | null;
-}
+type ContactId = string | number;
 
+// Componente controllato: ricerca, selezione e contatti vivono in useQuoteForm
 interface InfoClientProps {
+  // ricerca
+  clients: ClientDetail[];
+  isLoading: boolean;
+  error: string | null;
+  onQueryChange: (query: string) => void;
+
+  // selezione
+  selectedClient: ClientDetail | null;
   onSelectClient: (client: ClientDetail | null) => void;
-  onContactChange?: (contact: QuoteContact) => void;
+
+  // contatti scelti
+  selectedEmailId: ContactId | null;
+  selectedPhoneId: ContactId | null;
+  selectedAddressId: ContactId | null;
+  onEmailChange: (id: ContactId | null) => void;
+  onPhoneChange: (id: ContactId | null) => void;
+  onAddressChange: (id: ContactId | null) => void;
 }
 
 export default function InfoClient({
+  clients,
+  isLoading,
+  error,
+  onQueryChange,
+  selectedClient,
   onSelectClient,
-  onContactChange,
+  selectedEmailId,
+  selectedPhoneId,
+  selectedAddressId,
+  onEmailChange,
+  onPhoneChange,
+  onAddressChange,
 }: InfoClientProps) {
-  const { slug } = useParams<{ slug: string }>();
-  const [query, setQuery] = useState<string>("");
-
-  const {
-    results,
-    isLoading,
-    error,
-    selectedClient,
-    setSelectedClient,
-    selectedEmail,
-    selectedPhone,
-    selectedAddress,
-    setSelectedEmailId,
-    setSelectedPhoneId,
-    setSelectedAddressId,
-  } = useClientInfo(slug, query);
-
-  // Ref per evitare loop di render se il genitore non memoizza la callback
-  const onContactChangeRef = useRef(onContactChange);
-  useEffect(() => {
-    onContactChangeRef.current = onContactChange;
-  }, [onContactChange]);
-
-  const email = selectedEmail?.email ?? null;
-  const phone = selectedPhone?.phone ?? null; // adatta il nome del campo
-
-  // Comunica al preventivo email e telefono scelti
-  useEffect(() => {
-    onContactChangeRef.current?.({ email, phone });
-  }, [email, phone]);
-
   return (
     <>
       {/* Ricerca cliente */}
       <InfoClientSearchBar
-        clients={results}
+        clients={clients}
         isLoading={isLoading}
         error={error}
         selectedClient={selectedClient}
-        setSelectedClient={setSelectedClient}
-        onQueryChange={setQuery}
+        setSelectedClient={onSelectClient}
+        onQueryChange={onQueryChange}
         onSelectClient={onSelectClient}
       />
 
@@ -69,12 +58,12 @@ export default function InfoClient({
       {selectedClient && (
         <InfoClientDetail
           client={selectedClient}
-          selectedEmailId={selectedEmail?.id ?? null}
-          selectedPhoneId={selectedPhone?.id ?? null}
-          selectedAddressId={selectedAddress?.id ?? null}
-          onAddressChange={setSelectedAddressId}
-          onEmailChange={setSelectedEmailId}
-          onPhoneChange={setSelectedPhoneId}
+          selectedEmailId={selectedEmailId}
+          selectedPhoneId={selectedPhoneId}
+          selectedAddressId={selectedAddressId}
+          onEmailChange={onEmailChange}
+          onPhoneChange={onPhoneChange}
+          onAddressChange={onAddressChange}
         />
       )}
     </>

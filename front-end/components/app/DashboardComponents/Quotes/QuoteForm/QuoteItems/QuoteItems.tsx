@@ -99,6 +99,7 @@ export default function QuoteItems({
 
   // Il prodotto scelto precompila il modulo; quantità e sconto restano modificabili
   function handleSelectProduct(product: Product | null) {
+    console.log('prodotto in quote items: ',product)
     setSelectedProduct(product);
     if (!product) return;
 
@@ -108,7 +109,7 @@ export default function QuoteItems({
       name: product.name,
       description: product.description ?? "",
       unit: product.unit ?? d.unit,
-      price: product.price != null ? String(product.price) : d.price,
+      price: product.sale_price != null ? String(product.sale_price) : d.price,
     }));
     setFormError(null);
   }
@@ -202,9 +203,9 @@ export default function QuoteItems({
             />
           </Field>
 
-          <Field id={`${uid}-price`} label="Prezzo unitario">
+          <Field id={`${uid}-sale_price`} label="Prezzo unitario">
             <Input
-              id={`${uid}-price`}
+              id={`${uid}-sale_price`}
               inputMode="decimal"
               value={draft.price}
               onChange={(e) => setField("price", e.target.value)}

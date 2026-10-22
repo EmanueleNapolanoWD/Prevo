@@ -6,6 +6,7 @@ import { updateCompany } from "./company.server";
 import { CompanyValues, CompanyFormState } from "@/types/company";
 import { companyFormSchema } from "./company.schema";
 
+
 const FIELDS = [
   "name",
   "legal_name",
@@ -51,26 +52,6 @@ export async function updateCompanyDataAction(
     // flatten() include solo i campi che hanno errori
     const { fieldErrors, formErrors } = validation.error.flatten();
 
-    console.log(
-      "[ZOD] Errori di validazione:",
-      JSON.stringify(
-        {
-          fieldErrors,
-          formErrors,
-          issues: validation.error.issues.map((issue) => ({
-            field: issue.path.join("."),
-            code: issue.code,
-            message: issue.message,
-            received: issue.path.length
-              ? payload[issue.path[0] as keyof typeof payload]
-              : undefined,
-          })),
-        },
-        null,
-        2,
-      ),
-    );
-
     return {
       ok: false,
       message: formErrors[0] ?? "Controlla i campi evidenziati.",
@@ -109,3 +90,6 @@ export async function updateCompanyDataAction(
   redirect(`/${newSlug}`);
 
 }
+
+
+

@@ -27,36 +27,6 @@ export interface Company {
   trial_ends_at: Date;
 }
 
-//Company Settings
-export interface CompanySettingsData {
-  // Numerazione preventivi
-  quote_prefix: string;
-  quote_start_number: number;
-  next_quote_number: number;
-  quote_number_resets_yearly: boolean;
-  quote_number_padding: number;
-  quote_validity_days: number;
-
-  // Fiscale / importi
-  default_vat_rate: number;
-  default_vat_nature: string | null;
-  prices_include_vat: boolean;
-  stamp_duty_enabled: boolean;
-  default_currency: string;
-
-  // Condizioni commerciali
-  default_validity_days: number;
-  default_payment_terms: string | null;
-  default_payment_method: string | null;
-  default_notes: string | null;
-  default_terms: string | null;
-
-  // Localizzazione
-  locale: string;
-  timezone: string;
-  date_format: string;
-}
-
 export type CompanyValues = {
   name?: string;
   legal_name?: string | null;

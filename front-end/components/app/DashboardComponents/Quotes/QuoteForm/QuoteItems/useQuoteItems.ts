@@ -41,6 +41,7 @@ export function useQuoteItems(slug: string, query: string) {
           setError(res.message);
           setResults([]);
         } else if ("data" in res) {
+            
           setResults(res.data);
           setError(null);
         }

@@ -5,7 +5,7 @@ namespace App\Domains\Companies\Requests;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateCompanySettingsRequest extends FormRequest
+class UpdateQuoteSettingsRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

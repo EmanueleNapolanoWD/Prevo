@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import type { CompanySettingsData } from "@/types/company";
+import type { QuoteSettingsData } from "@/types/quote";
 import LocalizationSection from "./components/LocalizationSection";
 import NumberingSection from "./components/NumberingSection";
 import TaxSection from "./components/TaxSection";
@@ -13,15 +13,15 @@ export default function SettingsForm({
   initialValues,
 }: {
   slug: string,
-  initialValues?: Partial<CompanySettingsData>;
+  initialValues?: Partial<QuoteSettingsData>;
 }) {
   const { values, set, saving, message, handleSubmit } = useSettingsForm(slug, initialValues);
 
   return (
-    <form onSubmit={handleSubmit} className="mx-auto max-w-3xl space-y-6">
-      <NumberingSection values={values} set={set} /> ok
-      <TaxSection values={values} set={set} /> ok
-      <TermsSection values={values} set={set} /> ok
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <NumberingSection values={values} set={set} /> 
+      <TaxSection values={values} set={set} /> 
+      <TermsSection values={values} set={set} /> 
       <LocalizationSection values={values} set={set} />
 
       <div className="flex items-center justify-end gap-4">

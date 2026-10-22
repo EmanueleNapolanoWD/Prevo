@@ -8,7 +8,7 @@ use App\Domains\Auth\Models\User;
 use App\Domains\Clients\Models\Client;
 use App\Domains\Clients\Models\ClientGroup;
 use App\Domains\Companies\Enums\CompanyStatus;
-use App\Domains\Companies\Models\CompanySettings;
+use App\Domains\Quotes\Models\QuoteSettings;
 use App\Domains\Companies\Models\CompanyUser;
 use App\Domains\Products\Models\Product;
 use App\Domains\Products\Models\ProductCategory;
@@ -90,7 +90,7 @@ class Company extends Model implements IsTenant
     {
         // Ogni azienda nasce con le sue impostazioni (usa i default della migration)
         static::created(function (Company $company) {
-            $company->companySettings()->create();
+            $company->QuoteSettings()->create();
         });
     }
 
@@ -168,9 +168,9 @@ class Company extends Model implements IsTenant
     }
 
     /** * Impostazioni dell'azienda. */
-    public function companySettings(): HasOne
+    public function quoteSettings(): HasOne
     {
-        return $this->hasOne(CompanySettings::class);
+        return $this->hasOne(QuoteSettings::class);
     }
 
     /** * Quote associati all'azienda. */

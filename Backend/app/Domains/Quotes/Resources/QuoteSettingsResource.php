@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Domains\Companies\Resources;
+namespace App\Domains\Quotes\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class CompanySettingsResource extends JsonResource
+class QuoteSettingsResource extends JsonResource
 {
     /**
      * Transform the resource into an array.

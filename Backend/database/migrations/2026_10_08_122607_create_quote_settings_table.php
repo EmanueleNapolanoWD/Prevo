@@ -4,13 +4,17 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     public function up(): void
     {
-        Schema::create('company_settings', function (Blueprint $table) {
+        Schema::create('quote_settings', function (Blueprint $table) {
             $table->uuid('id')->primary(); // chiave primaria UUID
             $table->foreignUuid('company_id')->unique()->constrained()->cascadeOnDelete(); // azienda proprietaria; unique = relazione 1->1; cascade solo con forceDelete
+
+            // TEmplate preventivo
+            $table->string('default_quote_template', 30)->default('classic');
+            $table->string('quote_primary_color', 7)->default('#1F2937');
+            $table->string('quote_accent_color', 7)->default('#2563EB');
 
             // Numerazione preventivi
             $table->string('quote_prefix', 20)->default('PREV'); // prefisso del numero preventivo (es. PREV-2026-0001)

@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Domains\Companies\Actions;
+namespace App\Domains\Quotes\Actions;
 
 use App\Domains\Audit\Services\AuditLogger;
 use App\Domains\Auth\Models\User;
 use App\Domains\Companies\Models\Company;
-use App\Domains\Companies\Models\CompanySettings;
+use App\Domains\Quotes\Models\QuoteSettings;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 
-class UpdateCompanySettingsAction
+class UpdateQuoteSettingsAction
 {
     public function __construct(
         private readonly AuditLogger $audit,
@@ -20,11 +20,11 @@ class UpdateCompanySettingsAction
         Company $company,
         User $user,
         array $data
-    ): CompanySettings {
+    ): QuoteSettings {
         $settings = DB::transaction(function () use ($company, $user, $data, &$old, &$changes) {
 
             // fallback : se non fosse stata creata al insertoCompanies
-            $settings = $company->companySettings ?? $company->companySettings()->make();
+            $settings = $company->QuoteSettings ?? $company->QuoteSettings()->make();
 
             $settings->fill($data);
             $changes = $settings->getDirty();
@@ -38,7 +38,7 @@ class UpdateCompanySettingsAction
 
         if($changes !== []){
             $this->audit->log(
-                event: 'company_settings.updated',
+                event: 'quote_settings.updated',
                 user: $user,
                 company: $company,
                 auditable: $settings,

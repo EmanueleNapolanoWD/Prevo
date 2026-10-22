@@ -17,7 +17,7 @@ class UpdateCompanyAction
     ) {
     }
 
-    
+
     public function execute(Company $company, array $data, User $user): Company
     {
         return DB::transaction(function () use ($company, $data, $user) {
@@ -51,6 +51,7 @@ class UpdateCompanyAction
                 event: 'company_update',
                 user: $user,
                 company: $company,
+                auditable: $company,
                 old: $old,
                 new: $changes,
             );
