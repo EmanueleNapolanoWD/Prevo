@@ -1,57 +1,47 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Policies;
 
 use App\Domains\Auth\Models\User;
 use App\Domains\Clients\Models\Client;
-use App\Domains\Companies\Enums\CompanyRole;
 
-class ClientPolicy
+class ClientPolicy extends CompanyScopedPolicy
 {
+    private const READ = self::ALL_ROLES;
+
+    private const WRITE = self::ALL_ROLES;
+
+    private const DELETE = self::OWNER_ADMIN;
+
     public function viewAny(User $user, string $companyId): bool
     {
-        return $this->canAccessCompany($user, $companyId);
+        return $this->allows($user, $companyId, self::READ);
     }
 
     public function view(User $user, Client $client): bool
     {
-        return $this->canAccessCompany($user, $client->company_id);
+        return $this->allows($user, $client->company_id, self::READ);
     }
 
     public function create(User $user, string $companyId): bool
     {
-        return $this->canAccessCompany($user, $companyId);
+        return $this->allows($user, $companyId, self::WRITE);
     }
 
     public function update(User $user, Client $client): bool
     {
-        return $this->canAccessCompany($user, $client->company_id);
+        return $this->allows($user, $client->company_id, self::WRITE);
     }
 
     public function delete(User $user, Client $client): bool
     {
-        $role = $this->roleFor($user, $client->company_id);
-
-        return in_array($role, ['OWNER', 'ADMIN'], true);
+        return $this->allows($user, $client->company_id, self::DELETE);
     }
 
-    private function canAccessCompany(
-        User $user,
-        string $companyId
-    ): bool {
-        return $this->roleFor($user, $companyId) !== null;
-    }
-
-    private function roleFor(User $user, string $companyId): ?string
+    public function restore(User $user, Client $client): bool
     {
-        $role = $user->companyUsers()
-            ->where('company_id', $companyId)
-            ->value('role');
-
-        if ($role === null) {
-            return null;
-        }
-
-        return $role instanceof CompanyRole ? $role->value : (string) $role;
+        return $this->allows($user, $client->company_id, self::DELETE);
     }
 }

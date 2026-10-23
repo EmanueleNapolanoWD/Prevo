@@ -20,7 +20,6 @@ services:
             IGNITION_LOCAL_SITES_PATH: /var/www/html  
         volumes:
             - './Backend:/var/www/html'
-            - '/var/www/html/vendor'
         networks:
             - sail
         depends_on:

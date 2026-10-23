@@ -20,6 +20,7 @@ return new class extends Migration {
             $table->string('quote_prefix', 20)->default('PREV'); // prefisso del numero preventivo (es. PREV-2026-0001)
             $table->unsignedBigInteger('quote_start_number')->default(1); // numero da cui parte la numerazione (utile se l'azienda migra da un altro gestionale)
             $table->unsignedBigInteger('next_quote_number')->default(1); // contatore reale: prossimo numero da assegnare (da incrementare in transazione con lockForUpdate)
+            $table->unsignedSmallInteger('quote_number_year')->nullable();
             $table->boolean('quote_number_resets_yearly')->default(true); // se true, il contatore riparte da quote_start_number ogni 1 gennaio
             $table->unsignedTinyInteger('quote_number_padding')->default(4); // cifre del numero con zeri a sinistra (4 => 0001)
 

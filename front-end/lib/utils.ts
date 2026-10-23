@@ -1,6 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import type { QuoteItem } from "@/types/quote";
+import type { QuoteItem, DiscountType } from "@/types/quote";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -28,11 +28,17 @@ export function parseNumber(value: string): number {
   return v === "" ? NaN : Number(v);
 }
 
-export function calcLineTotal(
-  item: Pick<QuoteItem, "quantity" | "unit_price" | "discount">,
-): number {
-  const total = item.quantity * item.unit_price * (1 - item.discount / 100);
-  return Math.round(total * 100) / 100;
+export function calcLineDiscount(item: QuoteItem): number {
+  const gross = item.quantity * item.unit_price;
+  const raw =
+    item.discount_type === "percentage"
+      ? (gross * item.discount_value) / 100
+      : item.discount_value;
+  return Math.min(Math.max(raw, 0), gross);
+}
+
+export function calcLineTotal(item: QuoteItem): number {
+  return item.quantity * item.unit_price - calcLineDiscount(item);
 }
 
 // Data tra N giorni nel formato "YYYY-MM-DD" per <input type="date">
@@ -57,14 +63,32 @@ const round2 = (n: number) => Math.round(n * 100) / 100;
 // Maggiorazione e IVA sono percentuali; valori non numerici contano come 0
 export function calcTotals(
   items: QuoteItem[],
-  surchargePercent: number,
-  vatPercent: number,
-): QuoteTotals {
-  const subtotal = round2(items.reduce((s, i) => s + calcLineTotal(i), 0));
-  const surcharge = round2((subtotal * safe(surchargePercent)) / 100);
-  const taxable = round2(subtotal + surcharge);
-  const vat = round2((taxable * safe(vatPercent)) / 100);
-  return { subtotal, surcharge, taxable, vat, total: round2(taxable + vat) };
+  surcharge: number,
+  vatRate: number,
+  discount: { type: DiscountType; value: number } = {
+    type: "percentage",
+    value: 0,
+  },
+) {
+  const subtotal = items.reduce((sum, i) => sum + calcLineTotal(i), 0);
+
+  const rawDiscount =
+    discount.type === "percentage"
+      ? (subtotal * discount.value) / 100
+      : discount.value;
+  const discountTotal = Math.min(Math.max(rawDiscount || 0, 0), subtotal);
+
+  const taxable = subtotal - discountTotal + (surcharge || 0);
+  const vat = (taxable * (vatRate || 0)) / 100;
+
+  return {
+    subtotal,
+    discount: discountTotal,
+    surcharge: surcharge || 0,
+    taxable,
+    vat,
+    total: taxable + vat,
+  };
 }
 
 interface QuoteNumberSettings {

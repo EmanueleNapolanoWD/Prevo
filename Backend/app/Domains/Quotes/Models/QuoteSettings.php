@@ -126,4 +126,15 @@ class QuoteSettings extends Model
     {
         return $this->belongsTo(Company::class);
     }
+
+    // Helpers
+    public static function forCompanyForUpdate(Company $company): self
+    {
+        static::query()->createOrFirst(['company_id' => $company->id]);
+
+        return static::query()
+            ->where('company_id', $company->id)
+            ->lockForUpdate()
+            ->firstOrFail();
+    }
 }

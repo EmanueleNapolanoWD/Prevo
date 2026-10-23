@@ -17,7 +17,8 @@ class CreateQuoteRequest extends FormRequest
 
     public function company(): Company
     {
-        return $this->company ??= Company::where('slug', $this->route('slug'))->firstOrFail();
+        return $this->company ??= $this->attributes->get('company')
+            ?? abort(404);
     }
     /**
      * Determine if the user is authorized to make this request.
@@ -49,7 +50,7 @@ class CreateQuoteRequest extends FormRequest
         return [
             'client_id' => [
                 'required',
-                'integer',
+                'string',
                 Rule::exists('clients', 'id')->where('company_id', $companyId),
             ],
 
@@ -73,12 +74,26 @@ class CreateQuoteRequest extends FormRequest
             'items' => ['required', 'array', 'min:1', 'max:100'],
             'items.*.product_id' => [
                 'nullable',
-                'integer',
+                'string',
                 Rule::exists('products', 'id')->where('company_id', $companyId),
             ],
             'items.*.description' => ['required', 'string', 'max:500'],
             'items.*.quantity' => ['required', 'numeric', 'gt:0', 'max:999999', 'decimal:0,3'],
             'items.*.unit_price' => ['required', 'numeric', 'min:0', 'max:9999999', 'decimal:0,2'],
+            'items.*.discount_type' => [
+                'nullable',
+                Rule::in(['percentage', 'fixed']),
+                'required_with:items.*.discount_value',
+            ],
+
+            'items.*.discount_value' => [
+                'nullable',
+                'numeric',
+                'min:0',
+                'max:9999999',
+                'decimal:0,2',
+                'required_with:items.*.discount_type',
+            ],
         ];
     }
 

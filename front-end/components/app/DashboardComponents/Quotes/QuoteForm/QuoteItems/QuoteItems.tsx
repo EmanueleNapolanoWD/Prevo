@@ -6,10 +6,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { calcLineTotal, parseNumber } from "@/lib/utils";
 import type { Product } from "@/types/product";
-import type { QuoteItem } from "@/types/quote";
+import type { QuoteItem, DiscountType } from "@/types/quote";
 import ProductSearchBar from "./ProductSearchBar/ProductSearchBar";
 import { useQuoteItems } from "./useQuoteItems";
 import styles from "./quote-items.module.css";
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectSeparator,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface QuoteItemsProps {
   items: QuoteItem[];
@@ -25,7 +35,8 @@ interface Draft {
   quantity: string;
   unit: string;
   price: string;
-  discount: string;
+  discountType: DiscountType;
+  discountValue: string;
 }
 
 const EMPTY_DRAFT: Draft = {
@@ -35,7 +46,8 @@ const EMPTY_DRAFT: Draft = {
   quantity: "1",
   unit: "pz",
   price: "",
-  discount: "0",
+  discountType: "percentage",
+  discountValue: "0",
 };
 
 function Field({
@@ -99,7 +111,7 @@ export default function QuoteItems({
 
   // Il prodotto scelto precompila il modulo; quantità e sconto restano modificabili
   function handleSelectProduct(product: Product | null) {
-    console.log('prodotto in quote items: ',product)
+    console.log("prodotto in quote items: ", product);
     setSelectedProduct(product);
     if (!product) return;
 
@@ -125,8 +137,9 @@ export default function QuoteItems({
   function handleAdd() {
     const quantity = parseNumber(draft.quantity);
     const unitPrice = parseNumber(draft.price);
-    const discount = parseNumber(draft.discount === "" ? "0" : draft.discount);
-
+    const discountValue = parseNumber(
+      draft.discountValue === "" ? "0" : draft.discountValue,
+    );
     if (!draft.name.trim()) {
       setFormError("Inserisci un titolo per la voce.");
       return;
@@ -139,8 +152,19 @@ export default function QuoteItems({
       setFormError("Inserisci un prezzo valido.");
       return;
     }
-    if (Number.isNaN(discount) || discount < 0 || discount > 100) {
-      setFormError("Lo sconto deve essere compreso tra 0 e 100.");
+    if (Number.isNaN(discountValue) || discountValue < 0) {
+      setFormError("Inserisci uno sconto valido.");
+      return;
+    }
+    if (draft.discountType === "percentage" && discountValue > 100) {
+      setFormError("Lo sconto percentuale non può superare 100.");
+      return;
+    }
+    if (
+      draft.discountType === "fixed" &&
+      discountValue > quantity * unitPrice
+    ) {
+      setFormError("Lo sconto non può superare l'importo della voce.");
       return;
     }
 
@@ -152,7 +176,8 @@ export default function QuoteItems({
       quantity,
       unit: draft.unit.trim(),
       unit_price: unitPrice,
-      discount,
+      discount_type: draft.discountType,
+      discount_value: discountValue,
     };
 
     onItemsChange([...items, newItem]);
@@ -212,13 +237,33 @@ export default function QuoteItems({
             />
           </Field>
 
-          <Field id={`${uid}-discount`} label="Sconto %">
-            <Input
-              id={`${uid}-discount`}
-              inputMode="decimal"
-              value={draft.discount}
-              onChange={(e) => setField("discount", e.target.value)}
-            />
+          <Field id={`${uid}-discount`} label="Sconto">
+            <div className={styles.discountRow}>
+              <Input
+                id={`${uid}-discount`}
+                inputMode="decimal"
+                value={draft.discountValue}
+                onChange={(e) => setField("discountValue", e.target.value)}
+              />
+              <Select
+                value={draft.discountType}
+                onValueChange={(v) =>
+                  setField("discountType", v as DiscountType)
+                }
+              >
+                <SelectTrigger className="w-[90px]" aria-label="Tipo di sconto">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectItem value="percentage">%</SelectItem>
+                    <SelectItem value="fixed">
+                      {currency === "EUR" ? "€" : currency}
+                    </SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
           </Field>
 
           <Field id={`${uid}-description`} label="Descrizione" wide>
@@ -276,9 +321,15 @@ export default function QuoteItems({
                   <td className={styles.num}>
                     {item.quantity} {item.unit}
                   </td>
-                  <td className={styles.num}>{money.format(item.unit_price)}</td>
                   <td className={styles.num}>
-                    {item.discount > 0 ? `${item.discount}%` : "—"}
+                    {money.format(item.unit_price)}
+                  </td>
+                  <td className={styles.num}>
+                    {item.discount_value > 0
+                      ? item.discount_type === "percentage"
+                        ? `${item.discount_value}%`
+                        : money.format(item.discount_value)
+                      : "—"}
                   </td>
                   <td className={styles.num}>
                     {money.format(calcLineTotal(item))}

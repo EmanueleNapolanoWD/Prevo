@@ -5,7 +5,10 @@ import { useState, useCallback, useEffect, useMemo } from "react";
 // actions
 import { getProduct } from "@/lib/Api/Product/product.actions";
 import { getClients } from "@/lib/Api/Clients/clients.actions";
-import { getQuoteSettingsAction } from "@/lib/Api/Quote/quote.action";
+import {
+  createQuoteAction,
+  getQuoteSettingsAction,
+} from "@/lib/Api/Quote/quote.action";
 import {
   calcTotals,
   dateInDays,
@@ -16,10 +19,15 @@ import {
 // types
 import type { Product } from "@/types/product";
 import type { ClientDetail } from "@/types/client";
-import type {
-  QuoteSettingsData,
-  QuoteItem,
-  QuoteAppearanceValues,
+import {
+  type QuoteSettingsData,
+  type QuoteItem,
+  type QuoteAppearanceValues,
+  type QuotePayload,
+  type DiscountType,
+  DISCOUNT_TYPE_TO_API,
+  toQuotePayloadAppearance,
+  toQuotePayloadItem,
 } from "@/types/quote";
 
 // ============================================================================
@@ -42,6 +50,8 @@ export interface TaxQuoteValue {
   vat_rate: string;
   valid_until: string;
   surcharge: string;
+  discount_type: DiscountType;
+  discount_value: string;
   notes: string;
   terms: string;
 }
@@ -306,6 +316,8 @@ export function useQuoteForm({
         ? dateInDays(settings.default_validity_days ?? 0)
         : "",
       surcharge: "0",
+      discount_type: "percentage",
+      discount_value: "0",
       notes: settings?.default_notes ?? "",
       terms: settings?.default_terms ?? "",
     }),
@@ -373,8 +385,15 @@ export function useQuoteForm({
       items,
       parseNumber(tax.surcharge),
       parseNumber(tax.vat_rate),
+      { type: tax.discount_type, value: parseNumber(tax.discount_value) },
     );
-  }, [items, tax.surcharge, tax.vat_rate]);
+  }, [
+    items,
+    tax.surcharge,
+    tax.vat_rate,
+    tax.discount_type,
+    tax.discount_value,
+  ]);
 
   // --------------------------------------------------------------------------
   // Ricerca prodotti
@@ -511,37 +530,52 @@ export function useQuoteForm({
     if (items.length === 0)
       return { ok: false, error: "Aggiungi almeno una voce al preventivo" };
 
-    const payload = {
+    if (!header.title.trim()) {
+      return { ok: false, error: "Inserisci titolo preventivo" };
+    }
+
+    const discountValue = parseNumber(tax.discount_value || "0");
+    if (Number.isNaN(discountValue) || discountValue < 0) {
+      return { ok: false, error: "Sconto del preventivo non valido" };
+    }
+    if (tax.discount_type === "percentage" && discountValue > 100) {
+      return {
+        ok: false,
+        error: "Lo sconto percentuale non può superare 100",
+      };
+    }
+
+    const payload: QuotePayload = {
       client_id: selectedClient.id,
       contact: {
         email: contact.email || null,
         phone: contact.phone || null,
         address: contact.address || null,
       },
-      number: header.number,
-      title: header.title,
-      description: header.description || null,
+      title: header.title.trim(),
+      description: header.description.trim() || null,
       vat_rate: parseNumber(tax.vat_rate),
       surcharge: parseNumber(tax.surcharge),
+      ...(discountValue > 0
+        ? {
+            discount_type: DISCOUNT_TYPE_TO_API[tax.discount_type],
+            discount_value: discountValue,
+          }
+        : {}),
       valid_until: tax.valid_until,
-      notes: tax.notes || null,
-      terms: tax.terms || null,
-      appearance: {
-        template: appearance.template,
-        primary_color: appearance.primaryColor,
-        accent_color: appearance.accentColor,
-      },
-      items: items.map(({ id, ...rest }) => ({
-        product_id: rest.product_id ?? null,
-        description: rest.description,
-        quantity: parseNumber(String(rest.quantity)),
-        unit_price: parseNumber(String(rest.unit_price)),
-      })),
+      notes: tax.notes.trim() || null,
+      terms: tax.terms.trim() || null,
+      appearance: toQuotePayloadAppearance(appearance),
+      items: items.map(toQuotePayloadItem),
     };
 
-    console.log("payload per quote: ", payload);
+    const res = await createQuoteAction(slug, payload);
 
-    //return createQuoteAction(slug, payload); // server action che chiama il backend
+    if ("ok" in res && res.ok === false) {
+      return { ok: false, error: res.message };
+    }
+
+    return { ok: true, data: res };
   }, [selectedClient, items, contact, header, tax, appearance, slug]);
 
   return {

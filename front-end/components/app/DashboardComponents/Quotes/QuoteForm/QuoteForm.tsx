@@ -1,30 +1,25 @@
 "use client";
 
 import { useState } from "react";
-import { useParams } from "next/navigation";
 
 import InfoClient from "./InfoClient/InfoClient";
 import QuoteItems from "./QuoteItems/QuoteItems";
 import TaxQuoteSettings from "@/components/app/DashboardComponents/Quotes/QuoteForm/Tax/TaxQuoteSetting";
 import { QuoteHeader } from "./QuoteHeader/QuoteHeader";
 import QuoteTemplate from "./QuoteTemplate/QuoteTemplate";
-import { useQuoteForm } from "./hooks/useQuoteForm";
 import styles from "./quote-form.module.css";
+import type { UseQuoteFormReturn } from "../hooks/useQuoteForm";
 
-export default function QuoteForm() {
-  const { slug } = useParams<{ slug: string }>();
-
-  const {
+export default function QuoteForm({ form }: { form: UseQuoteFormReturn }) {
+   const {
     settings,
     settingsLoading,
     settingsError,
     currency,
-    money,
     header,
     tax,
     appearance,
     items,
-    totals,
     setHeader,
     setTax,
     setAppearance,
@@ -42,7 +37,7 @@ export default function QuoteForm() {
     setSelectedPhoneId,
     setSelectedAddressId,
     submit,
-  } = useQuoteForm({ slug });
+  } = form;
 
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -116,37 +111,6 @@ export default function QuoteForm() {
           defaultTerms={settings?.default_terms}
           disabled={settingsLoading}
         />
-      </section>
-
-      {/* riepilogo */}
-      <section className={styles.section}>
-        <h3 className={styles.sectionTitle}>Riepilogo</h3>
-        {totals ? (
-          <dl className={styles.summary}>
-            <div className={styles.summaryRow}>
-              <dt>Subtotale</dt>
-              <dd>{money.format(totals.subtotal)}</dd>
-            </div>
-            <div className={styles.summaryRow}>
-              <dt>Sovrapprezzo</dt>
-              <dd>{money.format(totals.surcharge)}</dd>
-            </div>
-            <div className={styles.summaryRow}>
-              <dt>Imponibile</dt>
-              <dd>{money.format(totals.taxable)}</dd>
-            </div>
-            <div className={styles.summaryRow}>
-              <dt>IVA</dt>
-              <dd>{money.format(totals.vat)}</dd>
-            </div>
-            <div className={`${styles.summaryRow} ${styles.summaryTotal}`}>
-              <dt>Totale</dt>
-              <dd>{money.format(totals.total)}</dd>
-            </div>
-          </dl>
-        ) : (
-          <p className={styles.muted}>Aggiungi almeno una voce per vedere i totali.</p>
-        )}
       </section>
 
       <div className={styles.footer}>

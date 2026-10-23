@@ -2,38 +2,31 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Domains\Quotes\Actions\UpdateQuoteSettingsAction;
+use App\Domains\Quotes\Actions\CreateQuoteAction;
 use App\Domains\Companies\Models\Company;
-use App\Domains\Quotes\Resources\QuoteSettingsResource;
-use App\Domains\Quotes\Requests\QuoteSettingsRequest;
+use App\Domains\Quotes\Data\CreateQuoteData;
+use App\Domains\Quotes\Requests\CreateQuoteRequest;
+use App\Domains\Quotes\Resources\QuoteResource;
 use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
 
 class QuoteController extends Controller
 {
-    /**
-     * Recupera le impostazioni dell'azienda.
-     */
-    public function getQuoteSettings(
-        Company $company
-    ): QuoteSettingsResource {
-        return new QuoteSettingsResource(
-            $company->QuoteSettings()->firstOrFail()
-        );
-    }
 
-    /**
-     * Aggiorna le impostazioni dell'azienda.
-     */
-    public function updateQuoteSettings(
-        QuoteSettingsRequest $request,
+    public function store(
+        CreateQuoteRequest $request,
         Company $company,
-        UpdateQuoteSettingsAction $action
-    ): QuoteSettingsResource {
+        CreateQuoteAction $action
+    ): JsonResponse {
 
-        $this->authorize('updateSettings', $company);
+        $quote = $action->execute(
+            $company,
+            $request->user(),
+            CreateQuoteData::fromArray($request->validated()),
+        );
 
-        $settings = $action->execute($company, $request->user(), $request->validated());
-
-        return new QuoteSettingsResource($settings);
+        return QuoteResource::make($quote)
+            ->response()
+            ->setStatusCode(201);
     }
 }

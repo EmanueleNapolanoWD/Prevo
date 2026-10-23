@@ -1,0 +1,256 @@
+.previewWrapper {
+  position: sticky;
+  top: 1rem;
+  padding: 1rem;
+  background: #f3f4f6;
+  border-radius: 12px;
+  max-height: calc(100vh - 2rem);
+  overflow: auto;
+}
+
+.document {
+  --quote-primary: #1f2937;
+  --quote-accent: #2563eb;
+
+  background: #fff;
+  color: #111827;
+  max-width: 794px; /* ~A4 */
+  margin: 0 auto;
+  padding: 2.5rem;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.12), 0 8px 24px rgb(0 0 0 / 0.06);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.document h2,
+.document h3,
+.document p {
+  margin: 0;
+}
+
+.document h3 {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--quote-accent);
+  margin-bottom: 0.5rem;
+}
+
+.muted,
+.placeholder {
+  color: #9ca3af;
+}
+
+.placeholder {
+  padding: 1rem;
+  border: 1px dashed #d1d5db;
+  border-radius: 6px;
+  text-align: center;
+}
+
+/* Intestazione */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1.5rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 3px solid var(--quote-primary);
+  margin-bottom: 1.5rem;
+}
+
+.eyebrow {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: var(--quote-accent);
+}
+
+.header h2 {
+  font-size: 1.5rem;
+  color: var(--quote-primary);
+  margin: 0.25rem 0;
+}
+
+.number {
+  color: #6b7280;
+}
+
+.company {
+  text-align: right;
+  font-size: 1rem;
+  color: var(--quote-primary);
+}
+
+.description {
+  margin-bottom: 1.5rem;
+  color: #374151;
+  white-space: pre-line;
+}
+
+/* Cliente + validità */
+.metaGrid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.clientSection p,
+.validity strong {
+  color: #374151;
+}
+
+.validity {
+  text-align: right;
+}
+
+/* Tabella voci */
+.itemsSection {
+  margin-bottom: 1.5rem;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  background: var(--quote-primary);
+  color: #fff;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+}
+
+.table td {
+  padding: 0.625rem 0.75rem;
+  border-bottom: 1px solid #e5e7eb;
+  vertical-align: top;
+}
+
+.table tbody tr:nth-child(even) {
+  background: #f9fafb;
+}
+
+.num {
+  text-align: right !important;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.itemName {
+  display: block;
+  font-weight: 600;
+}
+
+.itemDesc {
+  display: block;
+  font-size: 0.8rem;
+  color: #6b7280;
+  white-space: pre-line;
+}
+
+/* Totali */
+.totalsSection {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1.5rem;
+}
+
+.totals {
+  margin: 0;
+  width: min(100%, 280px);
+}
+
+.totals > div {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.totals dt {
+  color: #6b7280;
+}
+
+.totals dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.totals .grandTotal {
+  border-bottom: none;
+  border-top: 2px solid var(--quote-primary);
+  margin-top: 0.25rem;
+  padding-top: 0.6rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--quote-primary);
+}
+
+.grandTotal dt {
+  color: inherit;
+}
+
+/* Note / condizioni */
+.termsSection {
+  margin-bottom: 1rem;
+}
+
+.termsSection strong {
+  display: block;
+  margin-bottom: 0.25rem;
+  color: var(--quote-primary);
+}
+
+.termsSection p {
+  color: #4b5563;
+  font-size: 0.8rem;
+  white-space: pre-line;
+}
+
+.footer {
+  margin-top: 2rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #e5e7eb;
+  text-align: center;
+  font-size: 0.7rem;
+  color: #9ca3af;
+}
+
+/* Varianti template (opzionali, la classe arriva da appearance.template) */
+.modern .header {
+  border-bottom: none;
+  border-left: 6px solid var(--quote-accent);
+  padding-left: 1rem;
+}
+
+.minimal .header {
+  border-bottom-width: 1px;
+}
+
+.minimal .table th {
+  background: transparent;
+  color: var(--quote-primary);
+  border-bottom: 2px solid var(--quote-primary);
+}
+
+@media (max-width: 640px) {
+  .document {
+    padding: 1.25rem;
+  }
+  .header,
+  .metaGrid {
+    grid-template-columns: 1fr;
+    flex-direction: column;
+  }
+  .company,
+  .validity {
+    text-align: left;
+  }
+}

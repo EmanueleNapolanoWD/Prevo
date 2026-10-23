@@ -116,3 +116,8 @@
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
 }
+
+.discountRow {
+  display: flex;
+  gap: 0.5rem;
+}

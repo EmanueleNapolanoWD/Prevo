@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\ClientController;
 use App\Http\Controllers\Api\CompanyController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\QuoteController;
+use App\Http\Controllers\Api\QuoteSettingsController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -31,8 +32,8 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::put('', [CompanyController::class, 'updateCompanyData']);
 
             //ROTTE PER Quote SETTINGS
-            Route::get('settings', [QuoteController::class, 'getQuoteSettings']);
-            Route::put('settings', [QuoteController::class, 'updateQuoteSettings']);
+            Route::get('settings', [QuoteSettingsController::class, 'getQuoteSettings']);
+            Route::put('settings', [QuoteSettingsController::class, 'updateQuoteSettings']);
 
             // ROTTE PER CLIENTS
             Route::get('clients', [ClientController::class, 'index']);
@@ -48,6 +49,9 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('products/{productId}', [ProductController::class, 'show']);
             Route::put('products/{productId}', [ProductController::class, 'update']);
             Route::delete('products/{productId}', [ProductController::class, 'destroy']);
+
+            // QUOTES
+            Route::post('quotes',[QuoteController::class, 'store']);
         });
 
 
