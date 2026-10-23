@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 import InfoClient from "./InfoClient/InfoClient";
 import QuoteItems from "./QuoteItems/QuoteItems";
@@ -9,9 +10,10 @@ import { QuoteHeader } from "./QuoteHeader/QuoteHeader";
 import QuoteTemplate from "./QuoteTemplate/QuoteTemplate";
 import styles from "./quote-form.module.css";
 import type { UseQuoteFormReturn } from "../hooks/useQuoteForm";
+import { LoaderCircle, Save } from "lucide-react";
 
 export default function QuoteForm({ form }: { form: UseQuoteFormReturn }) {
-   const {
+  const {
     settings,
     settingsLoading,
     settingsError,
@@ -37,7 +39,10 @@ export default function QuoteForm({ form }: { form: UseQuoteFormReturn }) {
     setSelectedPhoneId,
     setSelectedAddressId,
     submit,
+    resetForm,
   } = form;
+
+  const router = useRouter();
 
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -46,8 +51,16 @@ export default function QuoteForm({ form }: { form: UseQuoteFormReturn }) {
     setSubmitting(true);
     setSubmitError(null);
     const res = await submit();
-    if (!res.ok) setSubmitError(res.error ?? "Errore durante il salvataggio");
+
+    if (!res.ok) {
+      setSubmitting(false);
+      setSubmitError(res.error ?? "Errore durante il salvataggio");
+      return;
+    }
+
+    resetForm();
     setSubmitting(false);
+    router.refresh();
   }
 
   return (
@@ -125,7 +138,17 @@ export default function QuoteForm({ form }: { form: UseQuoteFormReturn }) {
           disabled={submitting || settingsLoading}
           className={styles.submit}
         >
-          {submitting ? "Salvataggio…" : "Salva preventivo"}
+          {submitting ? (
+            <>
+              <LoaderCircle size={17} className={styles.spinner} />
+              Salvataggio…
+            </>
+          ) : (
+            <>
+              <Save size={17} strokeWidth={2} />
+              Salva preventivo
+            </>
+          )}
         </button>
       </div>
     </div>
