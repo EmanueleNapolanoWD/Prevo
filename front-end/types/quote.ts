@@ -1,4 +1,6 @@
-// ===== UI: riga del preventivo nel form =====
+// ============================================================================
+// UI: riga del preventivo nel form
+// ============================================================================
 
 export type DiscountType = "percentage" | "fixed";
 
@@ -47,7 +49,10 @@ export interface QuoteAppearanceValues {
   accentColor: string;
 }
 
-// ===== Impostazioni preventivi dell'azienda =====
+// ============================================================================
+// Impostazioni preventivi dell'azienda
+// ============================================================================
+
 export interface QuoteSettingsData {
   // Anagrafica
   company_name?: string | null;
@@ -80,7 +85,10 @@ export interface QuoteSettingsData {
   date_format: string;
 }
 
-// ===== API: creazione preventivo (POST /api/companies/{slug}/quotes) =====
+// ============================================================================
+// Stato e sconti (valori dell'API)
+// ============================================================================
+
 export type QuoteStatus =
   | "DRAFT"
   | "SENT"
@@ -89,12 +97,40 @@ export type QuoteStatus =
   | "REJECTED"
   | "EXPIRED";
 
+// Etichette italiane e stili per la lista (le chiavi sono quelle dell'API)
+export const QUOTE_STATUS_LABELS: Record<QuoteStatus, string> = {
+  DRAFT: "Bozza",
+  SENT: "Inviato",
+  VIEWED: "Visualizzato",
+  ACCEPTED: "Accettato",
+  REJECTED: "Rifiutato",
+  EXPIRED: "Scaduto",
+};
+
+export const QUOTE_STATUS_STYLES: Record<QuoteStatus, string> = {
+  DRAFT: "border-amber-200 bg-amber-50 text-amber-700",
+  SENT: "border-blue-200 bg-blue-50 text-blue-700",
+  VIEWED: "border-violet-200 bg-violet-50 text-violet-700",
+  ACCEPTED: "border-emerald-200 bg-emerald-50 text-emerald-700",
+  REJECTED: "border-slate-200 bg-slate-50 text-slate-700",
+  EXPIRED: "border-rose-200 bg-rose-50 text-rose-700",
+};
+
 export type QuoteDiscountType = "percentage" | "fixed";
 
 export const DISCOUNT_TYPE_TO_API: Record<DiscountType, QuoteDiscountType> = {
   percentage: "percentage",
   fixed: "fixed",
 };
+
+export const API_TO_DISCOUNT_TYPE: Record<QuoteDiscountType, DiscountType> = {
+  percentage: "percentage",
+  fixed: "fixed",
+};
+
+// ============================================================================
+// Payload inviato al backend (creazione e modifica)
+// ============================================================================
 
 /** Riga inviata al backend. Importi in euro; subtotale, IVA e totali li calcola il backend. */
 export interface QuotePayloadItem {
@@ -105,12 +141,12 @@ export interface QuotePayloadItem {
   unit_price: number; // max 2 decimali
   vat_rate?: number | null; // null/assente => aliquota del preventivo
   discount_type?: QuoteDiscountType | null;
-  discount_value?: number | null; // % se PERCENTAGE, euro se FIXED
+  discount_value?: number | null; // % se percentage, euro se fixed
 }
 
 /**
- * Payload di creazione. NON inviare `number` né totali: il backend li ignora
- * (il numero lo assegna lui, dentro una transazione).
+ * Payload di creazione e di modifica. NON inviare `number` né totali: il
+ * backend li ignora (il numero lo assegna lui, dentro una transazione).
  * I campi opzionali ricadono sui default di quote_settings.
  */
 export interface QuotePayload {
@@ -123,7 +159,7 @@ export interface QuotePayload {
   vat_rate?: number | null;
   surcharge?: number; // importo fisso in euro, max 2 decimali
   discount_type?: QuoteDiscountType | null;
-  discount_value?: number | null; // % se PERCENTAGE, euro se FIXED
+  discount_value?: number | null; // % se percentage, euro se fixed
   appearance?: {
     template?: QuoteTemplateKey;
     primary_color?: string; // "#RRGGBB"
@@ -135,9 +171,13 @@ export interface QuotePayload {
     address?: string | null;
   };
   items: QuotePayloadItem[];
+  version?: number;
 }
 
-// ===== API: preventivo restituito dal backend (QuoteResource) =====
+// ============================================================================
+// API: preventivo restituito dal backend (QuoteResource)
+// ============================================================================
+
 export interface QuoteClientSnapshot {
   id: string;
   type: "PERSON" | "COMPANY" | null;
@@ -188,6 +228,9 @@ export interface Quote {
     address: string | null;
   };
   currency: string;
+  vat_rate: number; // aliquota del preventivo
+  discount_type: QuoteDiscountType | null; // sconto globale
+  discount_value: number | null; // % se percentage, euro se fixed
   subtotal: number; // somma righe prima degli sconti
   discount_total: number;
   surcharge: number;
@@ -199,7 +242,16 @@ export interface Quote {
   updated_at: string | null;
 }
 
-// ===== Mapping UI -> payload =====
+export type SubmitResult =
+  | { ok: true; data: Quote }
+  | { ok: false; error: string };
+
+// Alias usato dal hook useQuoteForm
+export type QuoteDetail = Quote;
+
+// ============================================================================
+// Mapping UI -> payload
+// ============================================================================
 
 /** Converte la riga del form nella riga del payload. */
 export function toQuotePayloadItem(item: QuoteItem): QuotePayloadItem {
@@ -229,5 +281,42 @@ export function toQuotePayloadAppearance(
     template: a.template,
     primary_color: a.primaryColor,
     accent_color: a.accentColor,
+  };
+}
+
+// ============================================================================
+// Mapping API -> UI (per la modifica)
+// ============================================================================
+
+/**
+ * Inverso di toQuotePayloadItem: la prima riga di `description` è il nome,
+ * il resto è la descrizione. Number() perché Laravel può restituire i
+ * decimali come stringhe.
+ */
+export function toQuoteItem(line: QuoteLine): QuoteItem {
+  const [name, ...rest] = line.description.split("\n");
+  return {
+    id: String(line.id),
+    product_id: line.product_id,
+    name,
+    description: rest.join("\n"),
+    quantity: Number(line.quantity),
+    unit: line.unit,
+    unit_price: Number(line.unit_price),
+    discount_type: line.discount_type
+      ? API_TO_DISCOUNT_TYPE[line.discount_type]
+      : "percentage",
+    discount_value: Number(line.discount_value ?? 0),
+  };
+}
+
+/** Inverso di toQuotePayloadAppearance. */
+export function toQuoteAppearanceValues(
+  a: Quote["appearance"],
+): QuoteAppearanceValues {
+  return {
+    template: a.template,
+    primaryColor: a.primary_color,
+    accentColor: a.accent_color,
   };
 }

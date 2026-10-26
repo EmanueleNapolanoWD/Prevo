@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignUuid('quote_id')->constrained()->cascadeOnDelete();
             $table->string('from_status',30)->nullable();
             $table->string('to_status',30);
+            $table->string('actor_type', 20)->default('user');
             $table->foreignUuid('changed_by')->nullable()->constrained('users')->nullOnDelete();
             $table->string('reason',255)->nullable();
             $table->timestamps();

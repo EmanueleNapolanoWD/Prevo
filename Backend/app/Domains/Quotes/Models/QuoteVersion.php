@@ -10,8 +10,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class QuoteVersion extends Model
 {
 
-use HasUuids;
-    protected $table = 'quote_version';
+    use HasUuids;
+    public const UPDATED_AT = null;
+    protected $table = 'quote_versions';
 
     protected $fillable = [
         'quote_id',
@@ -23,9 +24,7 @@ use HasUuids;
     public function casts(): array
     {
         return [
-            'quote_id' => 'integer',
             'version_number' => 'integer',
-            'created_by' => 'integer',
             'snapshot' => 'json',
         ];
     }

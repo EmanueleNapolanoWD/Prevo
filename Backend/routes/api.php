@@ -51,7 +51,12 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::delete('products/{productId}', [ProductController::class, 'destroy']);
 
             // QUOTES
-            Route::post('quotes',[QuoteController::class, 'store']);
+            Route::get('quotes', [QuoteController::class, 'index']);
+            Route::get('quotes/{quoteId}', [QuoteController::class, 'show']);
+            Route::post('quotes', [QuoteController::class, 'store']);
+            Route::put('quotes/{quoteId}', [QuoteController::class, 'update']);
+            Route::delete('quotes/{quoteId}', [QuoteController::class, 'delete']);
+
         });
 
 

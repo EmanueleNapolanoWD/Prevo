@@ -9,6 +9,7 @@ use App\Domains\Companies\Models\Company;
 use App\Domains\Quotes\Data\CalculatedLine;
 use App\Domains\Quotes\Data\CreateQuoteData;
 use App\Domains\Quotes\Enums\QuoteStatus;
+use App\Domains\Quotes\Jobs\GenerateQuotePdfJob;
 use App\Domains\Quotes\Models\Quote;
 use App\Domains\Quotes\Models\QuoteSettings;
 use App\Domains\Quotes\Supports\Money;
@@ -69,6 +70,7 @@ class CreateQuoteAction
                 'client_snapshot' => $this->clientSnapShot($client, $data),
                 'subtotal' => Money::toDecimal($totals->subtotal),
                 'discount_total' => Money::toDecimal($totals->discountTotal),
+                'surcharge' => Money::toDecimal($data->surchargeCents),
                 'taxable_amount' => Money::toDecimal($totals->taxableAmount),
                 'tax_total' => Money::toDecimal($totals->taxTotal),
                 'total' => Money::toDecimal($totals->total),
@@ -80,12 +82,54 @@ class CreateQuoteAction
                 array_map(fn(CalculatedLine $line) => $line->toArray(), $totals->lines),
             );
 
+            $quote->load('items');
+
             // quote history
             $quote->statusHistory()->create([
                 'from_status' => null,
                 'to_status' => QuoteStatus::Draft->value,
                 'changed_by' => $user->id,
-                'reason' => 'Quote Creata',
+                'reason' => 'Preventivo Creato',
+            ]);
+
+            // creo versione quote
+            $quote->versions()->create([
+                'version_number' => 1,
+                'created_by' => $user->id,
+                'snapshot' => [
+                    'quote' => $quote->only([
+                        'number',
+                        'title',
+                        'description',
+                        'notes',
+                        'terms',
+                        'currency',
+                        'template',
+                        'primary_color',
+                        'accent_color',
+                        'valid_until',
+                        'subtotal',
+                        'discount_total',
+                        'surcharge',
+                        'taxable_amount',
+                        'tax_total',
+                        'total',
+                        'client_snapshot',
+                        'contact_email',
+                        'contact_phone',
+                        'contact_address',
+                    ]),
+                    'items' => $quote->items->toArray(),
+                    'company' => $company->only([
+                        'name',
+                        'vat_number',
+                        'tax_code',
+                        'email',
+                        'phone',
+                        'address',
+                        'logo_path'
+                    ])
+                ]
             ]);
 
             // audit
@@ -105,9 +149,31 @@ class CreateQuoteAction
                 metadata: ['items_count' => count($totals->lines)],
             );
 
-            return $quote->load('items');
+            // Generazione PDF se va tutto a buon fine
+            GenerateQuotePdfJob::dispatch($quote->id, $quote->version)->afterCommit();
+
+            return $quote;
         });
     }
+
+
+    // Indirizzo di fatturazione (o il primo disponibile), come array: il PDF lo formatta da solo
+    private function primaryAddress(Client $client): ?array
+    {
+        $address = $client->addresses->firstWhere('is_billing', true) ?? $client->addresses->first();
+
+        if (!$address) {
+            return null;
+        }
+
+        return [
+            'street' => $address->street,
+            'postal_code' => $address->postal_code,
+            'city' => $address->city,
+            'province' => $address->province,
+        ];
+    }
+
 
     /**
      * Scadenza a fine giornata nel fuso dell'azienda, poi convertita nel fuso dell'app:
@@ -128,10 +194,18 @@ class CreateQuoteAction
     // snapshot cliente
     private function clientSnapShot(Client $client, CreateQuoteData $data): array
     {
+        $client->loadMissing(['emails', 'phones', 'addresses']);
+
+
         return [
             'id' => $client->id,
             'type' => $client->type instanceof \BackedEnum ? $client->type->value : $client->type,
             'display_name' => $client->display_name,
+            'vat_number' => $client->vat_number,   // adatta ai nomi reali delle colonne
+            'tax_code' => $client->tax_code,
+            'email' => $data->contact['email'] ?? $client->emails->first()?->email,
+            'phone' => $data->contact['phone'] ?? $client->phones->first()?->phone,
+            'address' => $data->contact['address'] ?? $this->primaryAddress($client),
             'contact' => $data->contact,
         ];
     }

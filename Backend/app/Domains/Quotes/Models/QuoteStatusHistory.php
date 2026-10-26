@@ -24,10 +24,8 @@ class QuoteStatusHistory extends Model
     protected function casts(): array
     {
         return [
-            'quote_id' => 'integer',
             'from_status' => QuoteStatus::class,
             'to_status' => QuoteStatus::class,
-            'changed_by' => 'integer',
         ];
     }
 

@@ -28,6 +28,8 @@ final class QuoteTotalsCalculator
         int $surchargeCents,
         float $defaultVatRate,
         bool $pricesIncludesVat = false,
+        ?DiscountType $globalDiscountType = null,
+        float $globalDiscountValue = 0,
     ): QuoteTotals {
         if ($items === []) {
             throw new InvalidArgumentException('Un preventivo deve avere almeno una riga');
@@ -80,6 +82,31 @@ final class QuoteTotalsCalculator
                 taxCents: $tax,
                 totalCents: $lineTotal,
             );
+        }
+
+        $linesValue = array_sum($amountByRate);
+        $globalDiscount = $this->globalDiscount($globalDiscountType, $globalDiscountValue, $linesValue);
+
+        if ($globalDiscount > 0 && $linesValue > 0) {
+            $remaining = $globalDiscount;
+            $lastKey = array_key_last($amountByRate);
+            $globalDiscountNet = 0;
+
+            foreach ($amountByRate as $key => $amount) {
+                $share = $key === $lastKey
+                    ? $remaining
+                    : (int) round($globalDiscount * $amount / $linesValue);
+                $share = min($share, $amount);
+
+                $amountByRate[$key] -= $share;
+                $remaining -= $share;
+
+                $globalDiscountNet += $pricesIncludesVat
+                    ? (int) round($share / (1 + (float) $key / 100))
+                    : $share;
+            }
+
+            $discountTotal += $globalDiscountNet;
         }
 
         $surchargeNet = $surchargeCents;
@@ -153,5 +180,19 @@ final class QuoteTotalsCalculator
     private function rateKey(float $rate): string
     {
         return number_format($rate, 2, '.', '');
+    }
+
+    private function globalDiscount(?DiscountType $type, float $value, int $base): int
+    {
+        if ($type === null || $value <= 0 || $base <= 0) {
+            return 0;
+        }
+
+        $discount = match ($type) {
+            DiscountType::Percentage => (int) round($base * $value / 100),
+            DiscountType::Fixed => Money::toCents($value),
+        };
+
+        return min($discount, $base);
     }
 }

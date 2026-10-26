@@ -57,6 +57,9 @@ class AppServiceProvider extends ServiceProvider
         ======================> RATE LIMITING
         */
 
+        // limite richieste claudflare
+        RateLimiter::for('cloudflare-pdf', fn () => Limit::perSecond(1, 20)); // sotto il tuo limite reale
+
         // Limite di richieste per il login: 10 richieste al minuto per email e IP
         RateLimiter::for('login', fn(Request $r) => Limit::perMinute(10)->by($r->email . $r->ip()));
 

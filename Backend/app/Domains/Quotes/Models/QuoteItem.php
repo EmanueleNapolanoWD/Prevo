@@ -2,6 +2,7 @@
 
 namespace App\Domains\Quotes\Models;
 
+use App\Domains\Products\Models\Product;
 use App\Domains\Quotes\Enums\DiscountType;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
@@ -13,6 +14,7 @@ class QuoteItem extends Model
     protected $table = 'quote_items';
 
     protected $fillable = [
+        'quote_id',
         'product_id',
         'description',
         'unit',
@@ -30,9 +32,8 @@ class QuoteItem extends Model
     protected function casts(): array
     {
         return [
-            'product_id' => 'integer',
             'quantity' => 'decimal:2',
-            'unit_price' => 'decimal:4',
+            'unit_price' => 'decimal:2',
             'discount_type' => DiscountType::class,
             'discount_value' => 'decimal:4',
             'vat_rate' => 'decimal:2',
@@ -48,5 +49,11 @@ class QuoteItem extends Model
     public function quote(): BelongsTo
     {
         return $this->belongsTo(Quote::class);
+    }
+
+    // prodotti
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class);
     }
 }

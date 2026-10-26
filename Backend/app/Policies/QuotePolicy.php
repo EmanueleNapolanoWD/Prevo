@@ -36,7 +36,7 @@ class QuotePolicy extends CompanyScopedPolicy
 
     public function update(User $user, Quote $quote): bool
     {
-        return ! $this->isLocked($quote)
+        return $quote->status->isEditable()
             && $this->allows($user, $quote->company_id, self::WRITE);
     }
 

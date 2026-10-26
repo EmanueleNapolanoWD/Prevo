@@ -8,23 +8,18 @@ interface Props {
   params: Promise<{ slug: string; id: string }>;
 }
 
-export async function UpdateClientContent({
-  params,
-}: Props) {
+export async function UpdateClientContent({ params }: Props) {
   const { slug, id } = await params;
 
-  const result = await getClientById(slug, id);
-
-  if (!("data" in result)) notFound();
-
-  const client = result.data;
+  const res = await getClientById(slug, id);
+  if ("ok" in res && res.ok === false) notFound();
 
   return (
     <>
       <ClientForm
-        key={client.id}
+        key={res.id}
         mode="update"
-        defaultValues={toFormValues(client)}
+        defaultValues={toFormValues(res)}
         onSubmit={updateClient.bind(null, slug, id)}
       />
     </>

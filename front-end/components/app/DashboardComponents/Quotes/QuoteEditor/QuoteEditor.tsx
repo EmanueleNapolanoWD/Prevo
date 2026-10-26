@@ -1,20 +1,37 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
 import QuoteForm from "../QuoteForm/QuoteForm";
 import { QuotePreview } from "../QuoteReview/QuotePreview";
 import { useQuoteForm } from "../hooks/useQuoteForm";
+import type { QuoteDetail } from "@/types/quote";
+import type { ClientDetail } from "@/types/client";
 import styles from "./quote-editor.module.css";
 
-export default function QuoteEditor() {
+type QuoteEditorProps =
+  | { mode?: "create"; quote?: undefined; initialClient?: undefined }
+  | { mode: "edit"; quote: QuoteDetail; initialClient?: ClientDetail | null };
+
+export default function QuoteEditor({
+  mode = "create",
+  quote,
+  initialClient,
+}: QuoteEditorProps) {
   const { slug } = useParams<{ slug: string }>();
-  const form = useQuoteForm({ slug });
+  const router = useRouter();
+
+  const form = useQuoteForm({ slug, quote, initialClient });
+
+  function handleSuccess() {
+    router.push(`/${slug}/preventivi`);
+    router.refresh();
+  }
 
   return (
     <div className={styles.layout}>
       <div className={styles.formColumn}>
-        <QuoteForm form={form} />
+        <QuoteForm form={form} mode={mode} onSuccess={handleSuccess} />
       </div>
 
       <aside className={`${styles.previewColumn} position-sticky`}>

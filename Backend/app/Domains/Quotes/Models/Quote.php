@@ -5,6 +5,7 @@ namespace App\Domains\Quotes\Models;
 use App\Domains\Auth\Models\User;
 use App\Domains\Clients\Models\Client;
 use App\Domains\Companies\Models\Company;
+use App\Domains\Quotes\Enums\QuoteStatus;
 use App\Domains\Quotes\Models\QuoteItem;
 use App\Domains\Quotes\Models\QuotePublicLink;
 use App\Domains\Quotes\Models\QuoteStatusHistory;
@@ -53,12 +54,14 @@ class Quote extends Model
         'viewed_at',
         'accepted_at',
         'rejected_at',
+        'pdf_path',
     ];
 
     protected function casts(): array
     {
         return [
             'version' => 'integer',
+            'status' => QuoteStatus::class,
             'client_snapshot' => 'array',
 
             'vat_rate' => 'decimal:2',

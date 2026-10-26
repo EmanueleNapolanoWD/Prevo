@@ -12,7 +12,19 @@ import styles from "./quote-form.module.css";
 import type { UseQuoteFormReturn } from "../hooks/useQuoteForm";
 import { LoaderCircle, Save } from "lucide-react";
 
-export default function QuoteForm({ form }: { form: UseQuoteFormReturn }) {
+type QuoteFormProps = {
+  form: UseQuoteFormReturn;
+  mode?: "create" | "edit";
+  onSuccess?: () => void;
+};
+
+export default function QuoteForm({
+  form,
+  mode = "create",
+  onSuccess,
+}: QuoteFormProps) {
+  const isEdit = mode === "edit";
+
   const {
     settings,
     settingsLoading,
@@ -50,17 +62,21 @@ export default function QuoteForm({ form }: { form: UseQuoteFormReturn }) {
   async function handleSubmit() {
     setSubmitting(true);
     setSubmitError(null);
+
     const res = await submit();
+    setSubmitting(false);
 
     if (!res.ok) {
-      setSubmitting(false);
       setSubmitError(res.error ?? "Errore durante il salvataggio");
       return;
     }
 
-    resetForm();
-    setSubmitting(false);
-    router.refresh();
+    if (isEdit) {
+      onSuccess?.();
+    } else {
+      resetForm();
+      router.refresh();
+    }
   }
 
   return (

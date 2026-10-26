@@ -1,12 +1,15 @@
 "use client";
 
-import { useState, useCallback, useEffect, useMemo } from "react";
+import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 
-// actions
+// ============================================================================
+// IMPORT: actions
+// ============================================================================
 import { getProduct } from "@/lib/Api/Product/product.actions";
 import { getClients } from "@/lib/Api/Clients/clients.actions";
 import {
   createQuoteAction,
+  updateQuoteAction,
   getQuoteSettingsAction,
 } from "@/lib/Api/Quote/quote.action";
 import {
@@ -16,7 +19,9 @@ import {
   parseNumber,
 } from "@/lib/utils";
 
-// types
+// ============================================================================
+// IMPORT: tipi
+// ============================================================================
 import type { Product } from "@/types/product";
 import type { ClientDetail } from "@/types/client";
 import {
@@ -24,14 +29,19 @@ import {
   type QuoteItem,
   type QuoteAppearanceValues,
   type QuotePayload,
+  type QuoteDetail,
+  type Quote,
   type DiscountType,
   DISCOUNT_TYPE_TO_API,
+  API_TO_DISCOUNT_TYPE,
   toQuotePayloadAppearance,
   toQuotePayloadItem,
+  toQuoteItem,
+  toQuoteAppearanceValues,
 } from "@/types/quote";
 
 // ============================================================================
-// Tipi
+// TIPI PUBBLICI
 // ============================================================================
 
 export interface QuoteContact {
@@ -56,6 +66,14 @@ export interface TaxQuoteValue {
   terms: string;
 }
 
+export type SubmitResult =
+  | { ok: true; data: Quote }
+  | { ok: false; error: string };
+
+// ============================================================================
+// TIPI INTERNI
+// ============================================================================
+
 type ContactId = string | number;
 type QuoteTotals = ReturnType<typeof calcTotals>;
 type ClientEmail = NonNullable<ClientDetail["emails"]>[number];
@@ -65,7 +83,7 @@ type ClientAddress = NonNullable<ClientDetail["addresses"]>[number];
 type SearchResponse<T> = { ok: false; message: string } | { data: T[] };
 
 // ============================================================================
-// Costanti e helper
+// COSTANTI
 // ============================================================================
 
 const MIN_CHARS = 2;
@@ -74,6 +92,7 @@ const DEBOUNCE_MS = 300;
 const PRODUCT_ERROR = "Errore durante il caricamento dei prodotti";
 const CLIENT_ERROR = "Errore durante la ricerca dei clienti";
 const SETTINGS_ERROR = "Errore durante il caricamento delle impostazioni";
+const SUBMIT_ERROR = "Errore durante il salvataggio";
 
 const EMPTY_CONTACT: QuoteContact = { email: "", phone: "", address: "" };
 const EMPTY_APPEARANCE: QuoteAppearanceValues = {
@@ -81,6 +100,10 @@ const EMPTY_APPEARANCE: QuoteAppearanceValues = {
   primaryColor: "#1F2937",
   accentColor: "#2563EB",
 };
+
+// ============================================================================
+// HELPER: contatti cliente
+// ============================================================================
 
 // Preferisce il contatto primario, altrimenti il primo della lista
 function pickDefault<T extends { id: ContactId; is_primary?: boolean }>(
@@ -99,7 +122,43 @@ function formatAddress(address: ClientAddress | null): string {
 }
 
 // ============================================================================
-// Hook interno: ricerca con debounce (usato per prodotti e clienti)
+// HELPER: mapper preventivo (backend) -> valori del form (solo modifica)
+// Tutti i campi vanno valorizzati, anche se vuoti: i valori del preventivo
+// vincono sui default delle impostazioni azienda (note, termini, IVA, validità).
+// ============================================================================
+
+function quoteToHeader(q: QuoteDetail): QuoteHeaderValues {
+  return {
+    number: q.number ?? "",
+    title: q.title ?? "",
+    description: q.description ?? "",
+  };
+}
+
+function quoteToTax(q: QuoteDetail): TaxQuoteValue {
+  return {
+    vat_rate: String(Number(q.vat_rate ?? 0)),
+    valid_until: q.valid_until?.slice(0, 10) ?? "", // input date: YYYY-MM-DD
+    surcharge: String(Number(q.surcharge ?? 0)),
+    discount_type: q.discount_type
+      ? API_TO_DISCOUNT_TYPE[q.discount_type]
+      : "percentage",
+    discount_value: String(Number(q.discount_value ?? 0)),
+    notes: q.notes ?? "",
+    terms: q.terms ?? "",
+  };
+}
+
+function quoteToContact(q: QuoteDetail): QuoteContact {
+  return {
+    email: q.contact?.email ?? "",
+    phone: q.contact?.phone ?? "",
+    address: q.contact?.address ?? "",
+  };
+}
+
+// ============================================================================
+// HOOK INTERNO: ricerca con debounce (prodotti e clienti)
 // ============================================================================
 
 function useDebouncedSearch<T>(
@@ -163,14 +222,25 @@ function useDebouncedSearch<T>(
 }
 
 // ============================================================================
-// Interfacce di ritorno
+// INTERFACCE: opzioni e valore di ritorno
 // ============================================================================
 
 export interface UseQuoteFormOptions {
   slug: string;
+  /** Presente = modalità modifica. */
+  quote?: QuoteDetail;
+  /**
+   * Cliente completo (con emails, phones, addresses) per la modifica.
+   * quote.client è solo uno snapshot: il cliente va caricato a parte
+   * nella page di edit.
+   */
+  initialClient?: ClientDetail | null;
 }
 
 export interface UseQuoteFormReturn {
+  // --- modalità ---
+  isEdit: boolean;
+
   // --- impostazioni azienda ---
   settings: QuoteSettingsData | null;
   settingsLoading: boolean;
@@ -231,18 +301,44 @@ export interface UseQuoteFormReturn {
   clearSelection: () => void;
 
   resetForm: () => void;
-  submit: () => Promise<{ ok: boolean; error?: string; data?: unknown }>;
+  submit: () => Promise<SubmitResult>;
 }
 
 // ============================================================================
-// Hook
+// HOOK PRINCIPALE
 // ============================================================================
 
 export function useQuoteForm({
   slug,
+  quote,
+  initialClient = null,
 }: UseQuoteFormOptions): UseQuoteFormReturn {
+  const isEdit = !!quote;
+
   // --------------------------------------------------------------------------
-  // Impostazioni preventivi
+  // VALORI INIZIALI (da preventivo in modifica, vuoti in creazione)
+  // Usati sia per l'inizializzazione degli stati sia per resetForm.
+  // --------------------------------------------------------------------------
+  const initial = useMemo(
+    () => ({
+      header: quote ? quoteToHeader(quote) : ({} as Partial<QuoteHeaderValues>),
+      tax: quote ? quoteToTax(quote) : ({} as Partial<TaxQuoteValue>),
+      appearance: quote
+        ? toQuoteAppearanceValues(quote.appearance)
+        : ({} as Partial<QuoteAppearanceValues>),
+      contact: quote ? quoteToContact(quote) : ({} as Partial<QuoteContact>),
+      items: quote ? quote.items.map(toQuoteItem) : ([] as QuoteItem[]),
+      client: initialClient,
+    }),
+    [quote, initialClient],
+  );
+
+  // Versione del preventivo che si sta modificando (controllo di concorrenza).
+  // Si aggiorna dopo ogni salvataggio, così un secondo invio non dà un falso 409.
+  const versionRef = useRef<number | undefined>(quote?.version);
+
+  // --------------------------------------------------------------------------
+  // IMPOSTAZIONI PREVENTIVI
   // --------------------------------------------------------------------------
   const [settings, setSettings] = useState<QuoteSettingsData | null>(null);
   const [settingsLoading, setSettingsLoading] = useState(true);
@@ -257,16 +353,12 @@ export function useQuoteForm({
 
       try {
         const res = await getQuoteSettingsAction(slug);
-        if (cancelled) return;
-
-        if ("ok" in res && res.ok === false) {
-          setSettingsError(res.message);
-          setSettings(null);
-        } else {
-          setSettings(res as QuoteSettingsData);
-        }
+        if (!cancelled) setSettings(res);
       } catch {
-        if (!cancelled) setSettingsError(SETTINGS_ERROR);
+        if (!cancelled) {
+          setSettings(null);
+          setSettingsError(SETTINGS_ERROR);
+        }
       } finally {
         if (!cancelled) setSettingsLoading(false);
       }
@@ -279,7 +371,7 @@ export function useQuoteForm({
     };
   }, [slug]);
 
-  const currency = settings?.default_currency ?? "EUR";
+  const currency = settings?.default_currency ?? quote?.currency ?? "EUR";
 
   const money = useMemo(
     () => new Intl.NumberFormat("it-IT", { style: "currency", currency }),
@@ -287,18 +379,23 @@ export function useQuoteForm({
   );
 
   // --------------------------------------------------------------------------
-  // Valori del form = default derivati dalle impostazioni + modifiche utente.
+  // VALORI DEL FORM = default dalle impostazioni + modifiche utente
   // Le modifiche sono Partial: ogni campo toccato vince, gli altri restano sui
-  // default (anche se le impostazioni arrivano dopo che l'utente ha iniziato).
+  // default. In modifica le edits partono dal preventivo, quindi i default
+  // delle impostazioni non sovrascrivono nulla.
   // --------------------------------------------------------------------------
   const [headerEdits, setHeaderEdits] = useState<Partial<QuoteHeaderValues>>(
-    {},
+    () => initial.header,
   );
-  const [taxEdits, setTaxEdits] = useState<Partial<TaxQuoteValue>>({});
+  const [taxEdits, setTaxEdits] = useState<Partial<TaxQuoteValue>>(
+    () => initial.tax,
+  );
   const [appearanceEdits, setAppearanceEdits] = useState<
     Partial<QuoteAppearanceValues>
-  >({});
-  const [contactEdits, setContactEdits] = useState<Partial<QuoteContact>>({});
+  >(() => initial.appearance);
+  const [contactEdits, setContactEdits] = useState<Partial<QuoteContact>>(
+    () => initial.contact,
+  );
 
   const headerDefaults = useMemo<QuoteHeaderValues>(
     () => ({
@@ -365,9 +462,9 @@ export function useQuoteForm({
   );
 
   // --------------------------------------------------------------------------
-  // Voci del preventivo
+  // VOCI DEL PREVENTIVO
   // --------------------------------------------------------------------------
-  const [items, setItems] = useState<QuoteItem[]>([]);
+  const [items, setItems] = useState<QuoteItem[]>(() => initial.items);
 
   const addItem = useCallback((item: Omit<QuoteItem, "id">) => {
     setItems((prev) => [...prev, { ...item, id: crypto.randomUUID() }]);
@@ -377,7 +474,7 @@ export function useQuoteForm({
     setItems((prev) => prev.filter((item) => item.id !== id));
   }, []);
 
-  const resetItems = useCallback(() => setItems([]), []);
+  const resetItems = useCallback(() => setItems(initial.items), [initial]);
 
   const totals = useMemo<QuoteTotals | null>(() => {
     if (items.length === 0) return null;
@@ -396,7 +493,7 @@ export function useQuoteForm({
   ]);
 
   // --------------------------------------------------------------------------
-  // Ricerca prodotti
+  // RICERCA E SELEZIONE PRODOTTI
   // --------------------------------------------------------------------------
   const fetchProducts = useCallback((q: string) => getProduct(slug, q), [slug]);
 
@@ -417,7 +514,7 @@ export function useQuoteForm({
   }, [resetProductSearch]);
 
   // --------------------------------------------------------------------------
-  // Ricerca e selezione cliente
+  // RICERCA E SELEZIONE CLIENTE
   // --------------------------------------------------------------------------
   const fetchClients = useCallback(
     (q: string) => getClients(slug, { q }),
@@ -434,7 +531,7 @@ export function useQuoteForm({
   } = useDebouncedSearch<ClientDetail>(fetchClients, CLIENT_ERROR);
 
   const [selectedClient, setSelectedClientState] =
-    useState<ClientDetail | null>(null);
+    useState<ClientDetail | null>(() => initial.client);
   const [emailId, setEmailId] = useState<ContactId | null>(null);
   const [phoneId, setPhoneId] = useState<ContactId | null>(null);
   const [addressId, setAddressId] = useState<ContactId | null>(null);
@@ -455,6 +552,7 @@ export function useQuoteForm({
     return list?.find((a) => a.id === addressId) ?? pickDefault(list) ?? null;
   }, [selectedClient, addressId]);
 
+  // Cambiando cliente si azzerano contatti scelti e modifiche manuali
   const setSelectedClient = useCallback(
     (client: ClientDetail | null) => {
       setSelectedClientState(client);
@@ -495,7 +593,10 @@ export function useQuoteForm({
     });
   }, []);
 
-  // Contatto effettivo = quello del cliente + eventuali modifiche manuali
+  // --------------------------------------------------------------------------
+  // CONTATTO EFFETTIVO = quello del cliente + modifiche manuali
+  // In modifica, contactEdits contiene il contatto salvato nel preventivo.
+  // --------------------------------------------------------------------------
   const contact = useMemo<QuoteContact>(
     () => ({
       ...EMPTY_CONTACT,
@@ -514,21 +615,33 @@ export function useQuoteForm({
   );
 
   // --------------------------------------------------------------------------
-  // Reset e invio
+  // RESET
+  // In creazione svuota il form, in modifica ripristina i valori del preventivo.
+  // setSelectedClient azzera contactEdits: va chiamato PRIMA di setContactEdits.
   // --------------------------------------------------------------------------
   const resetForm = useCallback(() => {
-    setSelectedClient(null);
-    setHeaderEdits({});
-    setTaxEdits({});
-    setAppearanceEdits({});
-    setItems([]);
+    setSelectedClient(initial.client);
+    setHeaderEdits(initial.header);
+    setTaxEdits(initial.tax);
+    setAppearanceEdits(initial.appearance);
+    setContactEdits(initial.contact);
+    setItems(initial.items);
     clearSelection();
-  }, [setSelectedClient, clearSelection]);
+  }, [setSelectedClient, clearSelection, initial]);
 
-  const submit = useCallback(async () => {
-    if (!selectedClient) return { ok: false, error: "Seleziona un cliente" };
-    if (items.length === 0)
+  // --------------------------------------------------------------------------
+  // INVIO (creazione o aggiornamento)
+  // --------------------------------------------------------------------------
+  const submit = useCallback(async (): Promise<SubmitResult> => {
+    // ---- validazione ----
+    // In modifica, se il cliente completo non è stato caricato, vale quello salvato
+    const clientId = selectedClient?.id ?? quote?.client_id ?? null;
+
+    if (!clientId) return { ok: false, error: "Seleziona un cliente" };
+
+    if (items.length === 0) {
       return { ok: false, error: "Aggiungi almeno una voce al preventivo" };
+    }
 
     if (!header.title.trim()) {
       return { ok: false, error: "Inserisci titolo preventivo" };
@@ -539,14 +652,12 @@ export function useQuoteForm({
       return { ok: false, error: "Sconto del preventivo non valido" };
     }
     if (tax.discount_type === "percentage" && discountValue > 100) {
-      return {
-        ok: false,
-        error: "Lo sconto percentuale non può superare 100",
-      };
+      return { ok: false, error: "Lo sconto percentuale non può superare 100" };
     }
 
+    // ---- payload ----
     const payload: QuotePayload = {
-      client_id: selectedClient.id,
+      client_id: clientId,
       contact: {
         email: contact.email || null,
         phone: contact.phone || null,
@@ -556,29 +667,46 @@ export function useQuoteForm({
       description: header.description.trim() || null,
       vat_rate: parseNumber(tax.vat_rate),
       surcharge: parseNumber(tax.surcharge),
+      // Senza sconto non si invia nulla: il backend azzera tipo e valore
       ...(discountValue > 0
         ? {
             discount_type: DISCOUNT_TYPE_TO_API[tax.discount_type],
             discount_value: discountValue,
           }
         : {}),
-      valid_until: tax.valid_until,
+      valid_until: tax.valid_until || null,
       notes: tax.notes.trim() || null,
       terms: tax.terms.trim() || null,
       appearance: toQuotePayloadAppearance(appearance),
       items: items.map(toQuotePayloadItem),
     };
 
-    const res = await createQuoteAction(slug, payload);
+    // ---- invio ----
+    try {
+      const res = quote
+        ? await updateQuoteAction(slug, quote.id, {
+            ...payload,
+            version: versionRef.current, // controllo di concorrenza lato backend
+          })
+        : await createQuoteAction(slug, payload);
 
-    if ("ok" in res && res.ok === false) {
-      return { ok: false, error: res.message };
+      if (!res.ok) return { ok: false, error: res.message };
+
+      if (quote) versionRef.current = res.data.version;
+
+      return { ok: true, data: res.data };
+    } catch {
+      // errori fuori dal contratto delle action (rete, ecc.)
+      return { ok: false, error: SUBMIT_ERROR };
     }
+  }, [selectedClient, items, contact, header, tax, appearance, slug, quote]);
 
-    return { ok: true, data: res };
-  }, [selectedClient, items, contact, header, tax, appearance, slug]);
-
+  // --------------------------------------------------------------------------
+  // RETURN
+  // --------------------------------------------------------------------------
   return {
+    isEdit,
+
     settings,
     settingsLoading,
     settingsError,
