@@ -51,7 +51,6 @@ export default function InfoClientDetail({
     .filter(Boolean)
     .join(" ");
 
-  console.log("client entrato: ", client);
 
   return (
     <div className="mt-4 space-y-5 rounded-md border p-4 text-sm">

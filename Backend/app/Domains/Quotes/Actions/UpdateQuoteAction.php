@@ -8,6 +8,7 @@ use App\Domains\Quotes\Data\CreateQuoteData;
 use App\Domains\Quotes\Enums\DiscountType;
 use App\Domains\Quotes\Models\Quote;
 use App\Domains\Quotes\Models\QuoteVersion;
+use App\Domains\Quotes\Supports\Money;
 use App\Domains\Quotes\Supports\QuoteTotalsCalculator;
 use DomainException;
 use Illuminate\Support\Facades\DB;
@@ -85,12 +86,12 @@ class UpdateQuoteAction
                 'appearance' => $data->appearance,
 
                 // totali (ADATTA: nomi e unità delle colonne)
-                'subtotal' => $totals->subtotal,
-                'discount_total' => $totals->discountTotal,
-                'surcharge' => $totals->surcharge,
-                'taxable_amount' => $totals->taxableAmount,
-                'tax_total' => $totals->taxTotal,
-                'total' => $totals->total,
+                'subtotal' => Money::toDecimal($totals->subtotal),
+                'discount_total' => Money::toDecimal($totals->discountTotal),
+                'surcharge' => Money::toDecimal($totals->surcharge),
+                'taxable_amount' => Money::toDecimal($totals->taxableAmount),
+                'tax_total' => Money::toDecimal($totals->taxTotal),
+                'total' => Money::toDecimal($totals->total),
             ]);
 
             $fieldChanges = $this->diffAttributes($quote);
@@ -116,7 +117,7 @@ class UpdateQuoteAction
             $this->audit->log(
                 event: 'quote.updated',
                 user: $user,
-                company: $quote->company, // ADATTA: relazione company() sul model Quote
+                company: $quote->company,
                 auditable: $quote,
                 old: $before,
                 new: $after,
@@ -162,13 +163,16 @@ class UpdateQuoteAction
             'description' => $line->description,
             'unit' => $line->unit,
             'quantity' => $line->quantity,
-            'unit_price' => $line->unitPriceCents,
+
+            'unit_price' => Money::toDecimal($line->unitPriceCents),
+
             'discount_type' => $line->discountType,
             'discount_value' => $line->discountValue,
             'vat_rate' => $line->vatRate,
-            'subtotal' => $line->subtotalCents,
-            'tax_amount' => $line->taxCents,
-            'total' => $line->totalCents,
+
+            'subtotal' => Money::toDecimal($line->subtotalCents),
+            'tax_amount' => Money::toDecimal($line->taxCents),
+            'total' => Money::toDecimal($line->totalCents),
         ];
     }
 

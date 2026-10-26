@@ -24,7 +24,7 @@ export default function QuoteEditor({
   const form = useQuoteForm({ slug, quote, initialClient });
 
   function handleSuccess() {
-    router.push(`/${slug}/preventivi`);
+    router.push(`/${slug}/quotes`);
     router.refresh();
   }
 

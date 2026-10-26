@@ -49,6 +49,7 @@ export type CompanyValues = {
   email?: string;
   phone?: string | null;
   website?: string | null;
+  logo_url?: string | null
 };
 
 export type CompanyFormState = {

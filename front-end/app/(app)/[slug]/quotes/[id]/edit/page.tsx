@@ -17,6 +17,8 @@ export default async function EditQuotePage({ params }: EditQuotePageProps) {
     ? await getClientById(slug, quote.client_id)
     : null;
 
+  console.log("quote: ", quote);
+
   return (
     <main className="px-6 py-10 lg:px-8">
       <h1 className="mb-6 text-3xl font-semibold tracking-tight">

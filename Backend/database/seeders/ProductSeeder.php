@@ -16,7 +16,7 @@ class ProductSeeder extends Seeder
     {
         // Azienda a cui associare i prodotti demo.
         $company = Company::query()
-            ->where('slug', 'emanuele-edilizia')
+            ->where('slug', 'emanuele-impianti')
             ->first();
 
         if (! $company) {

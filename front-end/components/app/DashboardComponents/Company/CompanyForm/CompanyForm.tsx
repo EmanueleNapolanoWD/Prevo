@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { updateCompanyDataAction } from "@/lib/Api/Company/company.action";
 import type { CompanyFormState, CompanyValues } from "@/types/company";
 import styles from "./companyform.module.css";
@@ -11,6 +11,9 @@ type Props = {
 };
 
 const initialState: CompanyFormState = { ok: false };
+
+const LOGO_ACCEPT = "image/png,image/jpeg,image/webp";
+const LOGO_MAX_BYTES = 2 * 1024 * 1024; // 2 MB
 
 type FieldProps = {
   name: keyof CompanyValues;
@@ -65,6 +68,132 @@ function Field({
   );
 }
 
+type LogoFieldProps = {
+  currentUrl?: string | null;
+  error?: string;
+};
+
+function LogoField({ currentUrl, error }: LogoFieldProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+  const [removed, setRemoved] = useState(false);
+  const [clientError, setClientError] = useState<string>();
+
+  // libera l'URL temporaneo dell'anteprima quando cambia o il componente si smonta
+  useEffect(() => {
+    return () => {
+      if (preview) URL.revokeObjectURL(preview);
+    };
+  }, [preview]);
+
+  function clearInput() {
+    if (inputRef.current) inputRef.current.value = "";
+    setPreview(null);
+  }
+
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    setClientError(undefined);
+
+    if (!file) {
+      setPreview(null);
+      return;
+    }
+
+    if (!LOGO_ACCEPT.split(",").includes(file.type)) {
+      clearInput();
+      setClientError("Formato non supportato: usa PNG, JPG o WebP.");
+      return;
+    }
+
+    if (file.size > LOGO_MAX_BYTES) {
+      clearInput();
+      setClientError("Il file supera i 2 MB.");
+      return;
+    }
+
+    setRemoved(false);
+    setPreview(URL.createObjectURL(file));
+  }
+
+  function handleRemove() {
+    clearInput();
+    setClientError(undefined);
+    // la rimozione lato server ha senso solo se esiste già un logo salvato
+    if (currentUrl) setRemoved(true);
+  }
+
+  const shownUrl = preview ?? (removed ? null : currentUrl);
+  const message = clientError ?? error;
+
+  return (
+    <div className={`${styles.field} ${styles.fullWidth}`}>
+      <label htmlFor="logo" className={styles.label}>
+        Logo
+      </label>
+
+      <div className={styles.logoRow}>
+        <div className={styles.logoPreview}>
+          {shownUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={shownUrl} alt="Anteprima logo azienda" />
+          ) : (
+            <span>Nessun logo</span>
+          )}
+        </div>
+
+        <div className={styles.logoControls}>
+          <input
+            ref={inputRef}
+            id="logo"
+            name="logo"
+            type="file"
+            accept={LOGO_ACCEPT}
+            onChange={handleChange}
+            aria-invalid={message ? true : undefined}
+            aria-describedby={message ? "logo-error" : "logo-hint"}
+            className={styles.input}
+          />
+          <p id="logo-hint" className={styles.hint}>
+            PNG, JPG o WebP, massimo 2 MB.
+          </p>
+
+          {shownUrl && (
+            <button
+              type="button"
+              onClick={handleRemove}
+              className={styles.linkButton}
+            >
+              Rimuovi logo
+            </button>
+          )}
+
+          {removed && (
+            <p className={styles.hint}>
+              Il logo verrà rimosso al salvataggio.{" "}
+              <button
+                type="button"
+                onClick={() => setRemoved(false)}
+                className={styles.linkButton}
+              >
+                Annulla
+              </button>
+            </p>
+          )}
+        </div>
+      </div>
+
+      {removed && <input type="hidden" name="remove_logo" value="1" />}
+
+      {message && (
+        <p id="logo-error" role="alert" className={styles.error}>
+          {message}
+        </p>
+      )}
+    </div>
+  );
+}
+
 export default function CompanyForm({ slug, initialValues }: Props) {
   const [state, formAction, pending] = useActionState(
     updateCompanyDataAction.bind(null, slug),
@@ -81,6 +210,10 @@ export default function CompanyForm({ slug, initialValues }: Props) {
     <form action={formAction} className={styles.form}>
       <fieldset className={styles.section}>
         <legend className={styles.legend}>Anagrafica</legend>
+        <LogoField
+          currentUrl={initialValues?.logo_url}
+          error={state.errors?.logo?.[0]}
+        />
         <Field name="name" label="Nome commerciale" required {...common} />
         <Field name="legal_name" label="Ragione sociale" {...common} />
         <Field name="legal_form" label="Forma giuridica" {...common} />
