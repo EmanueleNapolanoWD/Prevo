@@ -127,3 +127,14 @@ export function readableTextColor(hex: string): "#111827" | "#FFFFFF" {
   const b = n & 255;
   return 0.299 * r + 0.587 * g + 0.114 * b > 160 ? "#111827" : "#FFFFFF";
 }
+
+/** Euro (numero decimale digitato dall'utente) -> centesimi interi. */
+export function eurosToCents(euros: number): number {
+  // toPrecision evita errori float tipo 1.005 * 100 = 100.49999999999999
+  return Math.round(Number((euros * 100).toPrecision(15)));
+}
+
+/** Centesimi (dall'API) -> euro per form e anteprima. */
+export function centsToEuros(cents: number | string | null | undefined): number {
+  return (Number(cents) || 0) / 100;
+}

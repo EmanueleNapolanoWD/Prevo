@@ -3,6 +3,7 @@
 namespace App\Domains\Quotes\Actions;
 
 use App\Domains\Quotes\Models\Quote;
+use BackedEnum;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
@@ -10,19 +11,22 @@ use Spatie\LaravelPdf\Facades\Pdf;
 
 class GenerateQuotePdfAction
 {
-
     private const TEMPLATES = ['classic', 'modern', 'minimal'];
 
     public function execute(Quote $quote): string
     {
-        $quote->loadMissing(['items', 'company']);
+        $quote->loadMissing(['items', 'company.quoteSettings']);
 
-        $template = $quote->template instanceof \BackedEnum ? $quote->template->value : (string) $quote->template;
+        $template = $quote->template instanceof BackedEnum ? $quote->template->value : (string) $quote->template;
         $template = in_array($template, self::TEMPLATES, true) ? $template : 'classic';
 
         $items = $quote->items->sortBy('sort_order')->values();
         $company = $quote->company;
+        $settings = $company?->quoteSettings;
         $client = $this->clientSnapshot($quote);
+        $clientName = data_get($client, 'display_name')
+            ?: data_get($client, 'name')
+            ?: '—';
 
         $path = sprintf(
             'companies/%s/quotes/%s/%s-v%d.pdf',
@@ -35,6 +39,7 @@ class GenerateQuotePdfAction
         Pdf::view("pdf.quotes.{$template}", [
             'quote' => $quote,
             'company' => $company,
+            'settings' => $settings,
             'items' => $items,
             'totals' => $this->buildTotals($quote, $items),
             'colors' => [
@@ -44,21 +49,22 @@ class GenerateQuotePdfAction
             ],
             'logo' => $this->logoDataUrl($company),
             'companyLines' => $this->companyLines($company),
-            'clientName' => data_get($client, 'display_name') ?: (data_get($client, 'name') ?: '—'),
+            'clientName' => $clientName,
             'clientLines' => $this->clientLines($quote, $client),
             'dates' => [
                 'issued' => $this->date($quote->issue_date ?? $quote->created_at),
                 'valid_until' => $this->date($quote->valid_until),
             ],
             // helper di formattazione usati dalle view
-            'money' => fn($v) => $this->money($v),
+            'money' => fn($v) => $this->money($v),          // input: centesimi
+            'euros' => fn($v) => $this->moneyFromEuros($v), // input: euro (es. discount_value Fixed)
             'qty' => fn($v) => $this->qty($v),
             'discountLabel' => fn($item) => $this->discountLabel($item),
         ])
             ->footerView('pdf.quotes.footer', ['quote' => $quote, 'company' => $company])
             ->format('a4')
             ->margins(15, 12, 20, 12)
-            ->disk('local')
+            ->disk('r2-quotes')
             ->save($path);
 
         $quote->forceFill(['pdf_path' => $path])->saveQuietly();
@@ -66,80 +72,175 @@ class GenerateQuotePdfAction
         return $path;
     }
 
-    // HELPERS 
+    // ---------------------------------------------------------------- totali
 
-    // helpers per totali
+    /**
+     * Tutti gli importi restituiti sono in centesimi (int).
+     * Usa i totali persistiti dal QuoteTotalsCalculator; le somme sulle righe
+     * servono solo come fallback e per il dettaglio IVA.
+     */
     private function buildTotals(Quote $quote, Collection $items): array
     {
-        $gross = $items->sum(fn($i) => (float) $i->quantity * (float) $i->unit_price);
-        $net = $items->sum(fn($i) => (float) $i->subtotal);
-        $tax = $items->sum(fn($i) => (float) $i->tax_amount);
+        $linesGross = $items->sum(fn($i) => (int) round((float) $i->quantity * $this->cents($i->unit_price)));
+        $linesNet = $items->sum(fn($i) => $this->cents($i->subtotal));
+        $linesTax = $items->sum(fn($i) => $this->cents($i->tax_amount));
 
-        $vat = $items
-            ->groupBy(fn($i) => number_format((float) $i->vat_rate, 2, '.', ''))
-            ->map(fn($group, $rate) => [
-                'rate' => str_replace('.', ',', rtrim(rtrim((string) $rate, '0'), '.')),
-                'base' => $group->sum(fn($i) => (float) $i->subtotal),
-                'tax' => $group->sum(fn($i) => (float) $i->tax_amount)
-            ])
-            ->values()
-            ->all();
+        $surcharge = $this->cents($quote->surcharge);
+        $stamp = $this->cents($quote->stamp_duty);
 
-        $discount = max(0, round($gross - $net, 2));
-        $surcharge = (float) ($quote->surcharge ?? 0);
-        $stamp = (float) ($quote->stamp_duty ?? 0);
+        $taxable = $quote->taxable_amount !== null
+            ? $this->cents($quote->taxable_amount)
+            : $linesNet + $surcharge;
+
+        $total = $quote->total !== null ? $this->cents($quote->total) : null;
+
+        $tax = $quote->tax_total !== null
+            ? $this->cents($quote->tax_total)
+            : ($total !== null ? $total - $taxable : $linesTax);
+
+        $total ??= $taxable + $tax;
+
+        $subtotal = $quote->subtotal !== null
+            ? $this->cents($quote->subtotal)
+            : $linesGross;
+
+        $discount = $quote->discount_total !== null
+            ? $this->cents($quote->discount_total)
+            : max(0, $subtotal - ($taxable - $surcharge));
 
         return [
-            'gross' => $gross,
+            'gross' => $subtotal,
             'discount' => $discount,
-            'has_discounts' => $discount > 0.005,
-            'net' => $net,
+            'has_discounts' => $discount > 0,
+            'net' => $taxable - $surcharge, // righe al netto degli sconti, senza maggiorazione
             'surcharge' => $surcharge,
-            'vat' => $vat,
+            'taxable' => $taxable,
+            'vat' => $this->vatBreakdown($quote, $items, $surcharge, $tax),
             'tax' => $tax,
+            'total' => $total,
             'stamp_duty' => $stamp,
-            'total' => $quote->total !== null
-                ? (float) $quote->total
-                : round($net + $surcharge + $tax + $stamp, 2)
+            // se il bollo non è incluso in `total` (il calculator non lo conteggia)
+            'payable' => $total + $stamp,
         ];
     }
 
-    private function address(mixed $address): ?string
+    /** Riepilogo IVA per aliquota, riconciliato su $taxTotal (il calculator calcola l'IVA per gruppo). */
+    private function vatBreakdown(Quote $quote, Collection $items, int $surcharge, int $taxTotal): array
     {
-        if (is_array($address)) {
-            return collect(['street', 'address', 'line1', 'postal_code', 'zip', 'city', 'province', 'state'])
-                ->map(fn($k) => $address[$k] ?? null)
-                ->filter()
-                ->implode(', ') ?: null;
+        $groups = [];
+
+        foreach ($items as $item) {
+            $key = number_format((float) $item->vat_rate, 2, '.', '');
+            $groups[$key] ??= ['base' => 0, 'tax' => 0];
+            $groups[$key]['base'] += $this->cents($item->subtotal);
+            $groups[$key]['tax'] += $this->cents($item->tax_amount);
         }
 
-        return filled($address) ? (string) $address : null;
+        // la maggiorazione è imponibile con l'aliquota di default
+        $defaultRate = data_get($quote, 'default_vat_rate') ?? data_get($quote, 'vat_rate');
+        if ($surcharge > 0 && $defaultRate !== null) {
+            $key = number_format((float) $defaultRate, 2, '.', '');
+            $groups[$key] ??= ['base' => 0, 'tax' => 0];
+            $groups[$key]['base'] += $surcharge;
+        }
+
+        if ($groups === []) {
+            return [];
+        }
+
+        // l'ultimo gruppo assorbe i centesimi di differenza (tax_total è calcolato per aliquota)
+        $lastKey = array_key_last($groups);
+        $groups[$lastKey]['tax'] += $taxTotal - array_sum(array_column($groups, 'tax'));
+
+        $out = [];
+        foreach ($groups as $rate => $g) {
+            $out[] = [
+                'rate' => str_replace('.', ',', rtrim(rtrim($rate, '0'), '.')),
+                'base' => $g['base'],
+                'tax' => $g['tax'],
+            ];
+        }
+
+        return $out;
     }
 
+    // ---------------------------------------------------------------- indirizzi / righe anagrafiche
+
+    /**
+     * Compone "Via Roma 1, 80100 Napoli (NA)" da stringa o da array con chiavi alternative.
+     */
+    private function address(mixed $address): ?string
+    {
+        if (!is_array($address)) {
+            return filled($address) ? trim((string) $address) : null;
+        }
+
+        $pick = fn(array $keys) => collect($keys)
+            ->map(fn($k) => $address[$k] ?? null)
+            ->first(fn($v) => filled($v));
+
+        $street = $pick(['street', 'address', 'address_line', 'line1']);
+        $line2 = $pick(['line2']);
+        $zip = $pick(['postal_code', 'zip', 'cap']);
+        $city = $pick(['city', 'comune']);
+        $province = $pick(['province', 'provincia', 'state']);
+
+        $province = $province ? (strlen((string) $province) === 2 ? strtoupper($province) : $province) : null;
+
+        $cityLine = trim(implode(' ', array_filter([$zip, $city])));
+        if ($province && $cityLine !== '') {
+            $cityLine .= " ({$province})";
+        } elseif ($province) {
+            $cityLine = $province;
+        }
+
+        return implode(', ', array_filter([$street, $line2, $cityLine])) ?: null;
+    }
+
+    /** L'azienda può avere l'indirizzo come array/stringa unica oppure in colonne separate. */
+    private function companyAddress($company): ?string
+    {
+        $raw = data_get($company, 'address');
+
+        if (is_array($raw)) {
+            return $this->address($raw);
+        }
+
+        return $this->address([
+            'street' => $raw,
+            'postal_code' => data_get($company, 'postal_code') ?? data_get($company, 'zip') ?? data_get($company, 'cap'),
+            'city' => data_get($company, 'city'),
+            'province' => data_get($company, 'province'),
+        ]);
+    }
 
     private function companyLines($company): array
     {
+        $vat = data_get($company, 'vat_number');
+        $taxCode = data_get($company, 'tax_code');
+
         return array_values(array_filter([
-            $this->address(data_get($company, 'address')),
-            data_get($company, 'vat_number') ? 'P.IVA ' . data_get($company, 'vat_number') : null,
-            data_get($company, 'tax_code') ? 'C.F. ' . data_get($company, 'tax_code') : null,
+            $this->companyAddress($company),
+            filled($vat) ? 'P.IVA ' . trim((string) $vat) : null,
+            filled($taxCode) ? 'C.F. ' . trim((string) $taxCode) : null,
             data_get($company, 'email'),
             data_get($company, 'phone'),
-        ]));
+        ], fn($v) => filled($v)));
     }
 
     private function clientLines(Quote $quote, array $client): array
     {
+        $vat = data_get($client, 'vat_number');
+        $taxCode = data_get($client, 'tax_code');
+
         return array_values(array_filter([
             $this->address(data_get($client, 'address') ?: $quote->contact_address),
-            data_get($client, 'vat_number') ? 'P.IVA ' . data_get($client, 'vat_number') : null,
-            data_get($client, 'tax_code') ? 'C.F. ' . data_get($client, 'tax_code') : null,
+            filled($vat) ? 'P.IVA ' . trim((string) $vat) : null,
+            filled($taxCode) ? 'C.F. ' . trim((string) $taxCode) : null,
             data_get($client, 'email') ?: $quote->contact_email,
             data_get($client, 'phone') ?: $quote->contact_phone,
-        ]));
+        ], fn($v) => filled($v)));
     }
-
-
 
     private function logoDataUrl($company): ?string
     {
@@ -150,7 +251,6 @@ class GenerateQuotePdfAction
         }
 
         return 'data:' . Storage::mimeType($path) . ';base64,' . base64_encode(Storage::get($path));
-
     }
 
     private function clientSnapshot(Quote $quote): array
@@ -164,6 +264,8 @@ class GenerateQuotePdfAction
         return is_array($snapshot) ? $snapshot : [];
     }
 
+    // ---------------------------------------------------------------- formattazione
+
     private function safeColor(?string $color, string $fallback): string
     {
         return is_string($color) && preg_match('/^#[0-9a-fA-F]{6}$/', $color) ? $color : $fallback;
@@ -174,9 +276,22 @@ class GenerateQuotePdfAction
         return $value ? Carbon::parse($value)->format('d/m/Y') : null;
     }
 
-    private function money(mixed $value): string
+    /** Unico punto in cui si decide l'unità degli importi persistiti: oggi centesimi. */
+    private function cents(mixed $value): int
     {
-        return "€\u{00A0}" . number_format((float) $value, 2, ',', '.');
+        return (int) round((float) ($value ?? 0));
+    }
+
+    /** Formatta un importo in centesimi. */
+    private function money(mixed $cents): string
+    {
+        return "€\u{00A0}" . number_format($this->cents($cents) / 100, 2, ',', '.');
+    }
+
+    /** Formatta un importo già in euro (es. sconto Fixed). */
+    private function moneyFromEuros(mixed $euros): string
+    {
+        return "€\u{00A0}" . number_format((float) $euros, 2, ',', '.');
     }
 
     private function qty(mixed $value): string
@@ -192,14 +307,12 @@ class GenerateQuotePdfAction
             return '—';
         }
 
-        $type = $item->discount_type instanceof \BackedEnum
+        $type = $item->discount_type instanceof BackedEnum
             ? $item->discount_type->value
             : (string) $item->discount_type;
 
         return str_contains(strtolower($type), 'perc')
             ? $this->qty($value) . '%'
-            : $this->money($value);
+            : $this->moneyFromEuros($value); // il calculator tratta Fixed come euro
     }
-
-
 }

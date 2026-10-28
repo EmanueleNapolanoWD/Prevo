@@ -2,6 +2,8 @@
 // UI: riga del preventivo nel form
 // ============================================================================
 
+import { CompanyValues } from "./company";
+
 export type DiscountType = "percentage" | "fixed";
 
 export interface QuoteItem {
@@ -83,6 +85,8 @@ export interface QuoteSettingsData {
   locale: string;
   timezone: string;
   date_format: string;
+
+  company: QuoteCompany | null;
 }
 
 // ============================================================================
@@ -241,6 +245,24 @@ export interface Quote {
   created_at: string | null;
   updated_at: string | null;
 }
+
+export type QuoteCompany = {
+  name: string;
+  legal_name: string | null;
+  vat_number: string;
+  tax_code: string | null;
+  tax_regime: string | null;
+  sdi_code: string | null;
+  pec: string | null;
+  iban: string | null;
+  address: string;
+  postal_code: string;
+  city: string;
+  province: string;
+  email: string;
+  phone: string;
+  logo_url: string | null;
+};
 
 export type SubmitResult =
   | { ok: true; data: Quote }

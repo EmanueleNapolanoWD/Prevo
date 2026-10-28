@@ -25,8 +25,25 @@ class CompanyRequest extends FormRequest
 
     /** Regimi fiscali FatturaPA (RF03 non esiste, RF20 = regime transfrontaliero). */
     private const TAX_REGIMES = [
-        'RF01', 'RF02', 'RF04', 'RF05', 'RF06', 'RF07', 'RF08', 'RF09', 'RF10',
-        'RF11', 'RF12', 'RF13', 'RF14', 'RF15', 'RF16', 'RF17', 'RF18', 'RF19', 'RF20',
+        'RF01',
+        'RF02',
+        'RF04',
+        'RF05',
+        'RF06',
+        'RF07',
+        'RF08',
+        'RF09',
+        'RF10',
+        'RF11',
+        'RF12',
+        'RF13',
+        'RF14',
+        'RF15',
+        'RF16',
+        'RF17',
+        'RF18',
+        'RF19',
+        'RF20',
     ];
 
     /**
@@ -103,7 +120,7 @@ class CompanyRequest extends FormRequest
                 'max:20',
                 // prima il controllo formale (economico), poi la query di unicità
                 function (string $attribute, mixed $value, Closure $fail) use ($isItaly) {
-                    if ($isItaly && ! self::isValidItalianVat((string) $value)) {
+                    if ($isItaly && !self::isValidItalianVat((string) $value)) {
                         $fail('La partita IVA non è valida.');
                     }
                 },
@@ -137,7 +154,7 @@ class CompanyRequest extends FormRequest
                 'string',
                 'max:34',
                 function (string $attribute, mixed $value, Closure $fail) {
-                    if (! self::isValidIban((string) $value)) {
+                    if (!self::isValidIban((string) $value)) {
                         $fail('L\'IBAN non è valido.');
                     }
                 },
@@ -165,6 +182,37 @@ class CompanyRequest extends FormRequest
             ],
             'phone' => ['required', 'string', 'max:30', 'regex:/^\+?[0-9\s().\-]{6,30}$/'],
             'website' => ['nullable', 'url', 'max:255'],
+            'logo' => ['nullable', 'file', 'mimes:png,jpg,jpeg,webp', 'max:2048'], // KB
+            'remove_logo' => ['nullable', 'boolean'],
+        ];
+    }
+
+    public function attributes(): array
+    {
+        return [
+            'name' => 'nome azienda',
+            'legal_name' => 'ragione sociale',
+            'legal_form' => 'forma giuridica',
+            'country_code' => 'paese',
+            'vat_number' => 'partita IVA',
+            'tax_code' => 'codice fiscale',
+            'tax_regime' => 'regime fiscale',
+            'sdi_code' => 'codice SDI',
+            'pec' => 'PEC',
+            'rea_office' => 'ufficio REA',
+            'rea_number' => 'numero REA',
+            'share_capital' => 'capitale sociale',
+            'ateco_code' => 'codice ATECO',
+            'iban' => 'IBAN',
+            'address' => 'indirizzo',
+            'postal_code' => 'CAP',
+            'city' => 'città',
+            'province' => 'provincia',
+            'email' => 'email aziendale',
+            'phone' => 'telefono aziendale',
+            'website' => 'sito web',
+            'logo' => 'logo',
+            'remove_logo' => 'rimozione logo',
         ];
     }
 
@@ -215,6 +263,12 @@ class CompanyRequest extends FormRequest
             'phone.required' => 'Il campo telefono aziendale è obbligatorio.',
             'phone.regex' => 'Il numero di telefono non è valido.',
             'website.url' => 'Il sito web deve essere un URL valido (es. https://esempio.it).',
+
+            'logo.file' => 'Il logo deve essere un file valido.',
+            'logo.uploaded' => 'Caricamento del logo non riuscito: il file è troppo grande o il trasferimento è stato interrotto.',
+            'logo.mimes' => 'Il logo deve essere un file PNG, JPG o WebP.',
+            'logo.max' => 'Il logo non può superare i 2 MB.',
+            'remove_logo.boolean' => 'Il valore di rimozione del logo non è valido.',
         ];
     }
 
@@ -236,7 +290,7 @@ class CompanyRequest extends FormRequest
      */
     private static function clean(mixed $value): ?string
     {
-        if (! is_string($value)) {
+        if (!is_string($value)) {
             return null;
         }
 
@@ -251,7 +305,7 @@ class CompanyRequest extends FormRequest
      */
     private static function isValidItalianVat(string $vat): bool
     {
-        if (! preg_match('/^\d{11}$/', $vat)) {
+        if (!preg_match('/^\d{11}$/', $vat)) {
             return false;
         }
 
@@ -278,7 +332,7 @@ class CompanyRequest extends FormRequest
      */
     private static function isValidIban(string $iban): bool
     {
-        if (! preg_match('/^[A-Z]{2}\d{2}[A-Z0-9]{11,30}$/', $iban)) {
+        if (!preg_match('/^[A-Z]{2}\d{2}[A-Z0-9]{11,30}$/', $iban)) {
             return false;
         }
 

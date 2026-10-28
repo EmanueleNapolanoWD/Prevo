@@ -10,7 +10,6 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\RateLimited;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
-use Spatie\LaravelPdf\Exceptions\CouldNotGeneratePdf;
 use Throwable;
 
 class GenerateQuotePdfJob implements ShouldQueue
@@ -50,7 +49,7 @@ class GenerateQuotePdfJob implements ShouldQueue
     public function handle(GenerateQuotePdfAction $action): void
     {
 
-        $quote = Quote::find($this->quoteId);
+        $quote = Quote::with(['items', 'company.quoteSettings'])->find($this->quoteId);
 
         if (!$quote) {
             return;
@@ -60,19 +59,7 @@ class GenerateQuotePdfJob implements ShouldQueue
         if ($quote->version !== $this->version) {
             return;
         }
-
-        try {
-            $action->execute($quote);
-        } catch (CouldNotGeneratePdf $e) {
-            // limite superato 
-            if (str_contains($e->getMessage(), 'Rate Limit')) {
-                $this->release(random_int(45, 90));
-                return;
-            }
-
-            throw $e;
-        }
-
+        $action->execute($quote);
     }
 
     public function failed(Throwable $e): void

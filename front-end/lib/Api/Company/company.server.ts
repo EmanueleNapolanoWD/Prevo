@@ -53,7 +53,10 @@ export async function updateCompany(
       // nessun Content-Type manuale: il boundary lo imposta axios.
       // Se serverApi ha application/json come default, aggiungi qui
       // "Content-Type": "multipart/form-data" solo per questa chiamata.
-      headers: await authHeaders(),
+      headers: {
+        ...(await authHeaders()),
+        "Content-Type": "multipart/form-data",
+      },
     });
 
     // se il backend restituisce il nuovo slug, l'action reindirizza lì

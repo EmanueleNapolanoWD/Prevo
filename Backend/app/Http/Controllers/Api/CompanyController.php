@@ -31,19 +31,18 @@ class CompanyController extends Controller
         Company $company,
         UpdateCompanyAction $action,
     ): CompanyResource {
-
         $this->authorize('updateCompanyData', $company);
 
-        $validated = $request->validated();
-
         $company = $action->execute(
-            $company,
-            $validated,
-            $request->user()
+            company: $company,
+            data: $request->safe()->except(['logo', 'remove_logo']),
+            user: $request->user(),
+            logo: $request->file('logo'),
+            removeLogo: $request->boolean('remove_logo'),
         );
 
         return new CompanyResource($company);
     }
 
-   
+
 }

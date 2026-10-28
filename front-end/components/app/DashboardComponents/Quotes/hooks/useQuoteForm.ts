@@ -17,6 +17,8 @@ import {
   dateInDays,
   formatQuoteNumber,
   parseNumber,
+  centsToEuros,
+  eurosToCents,
 } from "@/lib/utils";
 
 // ============================================================================
@@ -38,6 +40,7 @@ import {
   toQuotePayloadItem,
   toQuoteItem,
   toQuoteAppearanceValues,
+  QuoteCompany,
 } from "@/types/quote";
 
 // ============================================================================
@@ -82,6 +85,8 @@ type ClientAddress = NonNullable<ClientDetail["addresses"]>[number];
 
 type SearchResponse<T> = { ok: false; message: string } | { data: T[] };
 
+type PersistedQuote = { id: QuoteDetail["id"]; version: number | undefined };
+
 // ============================================================================
 // COSTANTI
 // ============================================================================
@@ -93,6 +98,7 @@ const PRODUCT_ERROR = "Errore durante il caricamento dei prodotti";
 const CLIENT_ERROR = "Errore durante la ricerca dei clienti";
 const SETTINGS_ERROR = "Errore durante il caricamento delle impostazioni";
 const SUBMIT_ERROR = "Errore durante il salvataggio";
+const SUBMIT_BUSY = "Salvataggio già in corso";
 
 const EMPTY_CONTACT: QuoteContact = { email: "", phone: "", address: "" };
 const EMPTY_APPEARANCE: QuoteAppearanceValues = {
@@ -100,6 +106,22 @@ const EMPTY_APPEARANCE: QuoteAppearanceValues = {
   primaryColor: "#1F2937",
   accentColor: "#2563EB",
 };
+
+// ============================================================================
+// HELPER: unità monetarie
+// Form e anteprima (calcTotals) lavorano in EURO; l'API parla in CENTESIMI.
+// Lo sconto percentuale non è un importo e resta una percentuale.
+// ============================================================================
+
+function discountToApi(type: DiscountType, value: number): number {
+  return type === "percentage" ? value : eurosToCents(value);
+}
+
+function discountFromApi(type: DiscountType, value: unknown): number {
+  return type === "percentage"
+    ? Number(value ?? 0)
+    : centsToEuros(value as number);
+}
 
 // ============================================================================
 // HELPER: contatti cliente
@@ -136,14 +158,16 @@ function quoteToHeader(q: QuoteDetail): QuoteHeaderValues {
 }
 
 function quoteToTax(q: QuoteDetail): TaxQuoteValue {
+  const discountType: DiscountType = q.discount_type
+    ? API_TO_DISCOUNT_TYPE[q.discount_type]
+    : "percentage";
+
   return {
     vat_rate: String(Number(q.vat_rate ?? 0)),
     valid_until: q.valid_until?.slice(0, 10) ?? "", // input date: YYYY-MM-DD
-    surcharge: String(Number(q.surcharge ?? 0)),
-    discount_type: q.discount_type
-      ? API_TO_DISCOUNT_TYPE[q.discount_type]
-      : "percentage",
-    discount_value: String(Number(q.discount_value ?? 0)),
+    surcharge: String(centsToEuros(q.surcharge)),
+    discount_type: discountType,
+    discount_value: String(discountFromApi(discountType, q.discount_value)),
     notes: q.notes ?? "",
     terms: q.terms ?? "",
   };
@@ -241,6 +265,9 @@ export interface UseQuoteFormReturn {
   // --- modalità ---
   isEdit: boolean;
 
+  // --- azienda ---
+  company: QuoteCompany | null;
+
   // --- impostazioni azienda ---
   settings: QuoteSettingsData | null;
   settingsLoading: boolean;
@@ -333,9 +360,30 @@ export function useQuoteForm({
     [quote, initialClient],
   );
 
-  // Versione del preventivo che si sta modificando (controllo di concorrenza).
-  // Si aggiorna dopo ogni salvataggio, così un secondo invio non dà un falso 409.
-  const versionRef = useRef<number | undefined>(quote?.version);
+  // Chiave della 'sorgente' del form: quando cambia avvia nuova versione dopo un refresh
+  const sourceKey = `${quote?.id ?? "new"}:${quote?.version ?? 0}:${initialClient?.id ?? "none"}`;
+
+  // Preventivo già salvato (id + versione) per il controllo di concorrenza.
+  // Si aggiorna dopo OGNI salvataggio, create incluso: un secondo invio aggiorna
+  // lo stesso preventivo invece di duplicarlo e non dà un falso 409.
+  const persistedRef = useRef<PersistedQuote | null>(
+    quote ? { id: quote.id, version: quote.version } : null,
+  );
+
+  const submittingRef = useRef(false);
+
+  // Se arriva un preventivo diverso o una versione più recente dal server, si
+  // allinea; una versione più vecchia (refresh in ritardo) non fa tornare indietro.
+  useEffect(() => {
+    if (!quote) return;
+
+    const current = persistedRef.current;
+    if (!current || current.id !== quote.id) {
+      persistedRef.current = { id: quote.id, version: quote.version };
+    } else if ((quote.version ?? 0) > (current.version ?? 0)) {
+      persistedRef.current = { id: quote.id, version: quote.version };
+    }
+  }, [quote]);
 
   // --------------------------------------------------------------------------
   // IMPOSTAZIONI PREVENTIVI
@@ -393,6 +441,7 @@ export function useQuoteForm({
   const [appearanceEdits, setAppearanceEdits] = useState<
     Partial<QuoteAppearanceValues>
   >(() => initial.appearance);
+
   const [contactEdits, setContactEdits] = useState<Partial<QuoteContact>>(
     () => initial.contact,
   );
@@ -476,6 +525,8 @@ export function useQuoteForm({
 
   const resetItems = useCallback(() => setItems(initial.items), [initial]);
 
+  // Anteprima in euro: i centesimi possono differire di qualche unità dal
+  // backend (che riconcilia per aliquota). Dopo il salvataggio fa fede res.data.
   const totals = useMemo<QuoteTotals | null>(() => {
     if (items.length === 0) return null;
     return calcTotals(
@@ -615,24 +666,41 @@ export function useQuoteForm({
   );
 
   // --------------------------------------------------------------------------
-  // RESET
+  // RIALLINEAMENTO ALLA SORGENTE (reset + cambio di quote/initialClient)
   // In creazione svuota il form, in modifica ripristina i valori del preventivo.
-  // setSelectedClient azzera contactEdits: va chiamato PRIMA di setContactEdits.
+  // L'ordine conta: i contactEdits iniziali vanno impostati DOPO l'azzeramento.
   // --------------------------------------------------------------------------
-  const resetForm = useCallback(() => {
-    setSelectedClient(initial.client);
+  const applyInitial = useCallback(() => {
+    setSelectedClientState(initial.client);
+    setEmailId(null);
+    (setPhoneId(null), setAddressId(null), resetClientSearch());
+
     setHeaderEdits(initial.header);
     setTaxEdits(initial.tax);
-    setAppearanceEdits(initial.appearance);
-    setContactEdits(initial.contact);
-    setItems(initial.items);
+    (setAppearanceEdits(initial.appearance),
+      setContactEdits(initial.contact),
+      setItems(initial.items));
     clearSelection();
-  }, [setSelectedClient, clearSelection, initial]);
+  }, [initial, resetClientSearch, clearSelection]);
+
+  const resetForm = applyInitial;
+
+  // Se quote o initialClient cambiano dopo il mount (page di edit che carica il
+  // cliente in ritardo, refresh dopo un salvataggio, altro preventivo) gli
+  // useState non si rieseguono da soli: si riallinea durante il render, senza
+  // frame intermedio con lo stato vecchio.
+  const [syncedKey, setSyncedKey] = useState(sourceKey);
+  if (syncedKey !== sourceKey) {
+    setSyncedKey(sourceKey);
+    applyInitial();
+  }
 
   // --------------------------------------------------------------------------
   // INVIO (creazione o aggiornamento)
   // --------------------------------------------------------------------------
   const submit = useCallback(async (): Promise<SubmitResult> => {
+    if (submittingRef.current) return { ok: false, error: SUBMIT_BUSY };
+
     // ---- validazione ----
     // In modifica, se il cliente completo non è stato caricato, vale quello salvato
     const clientId = selectedClient?.id ?? quote?.client_id ?? null;
@@ -655,7 +723,19 @@ export function useQuoteForm({
       return { ok: false, error: "Lo sconto percentuale non può superare 100" };
     }
 
-    // ---- payload ----
+    const vatRate = parseNumber(tax.vat_rate);
+    if (Number.isNaN(vatRate) || vatRate < 0 || vatRate > 100) {
+      return { ok: false, error: "Aliquota IVA non valida" };
+    }
+
+    const surcharge = parseNumber(tax.surcharge || "0");
+    if (Number.isNaN(surcharge) || surcharge < 0) {
+      return { ok: false, error: "Maggiorazione non valida" };
+    }
+
+    // ---- payload (importi in centesimi) ----
+    // items: toQuotePayloadItem deve convertire unit_price e lo sconto Fixed di
+    // riga in centesimi (vedi note).
     const payload: QuotePayload = {
       client_id: clientId,
       contact: {
@@ -665,13 +745,13 @@ export function useQuoteForm({
       },
       title: header.title.trim(),
       description: header.description.trim() || null,
-      vat_rate: parseNumber(tax.vat_rate),
-      surcharge: parseNumber(tax.surcharge),
+      vat_rate: vatRate,
+      surcharge: eurosToCents(surcharge),
       // Senza sconto non si invia nulla: il backend azzera tipo e valore
       ...(discountValue > 0
         ? {
             discount_type: DISCOUNT_TYPE_TO_API[tax.discount_type],
-            discount_value: discountValue,
+            discount_value: discountToApi(tax.discount_type, discountValue),
           }
         : {}),
       valid_until: tax.valid_until || null,
@@ -682,22 +762,27 @@ export function useQuoteForm({
     };
 
     // ---- invio ----
+    submittingRef.current = true;
     try {
-      const res = quote
-        ? await updateQuoteAction(slug, quote.id, {
+      const persisted = persistedRef.current;
+
+      const res = persisted
+        ? await updateQuoteAction(slug, persisted.id, {
             ...payload,
-            version: versionRef.current, // controllo di concorrenza lato backend
+            version: persisted.version, // controllo di concorrenza lato backend
           })
         : await createQuoteAction(slug, payload);
 
       if (!res.ok) return { ok: false, error: res.message };
 
-      if (quote) versionRef.current = res.data.version;
+      persistedRef.current = { id: res.data.id, version: res.data.version };
 
       return { ok: true, data: res.data };
     } catch {
       // errori fuori dal contratto delle action (rete, ecc.)
       return { ok: false, error: SUBMIT_ERROR };
+    } finally {
+      submittingRef.current = false;
     }
   }, [selectedClient, items, contact, header, tax, appearance, slug, quote]);
 
@@ -706,6 +791,8 @@ export function useQuoteForm({
   // --------------------------------------------------------------------------
   return {
     isEdit,
+
+    company: settings?.company ?? null,
 
     settings,
     settingsLoading,

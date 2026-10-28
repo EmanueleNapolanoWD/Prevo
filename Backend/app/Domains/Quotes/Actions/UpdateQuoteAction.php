@@ -6,6 +6,7 @@ use App\Domains\Audit\Services\AuditLogger;
 use App\Domains\Quotes\Data\CalculatedLine;
 use App\Domains\Quotes\Data\CreateQuoteData;
 use App\Domains\Quotes\Enums\DiscountType;
+use App\Domains\Quotes\Jobs\GenerateQuotePdfJob;
 use App\Domains\Quotes\Models\Quote;
 use App\Domains\Quotes\Models\QuoteVersion;
 use App\Domains\Quotes\Supports\Money;
@@ -128,6 +129,9 @@ class UpdateQuoteAction
                     'items' => $this->diffItems($before['items'], $after['items']),
                 ],
             );
+
+            // Generazione PDF se va tutto a buon fine
+            GenerateQuotePdfJob::dispatch($quote->id, $quote->version)->afterCommit();
 
             return $quote->fresh(['client.emails', 'client.phones', 'client.addresses', 'items']);
         });

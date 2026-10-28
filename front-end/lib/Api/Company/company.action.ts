@@ -83,15 +83,23 @@ export async function updateCompanyDataAction(
   const removeLogo = formData.get("remove_logo") === "1" && !logo;
 
   // il form usa "name", il backend "company_name"
-  const { name, ...rest } = values;
-  const payload: Record<string, string | null> = {
-    ...rest,
-    company_name: name ?? null,
-  };
+  const payload = { ...values };
 
   // validazione dei dati tramite ZOD
   const validation = companyFormSchema.safeParse(payload);
+
+  if (!validation.success) {
+    console.error(
+      "Errori validazione Zod:",
+      validation.error.issues.map((issue) => ({
+        field: issue.path.join("."),
+        message: issue.message,
+        code: issue.code,
+      })),
+    );
+  }
   const logoError = validateLogo(logo);
+  if (logoError) console.error("Errore logo:", logoError);
 
   if (!validation.success || logoError) {
     // flatten() include solo i campi che hanno errori
@@ -119,6 +127,7 @@ export async function updateCompanyDataAction(
   );
 
   if (!result.ok) {
+    console.error("Errore backend:", JSON.stringify(result, null, 2));
     return {
       ok: false,
       message: result.message,
@@ -126,6 +135,15 @@ export async function updateCompanyDataAction(
       values: values as CompanyValues,
     };
   }
+
+  // if (!result.ok) {
+  //   return {
+  //     ok: false,
+  //     message: result.message,
+  //     errors: toFormErrors(result.errors),
+  //     values: values as CompanyValues,
+  //   };
+  // }
 
   // Recupera lo slug aggiornato dal backend
   const newSlug = result.slug ?? slug;

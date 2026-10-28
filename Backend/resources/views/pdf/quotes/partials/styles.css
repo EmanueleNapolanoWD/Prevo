@@ -1,0 +1,446 @@
+@page { size: A4; margin: 10.5mm; } /* ~ padding 2.5rem del preview */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+body {
+  /* STESSO font del front-end (es. Inter/Geist): va installato sul server o incorporato con @font-face */
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+}
+
+.document {
+  /* --quote-primary e --quote-accent arrivano da :root nei template (nessun default qui) */
+  background: #fff;
+  color: #111827;
+  width: 100%;
+  margin: 0;
+  padding: 2.5rem; /* stesso padding del preview frontend */
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.document h2,
+.document h3,
+.document p {
+  margin: 0;
+}
+
+.document h3 {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--quote-accent);
+  margin-bottom: 0.5rem;
+}
+
+.muted,
+.placeholder { color: #9ca3af; }
+
+.placeholder {
+  padding: 1rem;
+  border: 1px dashed #d1d5db;
+  border-radius: 6px;
+  text-align: center;
+}
+
+/* ---------- Intestazione ---------- */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1.5rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 3px solid var(--quote-primary);
+  margin-bottom: 1.5rem;
+}
+
+.brand {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.6rem;
+  min-width: 0;
+}
+
+.logo {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 140px;
+  max-height: 56px;
+  object-fit: contain;
+}
+
+.companyInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.companyName {
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--quote-primary);
+}
+
+.companyMeta {
+  margin: 0;
+  font-size: 0.72rem;
+  line-height: 1.5;
+  color: #6b7280;
+  overflow-wrap: anywhere;
+}
+
+.docMeta {
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.eyebrow {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: var(--quote-accent);
+}
+
+.number { color: #6b7280; }
+
+/* ---------- Titolo ---------- */
+.titleBlock { margin: 1.5rem 0 1.25rem; }
+
+.titleBlock h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  line-height: 1.25;
+  color: var(--quote-primary);
+}
+
+.titleBlock .description {
+  margin: 0.5rem 0 0;
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: #4b5563;
+  white-space: pre-line;
+}
+
+/* ---------- Destinatario + validità ---------- */
+.metaGrid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.clientSection p,
+.validity strong { color: #374151; }
+
+.validity { text-align: right; }
+
+/* ---------- Tabella voci ---------- */
+.itemsSection { margin-bottom: 1.5rem; }
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table thead { display: table-header-group; } /* ripete l'intestazione se va a pagina nuova */
+
+.table tr { break-inside: avoid; }
+
+.table th {
+  background: var(--quote-primary);
+  color: #fff;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+}
+
+.table td {
+  padding: 0.625rem 0.75rem;
+  border-bottom: 1px solid #e5e7eb;
+  vertical-align: top;
+}
+
+.table tbody tr:nth-child(even) { background: #f9fafb; }
+
+.num {
+  text-align: right !important;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.itemName {
+  display: block;
+  font-weight: 600;
+}
+
+.itemDesc {
+  display: block;
+  font-size: 0.8rem;
+  color: #6b7280;
+  white-space: pre-line;
+}
+
+/* ---------- Totali ---------- */
+.totalsSection {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1.5rem;
+  break-inside: avoid;
+}
+
+.totals {
+  margin: 0;
+  width: min(100%, 280px);
+}
+
+.totals > div {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.totals dt { color: #6b7280; }
+
+.totals dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.totals .grandTotal {
+  border-bottom: none;
+  border-top: 2px solid var(--quote-primary);
+  margin-top: 0.25rem;
+  padding-top: 0.6rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--quote-primary);
+}
+
+.grandTotal dt { color: inherit; }
+
+/* ---------- Pagamento ---------- */
+.paymentSection {
+  margin-top: 1.25rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  border-left: 3px solid var(--quote-accent);
+  background: #f9fafb;
+  font-size: 0.8rem;
+  break-inside: avoid;
+}
+
+.paymentSection p { margin: 0.25rem 0 0; }
+
+.iban {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: 0.02em;
+}
+
+/* ---------- Note / condizioni ---------- */
+.termsSection {
+  margin-bottom: 1rem;
+  break-inside: avoid;
+}
+
+.termsSection strong {
+  display: block;
+  margin-bottom: 0.25rem;
+  color: var(--quote-primary);
+}
+
+.termsSection p {
+  color: #4b5563;
+  font-size: 0.8rem;
+  white-space: pre-line;
+}
+
+.footer {
+  margin-top: 2rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #e5e7eb;
+  text-align: center;
+  font-size: 0.7rem;
+  color: #9ca3af;
+}
+
+/* ---------- Varianti template ---------- */
+/* classic: già allineato al frontend (border-bottom 3px su --quote-primary) */
+
+/* minimal */
+.minimal { font-size: 11px; }
+
+.minimal .header {
+  align-items: flex-end;
+  padding-bottom: 18px;
+  border-bottom-width: 1px;
+}
+
+.minimal .companyName {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+}
+
+.minimal .companyMeta { font-size: 10px; }
+
+.minimal .docMeta h1 {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 300;
+  line-height: 1.2;
+  letter-spacing: .02em;
+  color: var(--quote-primary);
+}
+
+.minimal .number {
+  font-size: 11px;
+  letter-spacing: .08em;
+  color: var(--quote-accent);
+}
+
+.minimal .titleBlock h2 {
+  font-size: 14px;
+  font-weight: 400;
+  color: #111827;
+}
+
+.minimal h3 {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: .14em;
+  color: #9ca3af;
+}
+
+.minimal .table th {
+  background: transparent;
+  color: #9ca3af;
+  font-size: 9px;
+  font-weight: 600;
+  padding: 8px 4px;
+  border-bottom: 1px solid #111827;
+}
+
+.minimal .table td {
+  padding: 10px 4px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.minimal .table tbody tr:nth-child(even) { background: transparent; }
+
+.minimal .totals { width: 42%; }
+
+.minimal .totals .grandTotal {
+  border-top: 1px solid #111827;
+  padding-top: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.minimal .paymentSection {
+  background: transparent;
+  border-left: 1px solid #9ca3af;
+}
+
+.minimal .termsSection strong { color: #111827; }
+
+/* modern */
+.modern .header {
+  align-items: center;
+  padding: 22px 26px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--quote-primary);
+  color: #fff;
+}
+
+.modern .companyName {
+  font-size: 17px;
+  color: #fff;
+}
+
+.modern .companyMeta {
+  font-size: 10.5px;
+  color: rgba(255, 255, 255, .8);
+}
+
+.modern .logoBox {
+  display: inline-block;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.modern .logoBox .logo {
+  margin: 0;
+}
+
+.modern .docMeta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.modern .docMeta h1 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #fff;
+}
+
+.modern .pill {
+  display: inline-block;
+  padding: 3px 12px;
+  border-radius: 999px;
+  background: var(--quote-accent);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.modern .clientSection,
+.modern .validity {
+  padding: 14px 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #f9fafb;
+}
+
+.modern .table th {
+  background: transparent;
+  color: var(--quote-primary);
+  border-bottom: 2px solid var(--quote-primary);
+}
+
+.modern .table td {
+  border-bottom: 1px solid #eef0f3;
+}
+
+.modern .table tbody tr:nth-child(even) {
+  background: transparent;
+}
+
+.modern .totals .grandTotal {
+  margin-top: .5rem;
+  padding: 10px 12px;
+  border-top: none;
+  border-radius: 8px;
+  background: var(--quote-primary);
+  color: #fff;
+}

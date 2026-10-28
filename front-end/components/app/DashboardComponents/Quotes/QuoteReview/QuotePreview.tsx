@@ -1,11 +1,13 @@
 "use client";
 
-import type { CSSProperties } from "react";
+import { useState, type CSSProperties } from "react";
+import Image from "next/image";
 
 import type {
   QuoteSettingsData,
   QuoteItem,
   QuoteAppearanceValues,
+  QuoteCompany,
 } from "@/types/quote";
 import type {
   QuoteHeaderValues,
@@ -20,6 +22,7 @@ type QuoteTotals = ReturnType<typeof calcTotals>;
 
 interface QuotePreviewProps {
   settings: QuoteSettingsData | null;
+  company: QuoteCompany | null;
   header: QuoteHeaderValues;
   tax: TaxQuoteValue;
   appearance: QuoteAppearanceValues;
@@ -38,8 +41,24 @@ function formatDate(value: string): string {
     : date.toLocaleDateString("it-IT");
 }
 
+// "IT60X0542811101000000123456" -> "IT60 X054 2811 1010 0000 0123 456"
+function formatIban(iban: string): string {
+  return iban.replace(/\s+/g, "").replace(/(.{4})/g, "$1 ").trim();
+}
+
+function formatCompanyAddress(company: QuoteCompany): string {
+  const cityLine = [company.postal_code, company.city]
+    .filter(Boolean)
+    .join(" ");
+  const province = company.province ? ` (${company.province})` : "";
+  return [company.address, `${cityLine}${province}`]
+    .filter(Boolean)
+    .join(", ");
+}
+
 export function QuotePreview({
   settings,
+  company,
   header,
   tax,
   appearance,
@@ -49,8 +68,20 @@ export function QuotePreview({
   totals,
   money,
 }: QuotePreviewProps) {
+  // se l'URL firmato del logo è scaduto o non carica, il logo si nasconde
+  const [failedLogo, setFailedLogo] = useState<string | null>(null);
+
   const vatRate = parseNumber(tax.vat_rate);
   const surcharge = parseNumber(tax.surcharge);
+
+  const showLogo = !!company?.logo_url && company.logo_url !== failedLogo;
+  const companyName = company?.name ?? company?.name ?? null;
+
+  const companyContacts = [company?.email, company?.phone].filter(Boolean);
+  const hasPayment =
+    !!settings?.default_payment_method ||
+    !!settings?.default_payment_terms ||
+    !!company?.iban;
 
   return (
     <div className={styles.previewWrapper}>
@@ -63,24 +94,59 @@ export function QuotePreview({
           } as CSSProperties
         }
       >
-        {/* Intestazione */}
+        {/* Intestazione: azienda a sinistra, identità del documento a destra */}
         <header className={styles.header}>
-          <div>
-            <span className={styles.eyebrow}>PREVENTIVO</span>
-            <h2 className={!header.title ? styles.muted : undefined}>
-              {header.title || "Titolo del preventivo"}
-            </h2>
-            <p className={styles.number}>N. {header.number || "—"}</p>
+          <div className={styles.brand}>
+            {showLogo && company?.logo_url && (
+              <Image
+                src={company.logo_url}
+                alt={`Logo di ${company.name}`}
+                width={140}
+                height={56}
+                className={styles.logo}
+                onError={() => setFailedLogo(company.logo_url)}
+                unoptimized
+              />
+            )}
+
+            {company ? (
+              <div className={styles.companyInfo}>
+                <strong className={styles.companyName}>{companyName}</strong>
+                <p className={styles.companyMeta}>
+                  {formatCompanyAddress(company)}
+                </p>
+                <p className={styles.companyMeta}>
+                  P.IVA {company.vat_number}
+                  {company.tax_code && ` · C.F. ${company.tax_code}`}
+                </p>
+                {companyContacts.length > 0 && (
+                  <p className={styles.companyMeta}>
+                    {companyContacts.join(" · ")}
+                  </p>
+                )}
+              </div>
+            ) : (
+              <strong className={`${styles.companyName} ${styles.muted}`}>
+                La tua azienda
+              </strong>
+            )}
           </div>
 
-          <div className={styles.company}>
-            <strong>{settings?.company_name ?? "La tua azienda"}</strong>
+          <div className={styles.docMeta}>
+            <span className={styles.eyebrow}>PREVENTIVO</span>
+            <p className={styles.number}>N. {header.number || "—"}</p>
           </div>
         </header>
 
-        {header.description && (
-          <section className={styles.description}>{header.description}</section>
-        )}
+        {/* Titolo e descrizione */}
+        <section className={styles.titleBlock}>
+          <h2 className={!header.title ? styles.muted : undefined}>
+            {header.title || "Titolo del preventivo"}
+          </h2>
+          {header.description && (
+            <p className={styles.description}>{header.description}</p>
+          )}
+        </section>
 
         {/* Destinatario + validità */}
         <section className={styles.metaGrid}>
@@ -123,7 +189,6 @@ export function QuotePreview({
               </thead>
               <tbody>
                 {items.map((item) => {
-                  const gross = item.quantity * item.unit_price;
                   const hasDiscount = item.discount_value > 0;
 
                   return (
@@ -184,6 +249,22 @@ export function QuotePreview({
             </div>
           </dl>
         </section>
+
+        {/* Pagamento */}
+        {hasPayment && (
+          <section className={styles.paymentSection}>
+            <strong>Pagamento</strong>
+            {settings?.default_payment_method && (
+              <p>Metodo: {settings.default_payment_method}</p>
+            )}
+            {settings?.default_payment_terms && (
+              <p>{settings.default_payment_terms}</p>
+            )}
+            {company?.iban && (
+              <p className={styles.iban}>IBAN {formatIban(company.iban)}</p>
+            )}
+          </section>
+        )}
 
         {/* Note e condizioni */}
         {tax.notes && (

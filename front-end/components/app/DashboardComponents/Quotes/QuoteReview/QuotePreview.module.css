@@ -18,7 +18,9 @@
   margin: 0 auto;
   padding: 2.5rem;
   border-radius: 4px;
-  box-shadow: 0 1px 3px rgb(0 0 0 / 0.12), 0 8px 24px rgb(0 0 0 / 0.06);
+  box-shadow:
+    0 1px 3px rgb(0 0 0 / 0.12),
+    0 8px 24px rgb(0 0 0 / 0.06);
   font-size: 0.875rem;
   line-height: 1.5;
 }
@@ -253,4 +255,94 @@
   .validity {
     text-align: left;
   }
+}
+
+/* ---------- Intestazione ---------- */
+.brand {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.6rem;
+  min-width: 0;
+}
+
+/* Il logo non supera mai 140×56 px e mantiene le proporzioni */
+.logo {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 140px;
+  max-height: 56px;
+  object-fit: contain;
+}
+
+.companyInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.companyName {
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--quote-primary);
+}
+
+.companyMeta {
+  margin: 0;
+  font-size: 0.72rem;
+  line-height: 1.5;
+  color: #6b7280;
+  overflow-wrap: anywhere;
+}
+
+.docMeta {
+  flex-shrink: 0;
+  text-align: right;
+}
+
+/* ---------- Titolo ---------- */
+.titleBlock {
+  margin: 1.5rem 0 1.25rem;
+}
+
+.titleBlock h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  line-height: 1.25;
+  color: var(--quote-primary);
+}
+
+.titleBlock .description {
+  margin: 0.5rem 0 0;
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: #4b5563;
+  white-space: pre-line;
+}
+
+/* ---------- Pagamento ---------- */
+.paymentSection {
+  margin-top: 1.25rem;
+  padding: 0.75rem 1rem;
+  border-left: 3px solid var(--quote-accent);
+  background: #f9fafb;
+  font-size: 0.8rem;
+}
+
+.paymentSection p {
+  margin: 0.25rem 0 0;
+}
+
+.iban {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: 0.02em;
+}
+
+.oldPrice {
+  display: block;
+  font-size: 0.85em;
+  opacity: 0.6;
 }

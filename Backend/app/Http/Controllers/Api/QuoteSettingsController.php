@@ -34,6 +34,6 @@ class QuoteSettingsController extends Controller
 
         $settings = $action->execute($company, $request->user(), $request->validated());
 
-        return new QuoteSettingsResource($settings);
+        return new QuoteSettingsResource($settings->load('company'));
     }
 }

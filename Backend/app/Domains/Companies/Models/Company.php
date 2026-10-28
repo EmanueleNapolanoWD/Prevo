@@ -8,11 +8,11 @@ use App\Domains\Auth\Models\User;
 use App\Domains\Clients\Models\Client;
 use App\Domains\Clients\Models\ClientGroup;
 use App\Domains\Companies\Enums\CompanyStatus;
-use App\Domains\Quotes\Models\QuoteSettings;
 use App\Domains\Companies\Models\CompanyUser;
 use App\Domains\Products\Models\Product;
 use App\Domains\Products\Models\ProductCategory;
 use App\Domains\Quotes\Models\Quote;
+use App\Domains\Quotes\Models\QuoteSettings;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
@@ -20,6 +20,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Filesystem\FilesystemAdapter;
+use Illuminate\Support\Facades\Storage;
 use Spatie\Multitenancy\Concerns\UsesMultitenancyConfig;
 use Spatie\Multitenancy\Contracts\IsTenant;
 use Spatie\Multitenancy\Models\Concerns\ImplementsTenant;
@@ -186,7 +188,7 @@ class Company extends Model implements IsTenant
     }
 
     // collegamento ad audit
-    public function audits(): HasMany 
+    public function audits(): HasMany
     {
         return $this->hasMany(AuditLog::class);
     }
@@ -218,5 +220,17 @@ class Company extends Model implements IsTenant
     {
         return $this->status === CompanyStatus::Trial
             && $this->trial_ends_at?->isFuture();
+    }
+
+    public function logoUrl(): ?string
+    {
+        if (!$this->logo_path) {
+            return null;
+        }
+
+        /** @var FilesystemAdapter $disk */
+        $disk = Storage::disk('r2-logos');
+
+        return $disk->temporaryUrl($this->logo_path, now()->addMinutes(30));
     }
 }

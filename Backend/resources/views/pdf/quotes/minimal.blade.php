@@ -1,53 +1,103 @@
+{{-- resources/views/pdf/quotes/minimal.blade.php --}}
 <!DOCTYPE html>
 <html lang="it">
 <head>
 <meta charset="utf-8">
 <title>Preventivo {{ $quote->number }}</title>
 <style>
-@include('pdf.quotes.partials.base-css')
+@include('pdf.quotes.partials.styles')
+:root { --quote-primary: {{ $colors['primary'] }}; --quote-accent: {{ $colors['accent'] }}; }
 
-:root { --primary: {{ $colors['primary'] }}; --accent: {{ $colors['accent'] }}; }
+/* ---------- Variante minimal ---------- */
+.minimal { font-size: 11px; }
 
-body { font-size: 11px; }
-.header { display: flex; justify-content: space-between; align-items: flex-end; padding-bottom: 18px; border-bottom: 1px solid var(--primary); }
-.company-name { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; }
-.header .lines { font-size: 10px; margin-top: 4px; }
-.doc-title { text-align: right; }
-.doc-title h1 { margin: 0; font-size: 30px; font-weight: 300; letter-spacing: .02em; color: var(--primary); }
-.doc-title .number { font-size: 11px; color: var(--accent); letter-spacing: .08em; }
+.minimal .header {
+  align-items: flex-end;
+  padding-bottom: 18px;
+  border-bottom-width: 1px;
+}
+.minimal .companyName {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+}
+.minimal .companyMeta { font-size: 10px; }
+.minimal .docMeta h1 {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 300;
+  line-height: 1.2;
+  letter-spacing: .02em;
+  color: var(--quote-primary);
+}
+.minimal .number {
+  font-size: 11px;
+  letter-spacing: .08em;
+  color: var(--quote-accent);
+}
 
-.parties { margin-top: 26px; }
-.party h4, .block h4 { font-size: 9px; font-weight: 600; color: #9ca3af; letter-spacing: .14em; }
-.party-name { font-weight: 600; }
-.subject { font-weight: 400; font-size: 14px; }
+.minimal .titleBlock h2 {
+  font-size: 14px;
+  font-weight: 400;
+  color: #111827;
+}
 
-.items th { font-size: 9px; font-weight: 600; color: #9ca3af; border-bottom: 1px solid #111827; padding: 8px 4px; }
-.items td { padding: 10px 4px; border-bottom: 1px solid #f3f4f6; }
-.totals { width: 42%; }
-.totals .grand td { border-top: 1px solid #111827; padding-top: 10px; font-size: 15px; font-weight: 600; }
-.block { margin-top: 26px; }
+.minimal h3 {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: .14em;
+  color: #9ca3af;
+}
+
+.minimal .table th {
+  background: transparent;
+  color: #9ca3af;
+  font-size: 9px;
+  font-weight: 600;
+  padding: 8px 4px;
+  border-bottom: 1px solid #111827;
+}
+.minimal .table td {
+  padding: 10px 4px;
+  border-bottom: 1px solid #f3f4f6;
+}
+.minimal .table tbody tr:nth-child(even) { background: transparent; }
+
+.minimal .totals { width: 42%; }
+.minimal .totals .grandTotal {
+  border-top: 1px solid #111827;
+  padding-top: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.minimal .paymentSection {
+  background: transparent;
+  border-left: 1px solid #9ca3af;
+}
+.minimal .termsSection strong { color: #111827; }
 </style>
 </head>
 <body>
+<div class="document minimal">
 
-<div class="header">
-  <div>
-    @if($logo)<img class="logo" src="{{ $logo }}" alt="">@endif
-    <div class="company-name">{{ $company->name }}</div>
-    <div class="lines muted">
-      @foreach($companyLines as $line)<div>{{ $line }}</div>@endforeach
+  <header class="header">
+    <div class="brand">
+      @if($logo)
+        <img class="logo" src="{{ $logo }}" alt="Logo di {{ $company->name }}">
+      @endif
+      @include('pdf.quotes.partials.company')
     </div>
-  </div>
-  <div class="doc-title">
-    <h1>Preventivo</h1>
-    <div class="number">N. {{ $quote->number }}</div>
-  </div>
+
+    <div class="docMeta">
+      <h1>Preventivo</h1>
+      <div class="number">N. {{ filled($quote->number) ? $quote->number : '—' }}</div>
+    </div>
+  </header>
+
+  @include('pdf.quotes.partials.body')
+
 </div>
-
-@include('pdf.quotes.partials.parties')
-@include('pdf.quotes.partials.items')
-@include('pdf.quotes.partials.totals')
-@include('pdf.quotes.partials.notes')
-
 </body>
 </html>

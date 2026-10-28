@@ -14,6 +14,13 @@ class QuoteSettingsResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return parent::toArray($request);
+        $data = collect(parent::toArray($request))
+            ->except(['id', 'company_id', 'created_at', 'updated_at'])
+            ->all();
+
+        return [
+            ...$data,
+            'company' => new QuoteCompanyResource($this->company),
+        ];
     }
 }

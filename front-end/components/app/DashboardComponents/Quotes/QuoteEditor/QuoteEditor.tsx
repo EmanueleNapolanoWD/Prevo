@@ -28,6 +28,8 @@ export default function QuoteEditor({
     router.refresh();
   }
 
+  console.log('form', form)
+
   return (
     <div className={styles.layout}>
       <div className={styles.formColumn}>
@@ -37,6 +39,7 @@ export default function QuoteEditor({
       <aside className={`${styles.previewColumn} position-sticky`}>
         <QuotePreview
           settings={form.settings}
+          company={form.company}
           header={form.header}
           tax={form.tax}
           appearance={form.appearance}
