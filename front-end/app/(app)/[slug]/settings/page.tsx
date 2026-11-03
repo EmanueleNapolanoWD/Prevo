@@ -80,6 +80,7 @@ async function SettingsTabs({
 
 async function CompanyContent({ slug }: { slug: string }) {
   const company = await getCompany(slug);
+  console.log("company: ", company);
   return <CompanyForm slug={slug} initialValues={company} />;
 }
 
