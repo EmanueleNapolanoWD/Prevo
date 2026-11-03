@@ -1,118 +1,73 @@
 import { Suspense } from "react";
+import { cookies } from "next/headers";
 
-import {
-  getDashboardKpis,
-  getDashboardTodos,
-  getDashboardRecent,
-  getDashboardChart,
-  getDashboardInsights,
-} from "@/lib/Api/Dashboard/dashboard.server";
-import { getCurrentUser } from "@/lib/Api/Auth/auth.server";
+import PageHeader from "@/components/app/DashboardComponents/Home/sections/PageHeader";
+import { RangeSelector } from "@/components/app/DashboardComponents/Home/sections/RangeSelector";
+import { KpiSection } from "@/components/app/DashboardComponents/Home/sections/KpiSection";
+import ToDoSection from "@/components/app/DashboardComponents/Home/sections/ToDoSection";
 
-import DashboardKpiCards from "@/components/app/DashboardComponents/Home/DashboardKpiCards";
-import DashboardChart from "@/components/app/DashboardComponents/Home/DashboardChart";
-import ActionsToDo from "@/components/app/DashboardComponents/Home/ActionsToDo";
-import RecentQuotes from "@/components/app/DashboardComponents/Home/RecentQuotes";
-import DashboardInsights from "@/components/app/DashboardComponents/Home/DashboardInsights";
-import styles from "./page.module.css";
+// import { RecentSection } from "@/components/app/DashboardComponents/Home/sections/RecentSection";
+import { ChartSection } from "@/components/app/DashboardComponents/Home/sections/ChartSection";
+import { Skeleton } from "@/components/ui/skeleton";
+import { parseDashboardRange } from "@/lib/Api/Dashboard/dashboard.types";
 
-type DashboardRange = "7d" | "30d" | "90d";
+import { getSessionUser } from "@/lib/Api/Auth/get-session-user";
 
-// ── Server section components: ognuno carica i propri dati in modo indipendente ──
-// Così Suspense può mostrare uno stato di caricamento distinto per ogni sezione.
-
-async function KpiSection({ slug, range }: { slug: string; range: string }) {
-  const kpis = await getDashboardKpis(slug, range as DashboardRange).catch(
-    () => null,
-  );
-  return <DashboardKpiCards kpis={kpis ?? undefined} range={range} />;
-}
-
-async function ChartSection({ slug, range }: { slug: string; range: string }) {
-  const chart = await getDashboardChart(slug, range as DashboardRange).catch(
-    () => null,
-  );
-  return <DashboardChart chart={chart ?? undefined} range={range} />;
-}
-
-async function ActionsSection({ slug }: { slug: string }) {
-  const todos = await getDashboardTodos(slug).catch(() => null);
-  return <ActionsToDo todos={todos ?? undefined} />;
-}
-
-async function RecentSection({ slug }: { slug: string }) {
-  const recent = await getDashboardRecent(slug, 8).catch(() => null);
-  return <RecentQuotes recent={recent ?? undefined} />;
-}
-
-async function InsightsSection({
-  slug,
-  isOwner,
-}: {
-  slug: string;
-  isOwner: boolean;
-}) {
-  const insights = await getDashboardInsights(slug).catch(() => null);
-  if (!isOwner || !insights) return null;
-  return <DashboardInsights insights={insights} isOwner={isOwner} />;
-}
-
-export default async function DashboardPage({
+export default async function Page({
   params,
   searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ range?: string }>;
+  searchParams: Promise<{ range?: string | string[] }>;
 }) {
   const { slug } = await params;
-  const { range: rangeParam } = await searchParams;
-  const range =
-    rangeParam === "7d" || rangeParam === "90d" ? rangeParam : "30d";
+  const query = await searchParams;
 
-  // Verifica se l'utente è OWNER della compagnia
-  let isOwner = false;
-  try {
-    const user = await getCurrentUser();
-    const membership = user.companies.find((c) => c.slug === slug);
-    isOwner = membership?.role === "OWNER";
-  } catch {
-    // utente non autenticato -> isOwner resta false
-  }
+  const cookieStore = await cookies();
+  const cookieHeader = cookieStore.toString();
+
+  const [user] = await Promise.all([getSessionUser(cookieHeader)]);
+
+  const range = parseDashboardRange(query.range);
 
   return (
-    <main className={styles.page}>
-      <div className={styles.section}>
-        {/* Riga KPI */}
-        <Suspense
-          fallback={<div className={styles.skeleton}>Caricamento KPI…</div>}
-        >
-          <KpiSection slug={slug} range={range} />
-        </Suspense>
+    <div className="flex min-h-screen bg-background">
+      <div className="min-w-0 flex-1">
+        <PageHeader user={user} />
 
-        {/* Grafico */}
-        <Suspense
-          fallback={<div className={styles.skeleton}>Caricamento grafico…</div>}
-        >
-          <ChartSection slug={slug} range={range} />
-        </Suspense>
+        <main className="mx-auto max-w-[1500px] space-y-6 p-4 lg:space-y-8 lg:p-8">
+          <div className="flex justify-end">
+            <RangeSelector value={range} />
+          </div>
 
-        {/* Da fare adesso + Ultimi preventivi (griglia 2 colonne) */}
-        <div className={styles.grid}>
-          <Suspense fallback={<div className={styles.skeleton}>Caricamento attività…</div>}>
-            <ActionsSection slug={slug} />
+          <Suspense key={`kpi-${range}`} fallback={<KpiSkeleton />}>
+            <KpiSection slug={slug} range={range} />
           </Suspense>
-          <Suspense fallback={<div className={styles.skeleton}>Caricamento preventivi…</div>}>
-            <RecentSection slug={slug} />
-          </Suspense>
-        </div>
 
-        {/* Insights (solo OWNER) */}
-        {isOwner && (
-          <Suspense fallback={<div className={styles.skeleton}>Caricamento insights…</div>}>
-            <InsightsSection slug={slug} isOwner={isOwner} />
+          <Suspense
+            key={`chart-${range}`}
+            fallback={<Skeleton className="h-80 rounded-xl" />}
+          >
+            <ChartSection slug={slug} range={range} />
           </Suspense>
-        )}
+
+          <div className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
+            <Suspense fallback={<Skeleton className="h-72 rounded-xl" />}>
+              <ToDoSection slug={slug} />
+            </Suspense>
+          </div>
+        </main>
       </div>
-    </main>
+    </div>
+  );
+}
+
+function KpiSkeleton() {
+  return (
+    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <Skeleton key={i} className="h-32 rounded-xl" />
+      ))}
+    </div>
   );
 }

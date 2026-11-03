@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Domains\Quotes\Actions;
+namespace App\Domains\Dashboard\Actions;
 
 use App\Domains\Auth\Models\User;
 use App\Domains\Companies\Models\Company;

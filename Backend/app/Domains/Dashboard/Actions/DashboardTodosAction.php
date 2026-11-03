@@ -2,10 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Domains\Quotes\Actions;
+namespace App\Domains\Dashboard\Actions;
 
 use App\Domains\Auth\Models\User;
-use App\Domains\Clients\Models\Client;
 use App\Domains\Companies\Models\Company;
 use App\Domains\Quotes\Enums\QuoteStatus;
 use App\Domains\Quotes\Models\Quote;
@@ -67,11 +66,11 @@ class DashboardTodosAction
         }
 
         // Ordina per urgenza (1 = più urgente), poi per data
-        usort($todos, fn ($a, $b) => $a['_urgency'] <=> $b['_urgency']);
+        usort($todos, fn($a, $b) => $a['_urgency'] <=> $b['_urgency']);
 
         // Rimuovi il campo interno di ordinamento
         return array_slice(
-            array_map(fn ($t) => Arr::except($t, ['_urgency']), $todos),
+            array_map(fn($t) => Arr::except($t, ['_urgency']), $todos),
             0,
             $limit
         );

@@ -6,6 +6,7 @@ enum QuoteStatus: string
 {
     case Draft = 'DRAFT';
     case Sent = 'SENT';
+    case Viewed = 'VIEWED';
     case Accepted = 'ACCEPTED';
     case Rejected = 'REJECTED';
     case Expired = 'EXPIRED';

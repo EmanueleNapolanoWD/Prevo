@@ -6,79 +6,60 @@ namespace App\Http\Controllers\Api;
 
 use App\Domains\Auth\Models\User;
 use App\Domains\Companies\Models\Company;
-use App\Domains\Quotes\Actions\DashboardChartAction;
-use App\Domains\Quotes\Actions\DashboardInsightsAction;
-use App\Domains\Quotes\Actions\DashboardKpisAction;
-use App\Domains\Quotes\Actions\DashboardRecentAction;
-use App\Domains\Quotes\Actions\DashboardTodosAction;
+use App\Domains\Dashboard\Actions\DashboardChartAction;
+use App\Domains\Dashboard\Actions\DashboardInsightsAction;
+use App\Domains\Dashboard\Actions\DashboardKpisAction;
+use App\Domains\Dashboard\Actions\DashboardRecentAction;
+use App\Domains\Dashboard\Actions\DashboardTodosAction;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class DashboardController extends Controller
 {
     public function kpis(
         Company $company,
-        Request $request,
-        DashboardKpisAction $action
+        Request $request
     ): JsonResponse {
-        $this->authorize('viewDashboard', $company);
 
-        $range = $request->string('range', '30d');
-        $user = $this->resolveUser($request, $company);
-
-        return response()->json($action->execute($range, $user));
-    }
-
-    public function todos(
-        Company $company,
-        Request $request,
-        DashboardTodosAction $action
-    ): JsonResponse {
-        $this->authorize('viewDashboard', $company);
+        $range = $request->string('range', '30d')->toString();
 
         $user = $this->resolveUser($request, $company);
 
-        return response()->json($action->execute($user));
-    }
+        $action = new DashboardKpisAction($company, $user);
 
-    public function recent(
-        Company $company,
-        Request $request,
-        DashboardRecentAction $action
-    ): JsonResponse {
-        $this->authorize('viewDashboard', $company);
+        $result = $action->execute($range);
 
-        $limit = $request->integer('limit', 8);
-        $user = $this->resolveUser($request, $company);
-
-        return response()->json($action->execute($limit, $user));
+        return response()->json($result);
     }
 
     public function chart(
         Company $company,
-        Request $request,
-        DashboardChartAction $action
+        Request $request
     ): JsonResponse {
-        $this->authorize('viewDashboard', $company);
 
-        $range = $request->string('range', '30d');
+        $range = $request->string('range', '30d')->toString();
         $user = $this->resolveUser($request, $company);
 
-        return response()->json($action->execute($range, $user));
-    }
+        Log::debug('[Dashboard Chart] Richiesta', [
+            'company_id' => $company->id,
+            'company_slug' => $company->slug,
+            'user_id' => $user?->id,
+            'range' => $range,
+        ]);
 
-    public function insights(
-        Company $company,
-        Request $request,
-        DashboardInsightsAction $action
-    ): JsonResponse {
-        $this->authorize('viewInsights', $company);
+        $action = new DashboardChartAction($company, $user);
 
-        $range = $request->string('range', '30d');
-        $user = $this->resolveUser($request, $company);
+        $result = $action->execute($range);
 
-        return response()->json($action->execute($range, $user));
+        Log::debug('[Dashboard Chart] Risultato', [
+            'company_id' => $company->id,
+            'user_id' => $user?->id,
+            'result' => $result,
+        ]);
+
+        return response()->json($result);
     }
 
     private function resolveUser(Request $request, Company $company): ?User
