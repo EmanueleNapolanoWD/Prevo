@@ -1,0 +1,152 @@
+/* Quote List — Modern CSS Module based on design system */
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-6);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-space-3);
+  flex-wrap: wrap;
+}
+
+.title {
+  font-size: var(--ds-text-xl);
+  font-weight: var(--ds-fw-semibold);
+  color: var(--ds-foreground);
+  line-height: var(--ds-lh-tight);
+}
+
+.subtitle {
+  font-size: var(--ds-text-sm);
+  color: var(--ds-muted-foreground);
+}
+
+.filters {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  flex-wrap: wrap;
+}
+
+.searchField {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+}
+
+.typeSelect {
+  min-width: 140px;
+}
+
+.resetFilters {
+  margin-left: auto;
+}
+
+.importExport {
+  margin-top: var(--ds-space-3);
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+}
+
+.tableWrap {
+  overflow-x: auto;
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-card);
+  box-shadow: var(--ds-shadow-xs);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: var(--ds-text-sm);
+}
+
+.table th {
+  padding: var(--ds-space-3) var(--ds-space-4);
+  background: var(--ds-muted-light);
+  color: var(--ds-muted-foreground);
+  font-size: var(--ds-text-xs);
+  font-weight: var(--ds-fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--ds-border);
+  white-space: nowrap;
+}
+
+.table td {
+  padding: var(--ds-space-3) var(--ds-space-4);
+  border-bottom: 1px solid var(--ds-border);
+  color: var(--ds-foreground);
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.table tbody tr:hover {
+  background: var(--ds-muted-light);
+}
+
+.emptyRow {
+  padding: var(--ds-space-8);
+  text-align: center;
+  color: var(--ds-muted-foreground);
+}
+
+.infoBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-space-2);
+  padding: var(--ds-space-3) var(--ds-space-4);
+  border-top: 1px solid var(--ds-border);
+  background: var(--ds-muted-light);
+  font-size: var(--ds-text-sm);
+  color: var(--ds-muted-foreground);
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+}
+
+.pageLabel {
+  font-weight: var(--ds-fw-medium);
+  color: var(--ds-foreground);
+}
+
+@media (max-width: 640px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--ds-space-2);
+  }
+
+  .filters {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .searchField {
+    width: 100%;
+  }
+
+  .resetFilters {
+    margin-left: 0;
+    margin-top: var(--ds-space-2);
+    align-self: flex-start;
+  }
+
+  .importExport {
+    margin-top: var(--ds-space-2);
+    width: 100%;
+    justify-content: flex-start;
+  }
+}

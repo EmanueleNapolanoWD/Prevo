@@ -23,8 +23,9 @@ export function buildListHref(
 // UTILS per QUOTE
 
 // Accetta anche la virgola decimale ("12,50"). Stringa vuota => NaN
-export function parseNumber(value: string): number {
-  const v = value.trim().replace(",", ".");
+export function parseNumber(value: string | number | null | undefined): number {
+  if (value === null || value === undefined) return NaN;
+  const v = String(value).trim().replace(",", ".");
   return v === "" ? NaN : Number(v);
 }
 

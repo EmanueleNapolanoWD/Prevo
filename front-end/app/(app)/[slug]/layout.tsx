@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { getCurrentUser } from "@/lib/Api/Auth/auth.server";
 
+import "@/components/app/DashboardComponents/_design-system.module.css";
 import { AppSidebar } from "@/components/app/DashboardUI/app-sidebar";
 import { SiteHeader } from "@/components/app/DashboardUI/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";

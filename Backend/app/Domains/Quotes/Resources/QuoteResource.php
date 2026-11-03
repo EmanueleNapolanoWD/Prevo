@@ -23,6 +23,7 @@ class QuoteResource extends JsonResource
             'notes' => $this->notes,
             'terms' => $this->terms,
             'valid_until' => $this->valid_until?->toIso8601String(),
+            'vat_rate' => (float) $this->vat_rate,
 
             'client_id' => $this->client_id,
             'client' => $this->client_snapshot,

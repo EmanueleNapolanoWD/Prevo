@@ -1,0 +1,76 @@
+/* Pagina Modifica Contatto — Layout full-width, nessun margin auto */
+.page {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--ds-background);
+}
+
+.header {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-3);
+  padding: var(--ds-space-4);
+  border-bottom: 1px solid var(--ds-border);
+}
+
+.headerTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-space-4);
+}
+
+.title {
+  font-size: var(--ds-text-2xl);
+  font-weight: var(--ds-fw-semibold);
+  color: var(--ds-foreground);
+  line-height: var(--ds-lh-tight);
+}
+
+.subtitle {
+  font-size: var(--ds-text-sm);
+  color: var(--ds-muted-foreground);
+}
+
+.content {
+  width: 100%;
+  padding: var(--ds-space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-6);
+}
+
+.formCard {
+  width: 100%;
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-card);
+  box-shadow: var(--ds-shadow-xs);
+}
+
+.formBody {
+  padding: var(--ds-space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-6);
+}
+
+.formFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--ds-space-3);
+  padding: var(--ds-space-4) var(--ds-space-5);
+  border-top: 1px solid var(--ds-border);
+  background: var(--ds-muted-light);
+}
+
+@media (max-width: 640px) {
+  .headerTop {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--ds-space-2);
+  }
+}

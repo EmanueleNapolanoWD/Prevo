@@ -1,0 +1,16 @@
+.paymentSection {
+  margin-top: 1.25rem;
+  padding: 0.75rem 1rem;
+  border-left: 3px solid var(--quote-accent);
+  background: #f9fafb;
+  font-size: 0.8rem;
+}
+
+.paymentSection p {
+  margin: 0.25rem 0 0;
+}
+
+.iban {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: 0.02em;
+}

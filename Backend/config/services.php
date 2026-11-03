@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'print' => [
+        'secret' => env('PRINT_SECRET'),
+    ],
+
 ];

@@ -30,7 +30,9 @@ export async function proxy(request: NextRequest) {
         const user = await getSessionUser(request.headers.get("cookie"));
         // Se ha un'azienda principale, potresti reindirizzarlo a user.companies[0].slug
         if (user && user.companies?.[0]) {
-          return NextResponse.redirect(new URL(`/${user.companies[0].slug}`, request.url));
+          return NextResponse.redirect(
+            new URL(`/${user.companies[0].slug}`, request.url),
+          );
         }
       }
     }
@@ -53,14 +55,20 @@ export async function proxy(request: NextRequest) {
   }
 
   // 2. Se è loggato, verifica che l'utente abbia effettivamente accesso a questo slug
-  const hasAccess = user.companies?.some((company: Company) => company.slug === slug);
+  const hasAccess = user.companies?.some(
+    (company: Company) => company.slug === slug,
+  );
 
   if (!hasAccess) {
     // Se non ha i permessi per questa azienda, reindirizzalo alla sua prima azienda valida o alla home
     const fallbackSlug = user.companies?.[0]?.slug;
     const redirectUrl = fallbackSlug ? `/${fallbackSlug}` : "/login";
-    
+
     return NextResponse.redirect(new URL(redirectUrl, request.url));
+  }
+
+  if (pathname.startsWith("/print/")) {
+    return NextResponse.next();
   }
 
   // Utente loggato e autorizzato: procedi con la richiesta
@@ -76,6 +84,6 @@ export const config = {
      * - _next/image (immagini ottimizzate)
      * - favicon.ico (icona del sito)
      */
-    "/((?!api|_next/static|_next/image|favicon.ico).*)",
+    "/((?!api|print|_next/static|_next/image|favicon.ico).*)",
   ],
 };

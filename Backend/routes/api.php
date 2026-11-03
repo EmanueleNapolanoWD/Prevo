@@ -3,8 +3,10 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ClientController;
 use App\Http\Controllers\Api\CompanyController;
+use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\QuoteController;
+use App\Http\Controllers\Api\QuotePdfController;
 use App\Http\Controllers\Api\QuoteSettingsController;
 use Illuminate\Support\Facades\Route;
 
@@ -14,6 +16,16 @@ Route::middleware('throttle:5,1')->group(function () {
     Route::post('/register', [AuthController::class, 'registerUser']);
     Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
     Route::post('/reset-password', [AuthController::class, 'resetPassword']);
+});
+
+Route::middleware(['signed:relative', 'throttle:30,1'])->group(function () {
+    // Dati per la pagina di stampa Next (JSON)
+    Route::get('/companies/{company:slug}/quotes/{quoteId}/print', [QuotePdfController::class, 'printData'])
+        ->name('quotes.print-data');
+
+    // Link pubblico temporaneo (WhatsApp / mail), usato da QuotePdfService::publicUrl()
+    Route::get('/public/companies/{company:slug}/quotes/{quoteId}/pdf', [QuotePdfController::class, 'publicShow'])
+        ->name('quotes.public.pdf');
 });
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -57,13 +69,15 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::put('quotes/{quoteId}', [QuoteController::class, 'update']);
             Route::delete('quotes/{quoteId}', [QuoteController::class, 'delete']);
 
+            // ROTTE DASHBOARD
+            Route::get('dashboard/kpis', [DashboardController::class, 'kpis']);
+            Route::get('dashboard/todos', [DashboardController::class, 'todos']);
+            Route::get('dashboard/recent', [DashboardController::class, 'recent']);
+            Route::get('dashboard/chart', [DashboardController::class, 'chart']);
+            Route::get('dashboard/insights', [DashboardController::class, 'insights']);
+
+            Route::get('quotes/{quoteId}/pdf', [QuotePdfController::class, 'show']);
+            Route::get('quotes/{quoteId}/pdf/download', [QuotePdfController::class, 'download']);
+
         });
-
-
-
-
-    // Clients
-
-
-
 });

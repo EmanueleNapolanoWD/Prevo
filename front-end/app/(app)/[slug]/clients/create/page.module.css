@@ -1,0 +1,21 @@
+.page {
+  width: 100%;
+  min-height: 100vh;
+  background: var(--ds-background);
+  color: var(--ds-foreground);
+  display: flex;
+  flex-direction: column;
+}
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-space-4);
+  margin-bottom: var(--ds-space-6);
+}
+.title {
+  font-size: var(--ds-text-lg);
+  font-weight: var(--ds-fw-semibold);
+  color: var(--ds-foreground);
+  margin: 0;
+}

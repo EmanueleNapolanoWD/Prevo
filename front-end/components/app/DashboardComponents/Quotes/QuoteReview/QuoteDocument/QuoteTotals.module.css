@@ -1,0 +1,41 @@
+.totalsSection {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1.5rem;
+}
+
+.totals {
+  margin: 0;
+  width: min(100%, 280px);
+}
+
+.totals > div {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.totals dt {
+  color: #6b7280;
+}
+
+.totals dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.totals .grandTotal {
+  border-bottom: none;
+  border-top: 2px solid var(--quote-primary);
+  margin-top: 0.25rem;
+  padding-top: 0.6rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--quote-primary);
+}
+
+/* Deve restare dopo ".totals dt" (stessa specificità): l'ordine fa vincere inherit */
+.grandTotal dt {
+  color: inherit;
+}

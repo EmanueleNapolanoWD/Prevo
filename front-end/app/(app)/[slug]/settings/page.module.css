@@ -3,6 +3,8 @@
   flex-direction: column;
   width: 100%;
   min-height: 100%;
+  background: var(--ds-background);
+  color: var(--ds-foreground);
 }
 
 .title {
@@ -10,33 +12,34 @@
   padding: 20px 24px 0;
   font-size: 1.5rem;
   font-weight: 600;
+  color: var(--ds-foreground);
 }
 
 .tabs {
   display: flex;
   gap: 4px;
   padding: 16px 24px 0;
-  border-bottom: 1px solid var(--border, #e5e7eb);
+  border-bottom: 1px solid var(--ds-border);
 }
 
 .tab {
   padding: 10px 14px;
   font-size: 0.875rem;
-  color: var(--muted-foreground, #6b7280);
+  color: var(--ds-muted-foreground);
   border-bottom: 2px solid transparent;
-  margin-bottom: -1px; /* sovrappone il bordo del tab a quello della nav */
+  margin-bottom: -1px;
   text-decoration: none;
   transition: color 0.15s, border-color 0.15s;
 }
 
 .tab:hover {
-  color: var(--foreground, #111827);
+  color: var(--ds-foreground);
 }
 
 .tabActive {
-  color: var(--foreground, #111827);
+  color: var(--ds-foreground);
   font-weight: 500;
-  border-bottom-color: #15803d;
+  border-bottom-color: var(--ds-primary);
 }
 
 /* Il pannello prende tutta la larghezza: niente max-width, niente margin auto */
@@ -57,9 +60,9 @@
   border-radius: 10px;
   background: linear-gradient(
     90deg,
-    #f3f4f6 25%,
-    #e5e7eb 50%,
-    #f3f4f6 75%
+    var(--ds-muted) 25%,
+    var(--ds-border) 50%,
+    var(--ds-muted) 75%
   );
   background-size: 200% 100%;
   animation: shimmer 1.4s infinite;

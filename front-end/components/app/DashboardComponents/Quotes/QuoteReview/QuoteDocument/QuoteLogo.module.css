@@ -1,0 +1,9 @@
+/* Il logo non supera mai 140×56 px e mantiene le proporzioni */
+.logo {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 140px;
+  max-height: 56px;
+  object-fit: contain;
+}

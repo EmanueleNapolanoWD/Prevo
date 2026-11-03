@@ -36,9 +36,11 @@ class GenerateQuotePdfAction
             $quote->version,
         );
 
-        Pdf::view("pdf.quotes.{$template}", [
+        Pdf::view("pdf.quotes.document", [
+            'template' => $template,
             'quote' => $quote,
             'company' => $company,
+            'companyAddress' => $this->companyAddress($company),
             'settings' => $settings,
             'items' => $items,
             'totals' => $this->buildTotals($quote, $items),
@@ -61,7 +63,6 @@ class GenerateQuotePdfAction
             'qty' => fn($v) => $this->qty($v),
             'discountLabel' => fn($item) => $this->discountLabel($item),
         ])
-            ->footerView('pdf.quotes.footer', ['quote' => $quote, 'company' => $company])
             ->format('a4')
             ->margins(15, 12, 20, 12)
             ->disk('r2-quotes')

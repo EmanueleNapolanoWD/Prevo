@@ -1,0 +1,64 @@
+/* Quote Row — Modern CSS Module based on design system */
+.row {
+  transition: opacity var(--ds-trans-fast);
+}
+
+.row[aria-busy="true"] {
+  opacity: 0.6;
+}
+
+.number {
+  font-family: var(--ds-font-mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace);
+  font-size: var(--ds-text-xs);
+  font-weight: var(--ds-fw-medium);
+  color: var(--ds-muted-foreground);
+}
+
+.clientName {
+  font-weight: var(--ds-fw-semibold);
+  color: var(--ds-foreground);
+}
+
+.clientContact {
+  font-size: var(--ds-text-xs);
+  color: var(--ds-muted-foreground);
+}
+
+.amount {
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--ds-fw-semibold);
+  color: var(--ds-foreground);
+  white-space: nowrap;
+}
+
+.amountSecondary {
+  font-size: var(--ds-text-xs);
+  color: var(--ds-muted-foreground);
+  white-space: nowrap;
+}
+
+.date {
+  font-size: var(--ds-text-xs);
+  color: var(--ds-muted-foreground);
+  white-space: nowrap;
+}
+
+.validUntil {
+  font-size: var(--ds-text-xs);
+  color: var(--ds-muted-foreground);
+  white-space: nowrap;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--ds-space-1);
+}
+
+.error {
+  margin-top: var(--ds-space-1);
+  font-size: var(--ds-text-xs);
+  color: var(--ds-destructive);
+  text-align: right;
+}

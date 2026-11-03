@@ -2,18 +2,8 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight, Search, X } from "lucide-react";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -23,8 +13,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import type { Quote } from "@/types/quote";
-import QuoteRow from "./QuoteRow";
 import { QuoteStatus } from "@/types/quote";
+import QuoteRow from "./QuoteRow";
+import { getQuoteStatus } from "@/components/app/shared/quote-status";
+import { ListToolbar } from "@/components/app/shared/ListToolbar";
+import { DataCard } from "@/components/app/shared/DataCard";
+import { TablePagination } from "@/components/app/shared/TablePagination";
+import { PageHeader } from "@/components/app/shared/PageHeader";
 
 const ALL_STATUSES = "ALL";
 
@@ -35,48 +30,21 @@ type QuotesListProps = {
   lastPage: number;
 };
 
-type QuoteStatusConfig = {
-  label: string;
-  className: string;
-};
-
-/**
- * Unica fonte di verità per etichette e stili degli stati.
- * Usata sia dal badge in QuoteRow sia dal filtro in QuotesList.
- */
-export const QUOTE_STATUS: Record<QuoteStatus, QuoteStatusConfig> = {
-  DRAFT: {
-    label: "Bozza",
-    className: "border-amber-200 bg-amber-50 text-amber-700",
-  },
-  SENT: {
-    label: "Inviato",
-    className: "border-blue-200 bg-blue-50 text-blue-700",
-  },
-  VIEWED: {
-    label: "Inviato",
-    className: "border-blue-200 bg-blue-50 text-blue-700",
-  },
-  ACCEPTED: {
-    label: "Accettato",
-    className: "border-emerald-200 bg-emerald-50 text-emerald-700",
-  },
-  REJECTED: {
-    label: "Rifiutato",
-    className: "border-rose-200 bg-rose-50 text-rose-700",
-  },
-  EXPIRED: {
-    label: "Scaduto",
-    className: "border-slate-200 bg-slate-100 text-slate-600",
-  },
-};
+const QUOTE_STATUS_VALUES: QuoteStatus[] = [
+  "DRAFT",
+  "SENT",
+  "VIEWED",
+  "ACCEPTED",
+  "REJECTED",
+  "EXPIRED",
+];
 
 const STATUS_OPTIONS = [
   { value: ALL_STATUSES, label: "Tutti gli stati" },
-  ...Object.entries(QUOTE_STATUS).map(([value, { label }]) => ({
-    value,
-    label,
-  })),
+  ...QUOTE_STATUS_VALUES.map((value) => {
+    const config = getQuoteStatus(value);
+    return { value, label: config.label };
+  }),
 ];
 
 export function QuotesList({
@@ -85,12 +53,8 @@ export function QuotesList({
   currentPage,
   lastPage,
 }: QuotesListProps) {
-  const router = useRouter();
-
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState(ALL_STATUSES);
-  // Invece di copiare le props in uno state e risincronizzarle con un effect,
-  // teniamo solo gli id eliminati e li escludiamo dai dati arrivati dal server.
   const [removedIds, setRemovedIds] = useState<ReadonlySet<string>>(new Set());
 
   const totalPages = Math.max(lastPage, 1);
@@ -99,7 +63,7 @@ export function QuotesList({
 
   const visibleQuotes = useMemo(
     () => initialQuotes.filter((quote) => !removedIds.has(quote.id)),
-    [initialQuotes, removedIds],
+    [initialQuotes, removedIds]
   );
 
   const filteredQuotes = useMemo(
@@ -114,15 +78,15 @@ export function QuotesList({
         return [
           quote.number,
           quote.title,
-          quote.client?.name,
-          quote.contact.email,
+          quote.client?.display_name,
+          quote.contact?.email,
         ]
           .filter(Boolean)
           .join(" ")
           .toLowerCase()
           .includes(normalizedQuery);
       }),
-    [visibleQuotes, normalizedQuery, status],
+    [visibleQuotes, normalizedQuery, status]
   );
 
   function resetFilters() {
@@ -130,62 +94,56 @@ export function QuotesList({
     setStatus(ALL_STATUSES);
   }
 
-  // Chiamata da QuoteRow solo dopo una cancellazione riuscita sul server
   function removeQuote(id: string) {
-    setRemovedIds((current) => new Set(current).add(id));
-    router.refresh(); // riallinea totale e paginazione con il backend
+    setRemovedIds((prev) => new Set([...prev, id]));
   }
 
-  const pageHref = (page: number) => `/${slug}/quotes?page=${page}`;
+  function pageHref(page: number) {
+    const params = new URLSearchParams();
+    if (query) params.set("q", query);
+    if (status !== ALL_STATUSES) params.set("status", status);
+    if (page > 1) params.set("page", String(page));
+    const queryString = params.toString();
+    return `/${slug}/quotes${queryString ? `?${queryString}` : ""}`;
+  }
 
   return (
-    <Card className="overflow-hidden shadow-sm">
-      <CardContent className="p-0">
-        <div className="flex flex-col gap-3 border-b bg-background p-4 sm:flex-row sm:items-center">
-          <div className="relative flex-1">
-            <Search
-              aria-hidden="true"
-              className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-            />
-            <Input
-              type="search"
-              aria-label="Cerca preventivi"
-              placeholder="Cerca per titolo, cliente o numero..."
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              className="pl-10"
-            />
-          </div>
-
-          <Select value={status} onValueChange={setStatus}>
-            <SelectTrigger
-              className="w-full sm:w-44"
-              aria-label="Filtra per stato"
-            >
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {STATUS_OPTIONS.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          {hasFilters && (
+    <>
+      <PageHeader
+        title="Preventivi"
+        description="Gestisci e monitora tutti i tuoi preventivi in un unico posto."
+        actions={
+          <Link
+            href={`/${slug}/quotes/create`}
+            className="inline-flex items-center justify-center gap-2 rounded-lg border border-input bg-background px-3 py-2 text-sm font-medium transition-colors hover:bg-muted hover:text-foreground"
+          >
+            <span>Nuovo preventivo</span>
+          </Link>
+        }
+      />
+      <DataCard>
+        <ListToolbar
+          placeholder="Cerca preventivi…"
+          q={query}
+          onQueryChange={setQuery}
+          filterLabel="Stato"
+          filterValue={status}
+          filterOptions={STATUS_OPTIONS}
+          onFilterChange={setStatus}
+        />
+        {hasFilters && (
+          <div className="flex items-start gap-2 pt-3">
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
               onClick={resetFilters}
-              className="self-start sm:self-auto"
+              className="text-xs"
             >
-              <X aria-hidden="true" />
+              <X aria-hidden="true" className="size-4 mr-1" />
               Azzera filtri
             </Button>
-          )}
-        </div>
-
+          </div>
+        )}
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
@@ -226,52 +184,14 @@ export function QuotesList({
             </TableBody>
           </Table>
         </div>
-
-        <div className="flex flex-col gap-3 border-t bg-background px-4 py-3 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-          <span aria-live="polite">
-            Visualizzati {filteredQuotes.length} di {visibleQuotes.length}{" "}
-            preventivi in questa pagina
-          </span>
-
-          <nav aria-label="Paginazione" className="flex items-center gap-2">
-            {currentPage > 1 ? (
-              <Link
-                href={pageHref(currentPage - 1)}
-                rel="prev"
-                className={buttonVariants({ variant: "outline", size: "sm" })}
-              >
-                <ChevronLeft data-icon="inline-start" />
-                Precedente
-              </Link>
-            ) : (
-              <Button variant="outline" size="sm" disabled>
-                <ChevronLeft data-icon="inline-start" />
-                Precedente
-              </Button>
-            )}
-
-            <span className="px-2 font-medium text-foreground">
-              Pagina {currentPage} di {totalPages}
-            </span>
-
-            {currentPage < totalPages ? (
-              <Link
-                href={pageHref(currentPage + 1)}
-                rel="next"
-                className={buttonVariants({ variant: "outline", size: "sm" })}
-              >
-                Successiva
-                <ChevronRight data-icon="inline-end" />
-              </Link>
-            ) : (
-              <Button variant="outline" size="sm" disabled>
-                Successiva
-                <ChevronRight data-icon="inline-end" />
-              </Button>
-            )}
-          </nav>
-        </div>
-      </CardContent>
-    </Card>
+        <TablePagination
+          currentPage={currentPage}
+          lastPage={lastPage}
+          totalItems={visibleQuotes.length}
+          pageItems={filteredQuotes.length}
+          buildHref={pageHref}
+        />
+      </DataCard>
+    </>
   );
 }

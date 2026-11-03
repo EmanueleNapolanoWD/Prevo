@@ -28,8 +28,6 @@ export default function QuoteEditor({
     router.refresh();
   }
 
-  console.log('form', form)
-
   return (
     <div className={styles.layout}>
       <div className={styles.formColumn}>

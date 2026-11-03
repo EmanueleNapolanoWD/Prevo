@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { FileText, Plus } from "lucide-react";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { getQuotesAction } from "@/lib/Api/Quote/quote.action"; // adatta il path
+import { Plus } from "lucide-react";
+import { getQuotesAction } from "@/lib/Api/Quote/quote.action";
 import { QuotesList } from "@/components/app/DashboardComponents/Quotes/QuoteList/QuoteList";
+import { PageHeader } from "@/components/app/shared/PageHeader";
+import { PageContainer } from "@/components/app/shared/PageContainer";
 
 type QuotesPageProps = {
   params: Promise<{ slug: string }>;
@@ -19,37 +20,21 @@ export default async function QuotesPage({
   const quotes = await getQuotesAction(slug, currentPage);
 
   return (
-    <main className="min-h-screen bg-muted/30">
-      <header className="border-b bg-background">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5 lg:px-8">
-          <div className="flex items-center gap-3">
-            <div className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <FileText aria-hidden="true" />
-            </div>
-            <span className="text-lg font-semibold tracking-tight">
-              Preventivi
-            </span>
-          </div>
-          <Link href={`/${slug}/quotes/create`} className={buttonVariants()}>
-            <Plus data-icon="inline-start" />
-            Crea preventivo
-          </Link>
-        </div>
-      </header>
-
-      <div className="mx-auto flex max-w-7xl flex-col gap-8 px-6 py-10 lg:px-8">
-        <section>
-          <p className="mb-2 text-sm font-medium text-primary">
-            Workspace / Vendite
-          </p>
-          <h1 className="text-3xl font-semibold tracking-tight">
-            Preventivi salvati
-          </h1>
-          <p className="mt-2 text-muted-foreground">
-            Gestisci e monitora tutti i tuoi preventivi in un unico posto.
-          </p>
-        </section>
-
+    <main className="flex flex-col min-h-[calc(100vh-77px)]">
+      <PageContainer>
+        <PageHeader
+          title="Preventivi"
+          description="Gestisci e monitora tutti i tuoi preventivi in un unico posto."
+          actions={
+            <Link
+              href={`/${slug}/quotes/create`}
+              className="inline-flex items-center justify-center gap-2 rounded-lg border border-input bg-background px-3 py-2 text-sm font-medium transition-colors hover:bg-muted hover:text-foreground"
+            >
+              <Plus data-icon="inline-start" className="size-4" />
+              Crea preventivo
+            </Link>
+          }
+        />
         <QuotesList
           key={currentPage}
           initialQuotes={quotes.data}
@@ -57,8 +42,7 @@ export default async function QuotesPage({
           currentPage={currentPage}
           lastPage={quotes.meta.last_page}
         />
-        
-      </div>
+      </PageContainer>
     </main>
   );
 }

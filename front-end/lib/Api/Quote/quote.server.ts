@@ -4,6 +4,8 @@ import { isAxiosError } from "axios";
 import type { Quote, QuotePayload, QuoteSettingsData } from "@/types/quote";
 import { authHeaders, serverApi } from "../Services/server-api";
 import { handleReadError } from "../Services/errors";
+import type { PrintQuoteData } from "./quote.mappers";
+import { notFound, unstable_rethrow } from "next/navigation";
 
 // ============================================================================
 // URL
@@ -45,6 +47,13 @@ export type PaginatedQuotes = {
   };
 };
 
+interface FetchPrintQuoteParams {
+  slug: string;
+  id: string;
+  expires: string;
+  signature: string;
+}
+
 // ============================================================================
 // Helper
 // ============================================================================
@@ -65,7 +74,6 @@ type ErrorMessages = {
 // Converte un errore di scrittura in un risultato leggibile dal form
 function toActionError(error: unknown, messages: ErrorMessages): ActionError {
   if (!isAxiosError(error)) {
-    console.error("[quotes] errore imprevisto:", error);
     return { ok: false, status: null, message: "Errore imprevisto. Riprova." };
   }
 
@@ -185,6 +193,52 @@ export async function fetchQuoteById(
   } catch (error) {
     if (isAxiosError(error) && error.response?.status === 404) return null;
     handleReadError(error);
+    throw error;
+  }
+}
+
+const printQuoteUrl = (slug: string, quoteId: string) =>
+  `/api/companies/${encodeURIComponent(slug)}/quotes/${encodeURIComponent(quoteId)}/print`;
+
+// nella sezione Letture
+export async function fetchPrintQuoteData({
+  slug,
+  id,
+  expires,
+  signature,
+}: FetchPrintQuoteParams): Promise<PrintQuoteData> {
+  try {
+    const res = await serverApi.get<PrintQuoteData>(printQuoteUrl(slug, id), {
+      params: { expires, signature }, // solo questi due: altri parametri invalidano la firma
+      timeout: 15_000,
+      headers: { Accept: "application/json" },
+      // nessun authHeaders(): l'accesso è garantito dalla firma Laravel
+    });
+
+    if (!res.data?.quote) {
+      console.error("[print] risposta senza quote");
+      notFound();
+    }
+
+    if (!res.data?.quote) notFound();
+
+    return res.data;
+  } catch (error) {
+    unstable_rethrow(error); // lascia passare notFound()/redirect di Next
+    console.error(
+      "[print] errore dati stampa:",
+      isAxiosError(error) ? error.response?.status : error,
+    );
+
+    if (isAxiosError(error)) {
+      console.error(
+        "[print] 404 su:",
+        error.config?.baseURL,
+        error.config?.url,
+        "- risposta:",
+        JSON.stringify(error.response?.data)?.slice(0, 200),
+      );
+    }
     throw error;
   }
 }

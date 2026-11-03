@@ -1,0 +1,401 @@
+/* ==========================================================================
+   DESIGN SYSTEM — Dashboard Prevo
+   Token condivisi per omogeneità visiva. Colori identici a globals.css.
+   ========================================================================== */
+:root {
+  --ds-primary: oklch(0.527 0.154 150.069);
+  --ds-primary-foreground: oklch(1 0 0);
+  --ds-secondary: oklch(1 0 0);
+  --ds-secondary-foreground: oklch(0.145 0 0);
+  --ds-background: oklch(1 0 0);
+  --ds-foreground: oklch(0.145 0 0);
+  --ds-card: oklch(1 0 0);
+  --ds-card-foreground: oklch(0.145 0 0);
+  --ds-muted: oklch(0.97 0.005 150);
+  --ds-muted-foreground: oklch(0.556 0 0);
+  --ds-accent: oklch(0.962 0.044 156.743);
+  --ds-accent-foreground: oklch(0.393 0.095 152.535);
+  --ds-destructive: oklch(0.577 0.245 27.325);
+  --ds-border: oklch(0.922 0 0);
+  --ds-input: oklch(0.922 0 0);
+  --ds-ring: oklch(0.627 0.194 149.214);
+  --ds-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.04);
+  --ds-shadow: 0 4px 18px rgba(28, 50, 38, 0.04);
+  --ds-shadow-md: 0 8px 30px oklch(0 0 0 / 3%);
+  --ds-radius-md: 0.5rem;
+  --ds-radius-lg: 0.625rem;
+  --ds-radius-xl: 0.875rem;
+  --ds-text-xs: 0.75rem;
+  --ds-text-sm: 0.875rem;
+  --ds-text-base: 1rem;
+  --ds-text-lg: 1.125rem;
+  --ds-text-xl: 1.25rem;
+  --ds-text-2xl: 1.5rem;
+  --ds-text-3xl: 1.875rem;
+  --ds-fw-normal: 400;
+  --ds-fw-medium: 500;
+  --ds-fw-semibold: 600;
+  --ds-fw-bold: 700;
+  --ds-lh-tight: 1.1;
+  --ds-lh-normal: 1.5;
+  --ds-trans-fast: 0.15s ease;
+}
+.dark {
+  --ds-background: oklch(0.145 0 0);
+  --ds-foreground: oklch(0.985 0 0);
+  --ds-card: oklch(0.205 0 0);
+  --ds-card-foreground: oklch(0.985 0 0);
+  --ds-muted: oklch(0.269 0 0);
+  --ds-muted-foreground: oklch(0.708 0 0);
+  --ds-accent: oklch(0.393 0.095 152.535);
+  --ds-accent-foreground: oklch(0.985 0 0);
+  --ds-border: oklch(1 0 0 / 10%);
+  --ds-input: oklch(1 0 0 / 15%);
+}
+
+/* ── Stati semi-trasparenti (moderno) ── */
+:root {
+  --ds-primary-light: oklch(0.92 0.08 150.069);
+  --ds-accent-light: oklch(0.94 0.03 156.743);
+  --ds-muted-light: oklch(0.985 0 0);
+  --ds-destructive-light: oklch(0.97 0.03 27.325);
+  --ds-shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.03);
+  --ds-shadow-inset: inset 0 1px 2px 0 rgb(0 0 0 / 0.03);
+  --ds-text-xs-line: 1rem;
+  --ds-text-sm-line: 1.25rem;
+  --ds-text-base-line: 1.5rem;
+  --ds-text-lg-line: 1.75rem;
+  --ds-text-xl-line: 1.75rem;
+  --ds-text-2xl-line: 2rem;
+  --ds-text-3xl-line: 2.25rem;
+  --ds-text-4xl: 2.25rem;
+  --ds-text-4xl-line: 2.5rem;
+  --ds-lh-snug: 1.25;
+  --ds-lh-relaxed: 1.625;
+  --ds-transition-base: 0.2s ease;
+  --ds-transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --ds-container-padding: 1.5rem;
+}
+.dark {
+  --ds-muted-light: oklch(0.22 0 0);
+  --ds-destructive-light: oklch(0.2 0.02 27.325);
+}
+
+/* ── Layout base ── */
+.ds-page {
+  width: 100%;
+  min-height: 100vh;
+  background: var(--ds-background);
+  color: var(--ds-foreground);
+  display: flex;
+  flex-direction: column;
+}
+.ds-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-8);
+}
+
+/* ── Card moderna ── */
+.ds-card {
+  width: 100%;
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-card);
+  box-shadow: var(--ds-shadow-xs);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow var(--ds-transition-base), border-color var(--ds-transition-base);
+}
+.ds-card:hover {
+  box-shadow: var(--ds-shadow-sm);
+  border-color: var(--ds-input);
+}
+.ds-card-header {
+  padding: var(--ds-space-5);
+  border-bottom: 1px solid var(--ds-border);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-1);
+}
+.ds-card-title {
+  font-size: var(--ds-text-lg);
+  font-weight: var(--ds-fw-semibold);
+  color: var(--ds-foreground);
+  line-height: var(--ds-lh-tight);
+}
+.ds-card-description {
+  font-size: var(--ds-text-sm);
+  color: var(--ds-muted-foreground);
+  line-height: var(--ds-lh-normal);
+}
+.ds-card-content {
+  padding: var(--ds-space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-6);
+}
+.ds-card-footer {
+  padding: var(--ds-space-4) var(--ds-space-5);
+  border-top: 1px solid var(--ds-border);
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--ds-space-3);
+  align-items: center;
+  background: var(--ds-muted-light);
+}
+
+/* ── Bottoni moderni ── */
+.ds-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ds-space-2);
+  height: 38px;
+  padding: 0 var(--ds-space-4);
+  border: 1px solid transparent;
+  border-radius: var(--ds-radius-md);
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-fw-medium);
+  line-height: var(--ds-lh-normal);
+  cursor: pointer;
+  transition: all var(--ds-trans-fast);
+  text-decoration: none;
+  font-family: inherit;
+}
+.ds-btn:focus-visible {
+  outline: 2px solid var(--ds-ring);
+  outline-offset: 2px;
+}
+.ds-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.ds-btn-primary {
+  background: var(--ds-primary);
+  color: var(--ds-primary-foreground);
+  border-color: var(--ds-primary);
+  box-shadow: var(--ds-shadow-xs);
+}
+.ds-btn-primary:hover:not(:disabled) {
+  filter: brightness(0.92);
+  box-shadow: 0 4px 10px rgb(0 0 0 / 8%);
+}
+.ds-btn-outline {
+  background: transparent;
+  color: var(--ds-foreground);
+  border-color: var(--ds-border);
+}
+.ds-btn-outline:hover:not(:disabled) {
+  background: var(--ds-muted);
+  border-color: var(--ds-input);
+}
+.ds-btn-ghost {
+  background: transparent;
+  color: var(--ds-foreground);
+  border-color: transparent;
+}
+.ds-btn-ghost:hover:not(:disabled) {
+  background: var(--ds-muted);
+}
+.ds-btn-destructive {
+  background: var(--ds-destructive);
+  color: var(--ds-primary-foreground);
+  border-color: var(--ds-destructive);
+}
+.ds-btn-destructive:hover:not(:disabled) {
+  filter: brightness(0.92);
+}
+.ds-btn-sm {
+  height: 32px;
+  padding: 0 var(--ds-space-3);
+  font-size: var(--ds-text-xs);
+}
+.ds-btn-lg {
+  height: 44px;
+  padding: 0 var(--ds-space-5);
+  font-size: var(--ds-text-base);
+}
+.ds-btn-icon {
+  height: 38px;
+  width: 38px;
+  padding: 0;
+  border-radius: var(--ds-radius-md);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.ds-btn-icon:hover:not(:disabled) {
+  background: var(--ds-muted);
+}
+
+/* ── Input e form moderni ── */
+.ds-input {
+  width: 100%;
+  height: 38px;
+  padding: 0 var(--ds-space-3);
+  font-size: var(--ds-text-sm);
+  font-family: inherit;
+  color: var(--ds-foreground);
+  background: var(--ds-background);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-md);
+  transition: border-color var(--ds-trans-fast), box-shadow var(--ds-trans-fast);
+}
+.ds-input:hover {
+  border-color: var(--ds-input);
+}
+.ds-input:focus-visible {
+  outline: none;
+  border-color: var(--ds-ring);
+  box-shadow: 0 0 0 2px rgb(98 176 131 / 0.2);
+}
+.ds-input[aria-invalid="true"] {
+  border-color: var(--ds-destructive);
+}
+.ds-input[aria-invalid="true"]:focus-visible {
+  box-shadow: 0 0 0 2px rgb(220 38 38 / 0.2);
+}
+.ds-label {
+  display: block;
+  font-size: var(--ds-text-xs);
+  font-weight: var(--ds-fw-medium);
+  color: var(--ds-muted-foreground);
+  margin-bottom: var(--ds-space-1);
+  letter-spacing: -0.01em;
+}
+.ds-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-1);
+}
+.ds-textarea {
+  width: 100%;
+  min-height: 80px;
+  padding: var(--ds-space-3);
+  font-size: var(--ds-text-sm);
+  font-family: inherit;
+  color: var(--ds-foreground);
+  background: var(--ds-background);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-md);
+  resize: vertical;
+  transition: border-color var(--ds-trans-fast), box-shadow var(--ds-trans-fast);
+}
+.ds-textarea:focus-visible {
+  outline: none;
+  border-color: var(--ds-ring);
+  box-shadow: 0 0 0 2px rgb(98 176 131 / 0.2);
+}
+
+/* ── Badge moderni ── */
+.ds-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-1);
+  padding: 0.25rem 0.625rem;
+  border-radius: var(--ds-radius-full);
+  font-size: var(--ds-text-xs);
+  font-weight: var(--ds-fw-semibold);
+  line-height: 1;
+  text-decoration: none;
+  border: 1px solid transparent;
+}
+.ds-badge-outline {
+  background: transparent;
+  border-color: var(--ds-border);
+  color: var(--ds-foreground);
+}
+.ds-badge-secondary {
+  background: var(--ds-secondary);
+  color: var(--ds-secondary-foreground);
+}
+.ds-badge-draft {
+  background: var(--ds-status-draft);
+  color: var(--ds-status-draft-foreground);
+  border-color: var(--ds-status-draft);
+}
+.ds-badge-sent {
+  background: var(--ds-status-sent);
+  color: var(--ds-status-sent-foreground);
+  border-color: var(--ds-status-sent);
+}
+.ds-badge-accepted {
+  background: var(--ds-status-accepted);
+  color: var(--ds-status-accepted-foreground);
+  border-color: var(--ds-status-accepted);
+}
+.ds-badge-rejected {
+  background: var(--ds-status-rejected);
+  color: var(--ds-status-rejected-foreground);
+  border-color: var(--ds-status-rejected);
+}
+.ds-badge-expired {
+  background: var(--ds-status-expired);
+  color: var(--ds-status-expired-foreground);
+  border-color: var(--ds-status-expired);
+}
+
+/* Stati prodotto */
+.ds-badge-active {
+  background: var(--ds-status-accepted);
+  color: var(--ds-status-accepted-foreground);
+  border-color: var(--ds-status-accepted);
+}
+.ds-badge-inactive {
+  background: var(--ds-status-expired);
+  color: var(--ds-status-expired-foreground);
+  border-color: var(--ds-status-expired);
+}
+
+/* ── Tabella moderna ── */
+.ds-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: var(--ds-text-sm);
+}
+.ds-table th {
+  padding: var(--ds-space-3) var(--ds-space-4);
+  background: var(--ds-muted-light);
+  color: var(--ds-muted-foreground);
+  font-size: var(--ds-text-xs);
+  font-weight: var(--ds-fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--ds-border);
+}
+.ds-table td {
+  padding: var(--ds-space-3) var(--ds-space-4);
+  border-bottom: 1px solid var(--ds-border);
+  color: var(--ds-foreground);
+  vertical-align: middle;
+}
+.ds-table tbody tr:hover {
+  background: var(--ds-muted-light);
+}
+
+/* ── Utilità layout ── */
+.ds-flex { display: flex; }
+.ds-flex-col { flex-direction: column; }
+.ds-items-center { align-items: center; }
+.ds-justify-between { justify-content: space-between; }
+.ds-gap-2 { gap: var(--ds-space-2); }
+.ds-gap-4 { gap: var(--ds-space-4); }
+.ds-gap-6 { gap: var(--ds-space-6); }
+.ds-gap-8 { gap: var(--ds-space-8); }
+.ds-grid { display: grid; }
+.ds-grid-cols-1 { grid-template-columns: 1fr; }
+.ds-w-full { width: 100%; }
+.ds-h-full { height: 100%; }
+
+@media (max-width: 640px) {
+  .ds-page { padding: var(--ds-space-4); }
+  .ds-card { border-radius: var(--ds-radius-lg); }
+  .ds-grid-cols-1 { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ds-reduced-motion { transition: none !important; animation: none !important; }
+}

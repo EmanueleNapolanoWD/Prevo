@@ -1,0 +1,65 @@
+/*
+ * Radice del documento. Qui vivono:
+ * - le variabili CSS condivise con i default (--quote-primary / --quote-accent),
+ *   sovrascritte inline da QuoteDocument con i colori di appearance;
+ * - lo stile della "pagina" (A4, padding, ombra, font di base);
+ * - il footer.
+ * Il template (classic | modern | minimal) è esposto come data-template sul
+ * root: i moduli dei figli lo leggono con [data-template="..."] .classe
+ */
+.document {
+  --quote-primary: #1f2937;
+  --quote-accent: #2563eb;
+
+  background: #fff;
+  color: #111827;
+  max-width: 794px; /* ~A4 */
+  margin: 0 auto;
+  padding: 2.5rem;
+  border-radius: 4px;
+  box-shadow:
+    0 1px 3px rgb(0 0 0 / 0.12),
+    0 8px 24px rgb(0 0 0 / 0.06);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.footer {
+  margin-top: 2rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #e5e7eb;
+  text-align: center;
+  font-size: 0.7rem;
+  color: #9ca3af;
+}
+
+@media (max-width: 640px) {
+  .document {
+    padding: 1.25rem;
+  }
+}
+
+@page {
+  size: A4;
+  margin: 15mm;
+}
+
+@media print {
+  .document {
+    width: auto;
+    min-height: 0;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+    transform: none;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .document tr,
+  .document [data-avoid-break] {
+    break-inside: avoid;
+  }
+  .document thead {
+    display: table-header-group;
+  }
+}

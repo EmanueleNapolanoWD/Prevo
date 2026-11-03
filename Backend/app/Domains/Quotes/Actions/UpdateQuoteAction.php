@@ -75,6 +75,9 @@ class UpdateQuoteAction
             // 4. Aggiornamento campi e totali
             // -----------------------------------------------------------------
             $quote->fill([
+                'template' => $data->appearance['template'],
+                'primary_color' => $data->appearance['primary_color'],
+                'accent_color' => $data->appearance['accent_color'],
                 'client_id' => $data->clientId,
                 'title' => $data->title,
                 'description' => $data->description,
@@ -190,6 +193,9 @@ class UpdateQuoteAction
             ...$quote->only([
                 'number',
                 'version',
+                'template',
+                'primary_color',
+                'accent_color',
                 'status',
                 'client_id',
                 'title',

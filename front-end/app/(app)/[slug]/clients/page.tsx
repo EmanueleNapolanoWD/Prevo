@@ -44,7 +44,7 @@ export default async function ClientsPage({
   return (
     <main className={styles.page}>
       <header className={styles.pageHeader}>
-        <div>
+        <div className={styles.headerLeft}>
           <div className={styles.eyebrow}>Rubrica clienti</div>
           <h1 className={styles.pageTitle}>Contatti</h1>
           <p className={styles.pageDescription}>

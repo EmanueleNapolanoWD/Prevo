@@ -5,6 +5,7 @@ import { getProducts } from "@/lib/Api/Product/product.actions";
 import { isApiError } from "@/types/product";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
+import styles from "./page.module.css";
 
 interface ProductsPageProps {
   params: Promise<{ slug: string }>;
@@ -26,10 +27,7 @@ async function ProductContent({
 
   if (isApiError(res)) {
     return (
-      <p
-        role="alert"
-        className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
-      >
+      <p role="alert" className={styles.error}>
         {res.message}
       </p>
     );
@@ -55,18 +53,16 @@ async function ProductContent({
 
 export default function ProductsPage(props: ProductsPageProps) {
   return (
-    <main className="min-h-screen bg-muted/30 px-4 py-8 text-foreground sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-6xl">
-        <Suspense
-          fallback={
-            <p className="text-sm text-muted-foreground">
-              Caricamento prodotti…
-            </p>
-          }
-        >
-          <ProductContent {...props} />
-        </Suspense>
-      </div>
+    <main className={styles.page}>
+      <Suspense
+        fallback={
+          <p className={styles.loading}>
+            Caricamento prodotti…
+          </p>
+        }
+      >
+        <ProductContent {...props} />
+      </Suspense>
     </main>
   );
 }

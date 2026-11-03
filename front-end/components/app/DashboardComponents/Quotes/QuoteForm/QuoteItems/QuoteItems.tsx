@@ -111,7 +111,6 @@ export default function QuoteItems({
 
   // Il prodotto scelto precompila il modulo; quantità e sconto restano modificabili
   function handleSelectProduct(product: Product | null) {
-    console.log("prodotto in quote items: ", product);
     setSelectedProduct(product);
     if (!product) return;
 

@@ -1,1 +1,0 @@
-<footer class="footer">Documento generato con Prevo</footer>

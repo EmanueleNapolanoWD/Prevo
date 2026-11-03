@@ -120,6 +120,7 @@ services:
             NEXT_PUBLIC_API_URL: http://localhost
             FRONTEND_URL: http://localhost:3000
             SESSION_COOKIE_NAME: ${SESSION_COOKIE_NAME:-prevo_session}
+            PRINT_SECRET: ${PRINT_SECRET}
         depends_on:
             - laravel.test
         networks:

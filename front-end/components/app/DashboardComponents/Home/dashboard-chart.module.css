@@ -1,0 +1,44 @@
+.root {
+  width: 100%;
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-card);
+  box-shadow: var(--ds-shadow-sm);
+  display: flex;
+  flex-direction: column;
+}
+.header {
+  padding: var(--ds-space-5);
+  border-bottom: 1px solid var(--ds-border);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-1);
+}
+.title {
+  font-size: var(--ds-text-lg);
+  font-weight: var(--ds-fw-semibold);
+  color: var(--ds-foreground);
+  line-height: var(--ds-lh-tight);
+}
+.content {
+  padding: var(--ds-space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-4);
+}
+.empty {
+  width: 100%;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ds-muted-foreground);
+  font-size: var(--ds-text-sm);
+}
+.chartWrapper {
+  width: 100%;
+  height: 240px;
+}
+.selectTrigger {
+  width: 100%;
+}

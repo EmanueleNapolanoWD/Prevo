@@ -53,6 +53,9 @@ return [
     */
 
     'url' => env('APP_URL', 'http://localhost'),
+    'frontend_url' => env('FRONTEND_URL'),
+    'frontend_internal_url' => env('FRONTEND_INTERNAL_URL', env('FRONTEND_URL')),
+    'frontend_public_url' => env('FRONTEND_PUBLIC_URL', env('FRONTEND_URL')),
 
     /*
     |--------------------------------------------------------------------------

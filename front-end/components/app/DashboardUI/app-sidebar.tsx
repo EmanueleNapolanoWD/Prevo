@@ -18,7 +18,6 @@ import {
   CommandIcon,
 } from "lucide-react"
 
-import { NavDocuments } from "@/components/app/DashboardUI/nav-documents"
 import { NavMain } from "@/components/app/DashboardUI/nav-main"
 import { NavSecondary } from "@/components/app/DashboardUI/nav-secondary"
 import { NavUser } from "@/components/app/DashboardUI/nav-user"
@@ -59,11 +58,6 @@ export function AppSidebar({ slug, user, company, ...props }: AppSidebarProps) {
     { title: "Cerca", url: "#", icon: <SearchIcon /> },
   ]
 
-  const documents = [
-    { name: "Data Library", url: "#", icon: <DatabaseIcon /> },
-    { name: "Reports", url: "#", icon: <FileChartColumnIcon /> },
-    { name: "Word Assistant", url: "#", icon: <FileIcon /> },
-  ]
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>
@@ -84,7 +78,6 @@ export function AppSidebar({ slug, user, company, ...props }: AppSidebarProps) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={navMain} slug={slug}/>
-        <NavDocuments items={documents} />
         <NavSecondary items={navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>

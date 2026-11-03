@@ -1,0 +1,94 @@
+.page {
+  width: 100%;
+  min-height: 100vh;
+  background: var(--ds-background);
+  color: var(--ds-foreground);
+  display: flex;
+  flex-direction: column;
+}
+.header {
+  border-bottom: 1px solid var(--ds-border);
+  background: var(--ds-card);
+  padding: var(--ds-space-5) 0;
+}
+.headerContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-space-4);
+}
+.iconGroup {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+}
+.iconBox {
+  display: flex;
+  width: 36px;
+  height: 36px;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-primary);
+  color: var(--ds-primary-foreground);
+}
+.pageTitle {
+  font-size: var(--ds-text-lg);
+  font-weight: var(--ds-fw-semibold);
+  letter-spacing: -0.02em;
+  color: var(--ds-foreground);
+}
+.pageSubtitle {
+  font-size: var(--ds-text-xs);
+  font-weight: var(--ds-fw-medium);
+  letter-spacing: -0.02em;
+  color: var(--ds-primary);
+  text-transform: uppercase;
+}
+.createLink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  height: 38px;
+  padding: 0 var(--ds-space-4);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-md);
+  background: transparent;
+  color: var(--ds-foreground);
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-fw-medium);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all var(--ds-trans-fast);
+}
+.createLink:hover {
+  background: var(--ds-muted);
+  border-color: var(--ds-input);
+}
+.createLink svg {
+  width: 16px;
+  height: 16px;
+}
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-6);
+  padding: var(--ds-space-6) 0;
+}
+.workspace {
+  font-size: var(--ds-text-xs);
+  font-weight: var(--ds-fw-medium);
+  color: var(--ds-primary);
+}
+.sectionTitle {
+  font-size: var(--ds-text-3xl);
+  font-weight: var(--ds-fw-semibold);
+  letter-spacing: -0.02em;
+  color: var(--ds-foreground);
+  margin: 0;
+}
+.sectionDescription {
+  font-size: var(--ds-text-sm);
+  color: var(--ds-muted-foreground);
+  margin-top: var(--ds-space-2);
+}

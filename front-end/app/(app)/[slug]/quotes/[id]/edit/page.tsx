@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { getQuoteAction } from "@/lib/Api/Quote/quote.action";
 import { getClientById } from "@/lib/Api/Clients/clients.actions"; // adatta il nome reale
 import QuoteEditor from "@/components/app/DashboardComponents/Quotes/QuoteEditor/QuoteEditor";
+import styles from "./page.module.css";
 
 type EditQuotePageProps = {
   params: Promise<{ slug: string; id: string }>;
@@ -17,11 +18,9 @@ export default async function EditQuotePage({ params }: EditQuotePageProps) {
     ? await getClientById(slug, quote.client_id)
     : null;
 
-  console.log("quote: ", quote);
-
   return (
-    <main className="px-6 py-10 lg:px-8">
-      <h1 className="mb-6 text-3xl font-semibold tracking-tight">
+    <main className={styles.page}>
+      <h1 className={styles.title}>
         Modifica preventivo
       </h1>
       <QuoteEditor

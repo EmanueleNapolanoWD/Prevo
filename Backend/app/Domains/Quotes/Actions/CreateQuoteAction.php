@@ -98,6 +98,9 @@ class CreateQuoteAction
                 'created_by' => $user->id,
                 'snapshot' => [
                     'quote' => $quote->only([
+                        'template',
+                        'primary_color',
+                        'accent_color',
                         'number',
                         'title',
                         'description',

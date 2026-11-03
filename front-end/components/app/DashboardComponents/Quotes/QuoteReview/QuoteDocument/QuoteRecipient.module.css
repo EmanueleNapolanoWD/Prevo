@@ -1,0 +1,32 @@
+.metaGrid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.muted {
+  color: #9ca3af;
+}
+
+.clientSection p {
+  margin: 0;
+  color: #374151;
+}
+
+.validity strong {
+  color: #374151;
+}
+
+.validity {
+  text-align: right;
+}
+
+@media (max-width: 640px) {
+  .metaGrid {
+    grid-template-columns: 1fr;
+  }
+  .validity {
+    text-align: left;
+  }
+}
