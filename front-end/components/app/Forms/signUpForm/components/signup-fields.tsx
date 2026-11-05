@@ -30,6 +30,9 @@ export function SignupField({
   const config = FIELD_CONFIG[name];
   const [showPassword, setShowPassword] = useState(false);
 
+  // Se per qualche motivo il campo non è in FIELD_CONFIG, evita il crash
+  if (!config) return null;
+
   const required = config.required ?? true;
   const errorId = `${name}-error`;
   const autoComplete = config.autoComplete ?? "off";
@@ -60,10 +63,10 @@ export function SignupField({
           <select
             id={name}
             name={name}
-            value={value}
+            value={value ?? ""}
             required={required}
             disabled={disabled}
-            autoComplete={autoComplete}
+            autoComplete={autoComplete !== "off" ? autoComplete : undefined}
             className={styles.select}
             onChange={(e) => onChange(name, e.target.value)}
             {...aria}
@@ -82,7 +85,7 @@ export function SignupField({
             id={name}
             name={name}
             type={isPassword && showPassword ? "text" : (config.type ?? "text")}
-            value={value}
+            value={value ?? ""}
             required={required}
             disabled={disabled}
             placeholder={config.placeholder}
@@ -96,8 +99,11 @@ export function SignupField({
           {isPassword && (
             <button
               type="button"
+              disabled={disabled}
               className={styles.inputAction}
-              aria-label={showPassword ? "Nascondi password" : "Mostra password"}
+              aria-label={
+                showPassword ? "Nascondi password" : "Mostra password"
+              }
               aria-pressed={showPassword}
               onClick={() => setShowPassword((visible) => !visible)}
             >

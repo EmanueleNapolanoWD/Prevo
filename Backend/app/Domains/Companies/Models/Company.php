@@ -8,7 +8,6 @@ use App\Domains\Auth\Models\User;
 use App\Domains\Clients\Models\Client;
 use App\Domains\Clients\Models\ClientGroup;
 use App\Domains\Companies\Enums\CompanyStatus;
-use App\Domains\Companies\Models\CompanyUser;
 use App\Domains\Products\Models\Product;
 use App\Domains\Products\Models\ProductCategory;
 use App\Domains\Quotes\Models\Quote;
@@ -28,18 +27,18 @@ use Spatie\Multitenancy\Models\Concerns\ImplementsTenant;
 
 class Company extends Model implements IsTenant
 {
-    use HasUuids, ImplementsTenant, UsesMultitenancyConfig, SoftDeletes;
+    use HasUuids, ImplementsTenant, SoftDeletes, UsesMultitenancyConfig;
 
     protected $table = 'companies';
 
     protected $fillable = [
-        //Anagrafica
+        // Anagrafica
         'name',
         'legal_name',
         'legal_form',
         'slug',
 
-        //Dati Fiscali
+        // Dati Fiscali
         'country_code',
         'vat_number',
         'tax_code',
@@ -52,26 +51,17 @@ class Company extends Model implements IsTenant
         'ateco_code',
         'iban',
 
-        //sede legale
-        'address',
-        'postal_code',
-        'city',
-        'province',
-
-        //Contatti
-        'email',
-        'phone',
         'website',
         'logo_path',
 
-        //Stato 
+        // Stato
         'status',
-        'trial_ends_at'
+        'trial_ends_at',
     ];
 
     protected $attributes = [
         'country_code' => 'IT',
-        'status' => 'trial'
+        'status' => 'trial',
     ];
 
     protected function casts(): array
@@ -79,7 +69,7 @@ class Company extends Model implements IsTenant
         return [
             'status' => CompanyStatus::class,
             'share_capital' => 'decimal:2',
-            'trial_ends_at' => 'datetime'
+            'trial_ends_at' => 'datetime',
         ];
     }
 
@@ -101,41 +91,33 @@ class Company extends Model implements IsTenant
     | NORMALIZZAZIONE DATI (mutator)
     |--------------------------------------------------------------------------
     */
-    protected function email(): Attribute
-    {
-        return Attribute::make(set: fn(string $value) => mb_strtolower(trim($value)));
-    }
 
     protected function pec(): Attribute
     {
-        return Attribute::make(set: fn(?string $value) => $value ? mb_strtolower(trim($value)) : null);
-    }
-
-    protected function province(): Attribute
-    {
-        return Attribute::make(set: fn(string $value) => strtoupper(trim($value)));
-    }
-
-    protected function reaOffice(): Attribute
-    {
-        return Attribute::make(set: fn(?string $value) => $value ? strtoupper(trim($value)) : null);
+        return Attribute::make(set: fn (?string $value) => $value ? mb_strtolower(trim($value)) : null);
     }
 
     protected function countryCode(): Attribute
     {
-        return Attribute::make(set: fn(string $value) => strtoupper(trim($value)));
+        return Attribute::make(
+            set: fn (string $value) => strtoupper(trim($value))
+        );
+    }
+
+    protected function reaOffice(): Attribute
+    {
+        return Attribute::make(set: fn (?string $value) => $value ? strtoupper(trim($value)) : null);
     }
 
     protected function sdiCode(): Attribute
     {
-        return Attribute::make(set: fn(?string $value) => $value ? strtoupper(trim($value)) : null);
+        return Attribute::make(set: fn (?string $value) => $value ? strtoupper(trim($value)) : null);
     }
 
     protected function vatNumber(): Attribute
     {
-        // Solo cifre/lettere, senza spazi né prefisso paese (es. "IT 123..." -> "123...")
         return Attribute::make(
-            set: fn(string $value) => preg_replace('/[^A-Za-z0-9]/', '', $value)
+            set: fn (?string $value) => $value ? preg_replace('/[^A-Za-z0-9]/', '', $value) : null
         );
     }
 
@@ -169,6 +151,41 @@ class Company extends Model implements IsTenant
         return $this->hasMany(CompanyUser::class, 'company_id');
     }
 
+    /** * Indirizzi associati all'azienda. */
+    public function addresses(): HasMany
+    {
+        return $this->hasMany(CompanyAddress::class);
+    }
+
+    // address is primary
+    public function primaryAddress(): HasOne
+    {
+        return $this->hasOne(CompanyAddress::class)->where('is_primary', true);
+    }
+
+    /** * Email associati all'azienda. */
+    public function emails(): HasMany
+    {
+        return $this->hasMany(CompanyEmail::class);
+    }
+
+    // email is primary
+    public function primaryEmail(): HasOne
+    {
+        return $this->hasOne(CompanyEmail::class)->where('is_primary', true);
+    }
+
+    public function phones(): HasMany
+    {
+        return $this->hasMany(CompanyPhone::class);
+    }
+
+    // phone is primary
+    public function primaryPhone(): HasOne
+    {
+        return $this->hasOne(CompanyPhone::class)->where('is_primary', true);
+    }
+
     /** * Impostazioni dell'azienda. */
     public function quoteSettings(): HasOne
     {
@@ -181,7 +198,7 @@ class Company extends Model implements IsTenant
         return $this->hasMany(Quote::class);
     }
 
-    //collegamento a Client
+    // collegamento a Client
     public function clients(): HasMany
     {
         return $this->hasMany(Client::class);
@@ -210,7 +227,6 @@ class Company extends Model implements IsTenant
         return $this->hasMany(ProductCategory::class);
     }
 
-
     /*
     |--------------------------------------------------------------------------
     | HELPER
@@ -224,7 +240,7 @@ class Company extends Model implements IsTenant
 
     public function logoUrl(): ?string
     {
-        if (!$this->logo_path) {
+        if (! $this->logo_path) {
             return null;
         }
 

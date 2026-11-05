@@ -238,7 +238,7 @@ export function useSignUpForm() {
 
     try {
       await registerUser(result.data);
-      router.replace("/dashboard");
+      router.replace("/");
       setValues(initialValues);
       router.refresh();
     } catch (error: unknown) {
