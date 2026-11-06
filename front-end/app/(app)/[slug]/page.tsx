@@ -11,7 +11,7 @@ import { ChartSection } from "@/components/app/DashboardComponents/Home/sections
 import { Skeleton } from "@/components/ui/skeleton";
 import { parseDashboardRange } from "@/lib/Api/Dashboard/dashboard.types";
 
-import { getSessionUser } from "@/lib/Api/Auth/get-session-user";
+import { getSessionUser } from "@/lib/Api/Auth/auth.server";
 
 export default async function Page({
   params,

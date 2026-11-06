@@ -49,6 +49,6 @@ return new class extends Migration {
 
     public function down(): void
     {
-        Schema::dropIfExists('company_settings'); // elimina la tabella in caso di rollback
+        Schema::dropIfExists('quote_settings'); // elimina la tabella in caso di rollback
     }
 };

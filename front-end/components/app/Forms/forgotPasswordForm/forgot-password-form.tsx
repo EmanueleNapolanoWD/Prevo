@@ -12,10 +12,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { forgotPassword } from "@/lib/Api/Auth/auth";
+import { forgotPassword } from "@/lib/Api/Auth/auth.client";
 
 type Status = "idle" | "submitting" | "sent" | "error";
-
 
 export default function ForgotPasswordForm({
   className,
@@ -91,7 +90,9 @@ export default function ForgotPasswordForm({
                   className="w-full"
                   disabled={status === "submitting"}
                 >
-                  {status === "submitting" ? "Invio in corso…" : "Invia il link"}
+                  {status === "submitting"
+                    ? "Invio in corso…"
+                    : "Invia il link"}
                 </Button>
               </form>
             </CardContent>

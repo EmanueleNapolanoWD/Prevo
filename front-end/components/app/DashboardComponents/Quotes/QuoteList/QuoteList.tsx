@@ -12,8 +12,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import type { Quote } from "@/types/quote";
-import { QuoteStatus } from "@/types/quote";
+import type { Quote } from "@/lib/Utility/Quote/quote.types";
+import { QuoteStatus } from "@/lib/Utility/Quote/quote.types";
 import QuoteRow from "./QuoteRow";
 import { getQuoteStatus } from "@/components/app/shared/quote-status";
 import { ListToolbar } from "@/components/app/shared/ListToolbar";
@@ -63,7 +63,7 @@ export function QuotesList({
 
   const visibleQuotes = useMemo(
     () => initialQuotes.filter((quote) => !removedIds.has(quote.id)),
-    [initialQuotes, removedIds]
+    [initialQuotes, removedIds],
   );
 
   const filteredQuotes = useMemo(
@@ -86,7 +86,7 @@ export function QuotesList({
           .toLowerCase()
           .includes(normalizedQuery);
       }),
-    [visibleQuotes, normalizedQuery, status]
+    [visibleQuotes, normalizedQuery, status],
   );
 
   function resetFilters() {

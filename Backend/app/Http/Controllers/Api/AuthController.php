@@ -7,33 +7,58 @@ use App\Domains\Auth\Actions\LoginUserAction;
 use App\Domains\Auth\Actions\LogoutUserAction;
 use App\Domains\Auth\Actions\RegisterUserAction;
 use App\Domains\Auth\Actions\ResetPasswordAction;
+use App\Domains\Auth\DTOs\ForgotPasswordData;
+use App\Domains\Auth\DTOs\LoginUserData;
+use App\Domains\Auth\DTOs\RegisterUserData;
+use App\Domains\Auth\DTOs\ResetPasswordData;
 use App\Domains\Auth\Requests\ForgotPasswordRequest;
 use App\Domains\Auth\Requests\LoginUserRequest;
-use App\Domains\Auth\Requests\RegisterUserRequest;
+use App\Domains\Auth\Requests\RegisterRequest;
 use App\Domains\Auth\Requests\ResetPasswordRequest;
 use App\Domains\Auth\Resources\UserResource;
-use App\Domains\Companies\Requests\CompanyRequest;
+use App\Domains\Companies\DTOs\CompanyData;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
     public function login(
         LoginUserRequest $request,
         LoginUserAction $action
-    ) {
-        $user = $action->execute($request);
+    ): JsonResponse {
+
+        $dto = LoginUserData::fromValidated($request->validated());
+
+        $user = $action->execute($dto, $request);
+
+        return response()->json([
+            'message' => 'Login effettuato con successo',
+            'user' => (new UserResource($user))->resolve(),
+        ]);
     }
 
     // registrazione
     public function registerUser(
-        RegisterUserRequest $userRequest,
-        CompanyRequest $companyRequest,
+        RegisterRequest $request,
         RegisterUserAction $action
     ) {
-        $user = $action->execute($userRequest, $companyRequest);
+        $validated = $request->validated();
+
+        [$user, $company] = $action->execute(
+            RegisterUserData::fromValidated($validated),
+            CompanyData::fromValidated($validated),
+            $request->session(),
+            $request 
+        );
+
+        return response()->json([
+            'message' => 'Registrazione effettuata con successo',
+            'user' => (new UserResource($user))->resolve(),
+            'company' => ['slug' => $company->slug],
+        ], 201);
     }
 
     // Recupero dell'utente autenticato con le sue aziende associate
@@ -57,7 +82,9 @@ class AuthController extends Controller
         ForgotPasswordAction $action
     ): JsonResponse {
 
-        $action->execute($request->validated('email'));
+        $dto = ForgotPasswordData::fromValidated($request->validated());
+
+        $action->execute($dto, $request);
 
         return response()->json([
             'message' => 'Se esiste un account associato a questa email, riceverai un link per reimpostare la password.',
@@ -69,16 +96,26 @@ class AuthController extends Controller
         ResetPasswordRequest $request,
         ResetPasswordAction $action
     ): JsonResponse {
-        $status = $action->execute($request->validated());
+
+        $dto = ResetPasswordData::fromValidated($request->validated());
+
+        $status = $action->execute($dto);
 
         if ($status !== Password::PASSWORD_RESET) {
-            return response()->json([
-                'message' => 'Errore durante il reset della password.',
-            ], 400);
+
+            $message = match ($status) {
+                Password::INVALID_TOKEN => 'Il link di recupero password non è valido o è già stato utilizzato.',
+                Password::INVALID_USER => 'Non è stato trovato alcun utente associato a questo indirizzo email.',
+                default => 'Errore durante il reset della password.',
+            };
+
+            throw ValidationException::withMessages([
+                'email' => [$message],
+            ]);
         }
 
         return response()->json([
-            'message' => 'Password reimpostata con successo.',
+            'message' => $message ?? 'La password è stata reimpostata con successo.',
         ]);
     }
 

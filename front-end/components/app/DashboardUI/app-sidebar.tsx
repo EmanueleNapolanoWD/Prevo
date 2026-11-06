@@ -30,7 +30,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import type { SidebarCompany, SidebarUser } from "@/types/auth"
+import type { SidebarCompany, SidebarUser } from "@/lib/Utility/Auth/auth.types"
 
 type AppSidebarProps = React.ComponentProps<typeof Sidebar> & {
   slug: string

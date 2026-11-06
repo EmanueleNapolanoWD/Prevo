@@ -1,5 +1,5 @@
-import type { ErrorBanner } from "@/types/Auth/signup.type";
 import type { FieldName } from "@/lib/Utility/Auth/SignUp/sign-up.fields";
+import type { ErrorBanner } from "@/lib/Utility/Auth/SignUp/sign-up.types";
 
 import styles from "../signup-form.module.css";
 

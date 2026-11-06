@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSessionUser } from "./lib/Api/Auth/get-session-user";
+import { getSessionUser } from "./lib/Api/Auth/auth.server";
 import { Company } from "./types/company";
 
 const SESSION_COOKIE = process.env.SESSION_COOKIE_NAME ?? "prevo_session";

@@ -23,6 +23,7 @@ export function QuotePreview({
   totals,
   money,
 }: QuotePreviewProps) {
+  console.log("appaerance in quote preview: ", appearance);
   return (
     <div className={styles.previewWrapper}>
       <QuoteDocument

@@ -7,16 +7,13 @@ import {
   deleteQuote,
   fetchQuoteById,
   fetchQuotes,
-  getQuoteSettings,
   updateQuote,
 } from "./quote.server";
 
 // ============================================================================
 // Letture
 // ============================================================================
-export async function getQuoteSettingsAction(slug: string) {
-  return getQuoteSettings(slug);
-}
+
 
 export async function getQuotesAction(slug: string, page: number) {
   return fetchQuotes(slug, page);

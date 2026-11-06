@@ -44,8 +44,8 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::put('', [CompanyController::class, 'updateCompanyData']);
 
             //ROTTE PER Quote SETTINGS
-            Route::get('settings', [QuoteSettingsController::class, 'getQuoteSettings']);
-            Route::put('settings', [QuoteSettingsController::class, 'updateQuoteSettings']);
+            Route::get('quote-settings', [QuoteSettingsController::class, 'show']);
+            Route::put('quote-settings', [QuoteSettingsController::class, 'update']);
 
             // ROTTE PER CLIENTS
             Route::get('clients', [ClientController::class, 'index']);

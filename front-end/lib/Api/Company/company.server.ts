@@ -1,11 +1,36 @@
 import "server-only";
 
 import { serverApi, authHeaders } from "../Services/server-api";
-import type { CompanyValues, UpdateCompanyResult } from "@/types/company";
+import type {
+  UpdateCompanyResult,
+  Company,
+} from "@/lib/Utility/Companies/companies.type";
+import type { CompanyFormData } from "@/lib/Validations/company.schema";
 import { handleReadError, toApiFailure } from "../Services/errors";
 
 const companyUrl = (slug: string) =>
   `/api/companies/${encodeURIComponent(slug)}`;
+
+/** Appiattisce oggetti e array nelle chiavi Laravel: emails[0][email]. */
+function appendValue(fd: FormData, key: string, value: unknown): void {
+  if (value === undefined) return;
+
+  if (Array.isArray(value)) {
+    value.forEach((v, i) => appendValue(fd, `${key}[${i}]`, v));
+    return;
+  }
+  if (value !== null && typeof value === "object") {
+    for (const [k, v] of Object.entries(value))
+      appendValue(fd, `${key}[${k}]`, v);
+    return;
+  }
+  if (typeof value === "boolean") {
+    fd.append(key, value ? "1" : "0");
+    return;
+  }
+  // FormData non ha null: "" diventa null lato Laravel (ConvertEmptyStringsToNull)
+  fd.append(key, value == null ? "" : String(value));
+}
 
 type UpdateCompanyOptions = {
   logo?: File | null;
@@ -15,7 +40,7 @@ type UpdateCompanyOptions = {
 //==================COMPANY
 
 // recupero company
-export async function getCompany(slug: string): Promise<CompanyValues> {
+export async function fetchCompany(slug: string): Promise<Company> {
   try {
     const res = await serverApi.get(companyUrl(slug), {
       headers: await authHeaders(),
@@ -30,7 +55,7 @@ export async function getCompany(slug: string): Promise<CompanyValues> {
 // aggiornamento dati company (multipart, per poter inviare anche il logo)
 export async function updateCompany(
   slug: string,
-  payload: Record<string, string | null>,
+  payload: CompanyFormData,
   { logo = null, removeLogo = false }: UpdateCompanyOptions = {},
 ): Promise<UpdateCompanyResult> {
   try {
@@ -40,10 +65,41 @@ export async function updateCompany(
     // con method spoofing, la route resta definita come PUT
     body.append("_method", "PUT");
 
-    for (const [key, value] of Object.entries(payload)) {
-      // FormData non ha null: le stringhe vuote diventano null lato Laravel
-      // grazie a ConvertEmptyStringsToNull
-      body.append(key, value ?? "");
+    const { emails, phones, addresses, ...scalars } = payload;
+
+    for (const [key, value] of Object.entries(scalars)) {
+      appendValue(body, key, value);
+    }
+
+    // il form usa value, le collonne si chiamano email/phone
+    appendValue(
+      body,
+      "emails",
+      emails.map((e) => ({
+        ...(e.id ? { id: e.id } : {}),
+        email: e.value,
+        is_primary: e.is_primary,
+      })),
+    );
+    appendValue(
+      body,
+      "phones",
+      phones.map((p) => ({
+        ...(p.id ? { id: p.id } : {}),
+        phone: p.value,
+        is_primary: p.is_primary,
+      })),
+    );
+    appendValue(
+      body,
+      "addresses",
+      addresses.map(({ id, ...rest }) => ({ ...(id ? { id } : {}), ...rest })),
+    );
+
+    // un array vuoto non produce chiavi nel multipart: questo dice a Laravel
+    // quali liste sincronizzare, anche quando l'utente le ha svuotate
+    for (const list of ["emails", "phones", "addresses"]) {
+      body.append("sync_lists[]", list);
     }
 
     if (logo) body.append("logo", logo);

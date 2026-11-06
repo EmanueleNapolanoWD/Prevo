@@ -9,15 +9,11 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
-import { registerUser, AuthError } from "@/lib/Api/Auth/auth";
+import { registerUser } from "@/lib/Api/Auth/auth.client";
+import { AuthError } from "@/lib/Api/Auth/auth.errors";
 
 // Schema e Tipi
 import { registerSchema, type SignUpFormValues } from "@/lib/Validations/auth";
-import type {
-  FieldErrors,
-  ErrorBanner,
-  ErrorItem,
-} from "@/types/Auth/signup.type";
 
 // Costanti e Utility
 import {
@@ -25,13 +21,17 @@ import {
   initialValues,
   STEPS,
 } from "@/lib/Utility/Auth/SignUp/sign-up.consts";
-import { FIELD_CONFIG, FieldName } from "./sign-up.fields";
-import { FieldError } from "@/components/ui/field";
+import { FieldName } from "./sign-up.fields";
 import {
   toFieldKey,
   extractMessages,
   parseServerErrors,
 } from "@/lib/Utility/Auth/SignUp/sign-up.utils";
+import {
+  type ErrorBanner,
+  type ErrorItem,
+  type FieldErrors,
+} from "@/lib/Utility/Auth/SignUp/sign-up.types";
 
 export function useSignUpForm() {
   const router = useRouter();
@@ -150,11 +150,11 @@ export function useSignUpForm() {
 
     if (error instanceof AuthError) {
       status = error.status;
-      message: error.message;
-      rawErrors: error.fieldErrors;
+      message = error.message;
+      rawErrors = error.fieldErrors;
     } else if (axios.isAxiosError(error)) {
       status = error.response?.status;
-      message: error.response?.message;
+      message = error.response?.data?.message;
       rawErrors = error.response?.data?.errors;
     } else {
       setBanner({
@@ -237,7 +237,65 @@ export function useSignUpForm() {
     setLoading(true);
 
     try {
-      await registerUser(result.data);
+      const formData = result.data;
+
+      const payload = {
+        // Dati personali utente
+        name: formData.name,
+        surname: formData.surname,
+        email: formData.email,
+        password: formData.password,
+        password_confirmation: formData.password_confirmation,
+
+        // Dati aziendali anagrafici e fiscali
+        company_name: formData.company_name,
+        legal_name: formData.company_name, // Fallback se non hai un campo separato
+        vat_number: formData.vat_number || null,
+        country_code: "IT",
+        tax_code: formData.tax_code || null,
+        pec: formData.pec || null,
+        iban: formData.iban || null,
+        website: formData.website || null,
+
+        // 2. Trasformazione del telefono in array di oggetti
+        phones: formData.phone
+          ? [
+              {
+                phone: formData.phone,
+                is_primary: true,
+                label: "Principale",
+              },
+            ]
+          : [],
+
+        // 3. Trasformazione dell'email aziendale in array di oggetti
+        emails: formData.company_email
+          ? [
+              {
+                email: formData.company_email,
+                is_primary: true,
+                label: "Aziendale",
+              },
+            ]
+          : [],
+
+        // 4. Trasformazione dell'indirizzo in array di oggetti
+        addresses: formData.address
+          ? [
+              {
+                address: formData.address,
+                city: formData.city,
+                postal_code: formData.postal_code,
+                country_code: "IT",
+                province: formData.province,
+                is_primary: true,
+                label: "Sede Legale",
+              },
+            ]
+          : [],
+      };
+
+      await registerUser(payload);
       router.replace("/");
       setValues(initialValues);
       router.refresh();

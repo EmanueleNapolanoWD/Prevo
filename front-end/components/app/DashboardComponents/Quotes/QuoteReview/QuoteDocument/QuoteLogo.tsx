@@ -16,7 +16,6 @@ interface QuoteLogoProps {
  */
 export function QuoteLogo({ src, alt }: QuoteLogoProps) {
   const [failedLogo, setFailedLogo] = useState<string | null>(null);
-  console.log("logo: ", src);
 
   if (!src || src === failedLogo) return null;
 

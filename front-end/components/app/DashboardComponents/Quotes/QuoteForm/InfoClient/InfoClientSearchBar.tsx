@@ -1,15 +1,14 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import type { Client, ClientDetail } from "@/types/client";
+import styles from "./info-client.module.css";
 
 interface InfoClientSearchBarProps {
   clients: ClientDetail[];
   isLoading: boolean;
   error: string | null;
-  selectedClient: ClientDetail | null,
+  selectedClient: ClientDetail | null;
   setSelectedClient: (client: Client | null) => void;
   onQueryChange: (query: string) => void;
   onSelectClient?: (client: Client | null) => void;
@@ -69,11 +68,12 @@ export default function InfoClientSearchBar({
   }
 
   return (
-    <div ref={containerRef} className="relative w-full space-y-2">
-      <h4 className="text-sm font-medium">Seleziona dalla lista clienti</h4>
+    <div ref={containerRef} className={styles.searchWrap}>
+      <h4 className={styles.title}>Seleziona dalla lista clienti</h4>
 
-      <Input
+      <input
         type="text"
+        className={styles.input}
         placeholder="Cerca per nome, cognome o ragione sociale..."
         value={search}
         onChange={(e) => handleSearch(e.target.value)}
@@ -87,55 +87,46 @@ export default function InfoClientSearchBar({
       />
 
       {!canSearch && !selectedClient && search.length > 0 && (
-        <p className="text-xs text-muted-foreground">
-          Digita almeno {MIN_CHARS} caratteri.
-        </p>
+        <p className={styles.hint}>Digita almeno {MIN_CHARS} caratteri.</p>
       )}
 
       {isOpen && canSearch && (
         <div
           id="client-search-results"
           role="listbox"
-          className="absolute left-0 top-full z-50 mt-1 max-h-64 w-full overflow-y-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
+          className={styles.dropdown}
         >
           {isLoading ? (
-            <p className="px-3 py-4 text-center text-sm text-muted-foreground">
-              Ricerca in corso…
-            </p>
+            <p className={styles.dropdownMessage}>Ricerca in corso…</p>
           ) : error ? (
-            <p className="px-3 py-4 text-center text-sm text-destructive">
-              {error}
-            </p>
+            <p className={styles.dropdownError}>{error}</p>
           ) : clients.length > 0 ? (
             clients.map((client) => (
-              <Button
+              <button
                 key={client.id}
                 type="button"
-                variant="ghost"
                 role="option"
+                className={styles.option}
                 aria-selected={selectedClient?.id === client.id}
                 onClick={() => handleSelectClient(client)}
-                className="flex h-auto w-full flex-col items-start gap-1 rounded-sm px-3 py-2 text-left text-sm"
               >
-                <span className="font-medium">{client.display_name}</span>
+                <span className={styles.optionName}>{client.display_name}</span>
 
                 {client.type === "COMPANY" && client.name && (
-                  <span className="text-xs text-muted-foreground">
+                  <span className={styles.optionMeta}>
                     {client.name} {client.surname}
                   </span>
                 )}
 
                 {client.emails.length > 0 && (
-                  <span className="text-xs text-muted-foreground">
+                  <span className={styles.optionMeta}>
                     {client.emails[0].email}
                   </span>
                 )}
-              </Button>
+              </button>
             ))
           ) : (
-            <p className="px-3 py-4 text-center text-sm text-muted-foreground">
-              Nessun cliente trovato.
-            </p>
+            <p className={styles.dropdownMessage}>Nessun cliente trovato.</p>
           )}
         </div>
       )}

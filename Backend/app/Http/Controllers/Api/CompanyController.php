@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Domains\Companies\Actions\UpdateCompanyAction;
+use App\Domains\Companies\DTOs\CompanyData;
 use App\Domains\Companies\Models\Company;
 use App\Domains\Companies\Requests\CompanyRequest;
 use App\Domains\Companies\Resources\CompanyResource;
@@ -35,7 +36,7 @@ class CompanyController extends Controller
 
         $company = $action->execute(
             company: $company,
-            data: $request->safe()->except(['logo', 'remove_logo']),
+            data: CompanyData::fromValidated($request->validated()),
             user: $request->user(),
             logo: $request->file('logo'),
             removeLogo: $request->boolean('remove_logo'),

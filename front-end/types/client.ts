@@ -79,7 +79,7 @@ export type GetClientsResult =
   | { data: Client[]; meta?: { current_page: number; last_page: number; total: number } }
   | ApiError;
 
-export type GetClientResult = { data: ClientDetail } | ApiError;
+export type GetClientResult = { data: ClientDetail[] } | ApiError;
 
 export interface ApiError {
     ok: false;

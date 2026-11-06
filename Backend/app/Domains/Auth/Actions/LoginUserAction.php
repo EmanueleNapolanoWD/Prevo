@@ -3,12 +3,11 @@
 namespace App\Domains\Auth\Actions;
 
 use App\Domains\Audit\Services\AuditLogger;
+use App\Domains\Auth\DTOs\LoginUserData;
 use App\Domains\Auth\Models\User;
-use App\Domains\Auth\Requests\LoginUserRequest;
-use App\Domains\Auth\Resources\UserResource;
 use App\Domains\Auth\Supports\LoginRateLimiter;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
-use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
@@ -25,39 +24,41 @@ class LoginUserAction
     ) {
     }
 
-    public function execute(LoginUserRequest $request): JsonResponse
+    public function execute(LoginUserData $data, Request $request)
     {
 
         // 1. Blocca PRIMA di toccare il database o l'hash
         try {
-            $this->limiter->ensureNotLocked($request, $request->input('email'));
+            $this->limiter->ensureNotLocked($request, $data->email);
         } catch (ThrottleRequestsException $e) {
-            //logga solo il primo rifiuto per finestra
-            $lockKey = 'audit:login_locked:' . sha1(Str::lower($request->input('email') . '|' . $request->ip()));
+            // Logga solo il primo rifiuto per finestra
+            $lockKey = 'audit:login_locked:' . sha1(Str::lower($data->email . '|' . $request->ip()));
 
             if (Cache::add($lockKey, true, now()->addMinutes(5))) {
                 $this->audit->log(
                     event: 'auth:login_locked',
-                    user: User::where('email', $request->input('email'))->first(),
-                    metadata: ['email' => $request->input('email')]
+                    user: User::where('email', $data->email)->first(), // <-- Corretto qui
+                    metadata: ['email' => $data->email]
                 );
             }
-            ;
 
             throw $e;
         }
 
         // 2. Tentativo di login
         $this->equalizeTiming(
-            $request->input('email'),
-            $request->input('password'),
+            $data->email,
+            $data->password,
         );
 
-        $validated = $request->validated();
-
         // tentativo di login
-        if (!Auth::guard('web')->attempt($validated, $request->boolean('remember'))) {
-            $this->limiter->hit($request, $request->input('email'));
+        if (
+            !Auth::guard('web')->attempt(
+                ['email' => $data->email, 'password' => $data->password],
+                $data->remember
+            )
+        ) {
+            $this->limiter->hit($request, $data->email);
 
             $this->audit->log(
                 event: 'auth_login_failed',
@@ -71,7 +72,7 @@ class LoginUserAction
         // nuovo id sessione
         $request->session()->regenerate();
 
-        $this->limiter->clear($request, $request->input('email'));
+        $this->limiter->clear($request, $data->email);
 
         $user = Auth::guard('web')->user();
 
@@ -87,10 +88,7 @@ class LoginUserAction
             metadata: ['remember' => $request->boolean('remember')]
         );
 
-        return response()->json([
-            'message' => 'Login effettuato con successo',
-            'user' => (new UserResource($user))->resolve(),
-        ]);
+        return $user;
     }
 
     /**

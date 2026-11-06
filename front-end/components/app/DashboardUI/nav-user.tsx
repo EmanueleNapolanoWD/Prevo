@@ -26,8 +26,8 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { logout } from "@/lib/Api/Auth/auth";
-import type { SidebarUser } from "@/types/auth";
+import { logout } from "@/lib/Api/Auth/auth.client";
+import type { SidebarUser } from "@/lib/Utility/Auth/auth.types";
 
 function getInitials(name: string): string {
   const initials = name

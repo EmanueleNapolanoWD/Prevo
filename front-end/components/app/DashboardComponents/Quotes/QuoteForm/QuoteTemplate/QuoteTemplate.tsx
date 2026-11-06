@@ -1,51 +1,17 @@
 "use client";
 
-import { useId, type CSSProperties } from "react";
-import { readableTextColor } from "@/lib/utils";
+import { useId } from "react";
 import {
   COLOR_PRESETS,
   QUOTE_TEMPLATES,
   type QuoteAppearanceValues,
-  type QuoteTemplateKey,
-} from "@/types/quote";
+} from "@/lib/Utility/Quote/quote.types";
 import styles from "./quote-templates.module.css";
 
 interface QuoteAppearanceProps {
   values: QuoteAppearanceValues;
   onChange: (values: QuoteAppearanceValues) => void;
   disabled?: boolean;
-}
-
-function MiniPreview({
-  template,
-  primary,
-  accent,
-}: {
-  template: QuoteTemplateKey;
-  primary: string;
-  accent: string;
-}) {
-  const vars = {
-    "--primary": primary,
-    "--accent": accent,
-    "--on-primary": readableTextColor(primary),
-  } as CSSProperties;
-
-  return (
-    <div className={styles.preview} data-template={template} style={vars}>
-      <div className={styles.pvHeader}>
-        <span className={styles.pvLogo} />
-        <span className={styles.pvTitle}>PREVENTIVO</span>
-      </div>
-      <div className={styles.pvLines}>
-        <i />
-        <i />
-        <i />
-        <i />
-      </div>
-      <div className={styles.pvTotal} />
-    </div>
-  );
 }
 
 export default function QuoteTemplate({
@@ -67,27 +33,23 @@ export default function QuoteTemplate({
       <fieldset className={styles.templates} disabled={disabled}>
         <legend className={styles.label}>Template</legend>
 
-        {QUOTE_TEMPLATES.map((t) => (
-          <label
-            key={t.key}
-            className={`${styles.card} ${disabled ? styles.disabled : ""}`}
-          >
-            <input
-              type="radio"
-              name={`${uid}-template`}
-              className={styles.radio}
-              checked={values.template === t.key}
-              onChange={() => setField("template", t.key)}
-            />
-            <MiniPreview
-              template={t.key}
-              primary={values.primaryColor}
-              accent={values.accentColor}
-            />
-            <span className={styles.cardLabel}>{t.label}</span>
-            <span className={styles.cardDesc}>{t.description}</span>
-          </label>
-        ))}
+        <div className={styles.templateRow}>
+          {QUOTE_TEMPLATES.map((t) => (
+            <label
+              key={t.key}
+              className={`${styles.option} ${disabled ? styles.disabled : ""}`}
+            >
+              <input
+                type="radio"
+                name={`${uid}-template`}
+                className={styles.radio}
+                checked={values.template === t.key}
+                onChange={() => setField("template", t.key)}
+              />
+              <span className={styles.optionLabel}>{t.label}</span>
+            </label>
+          ))}
+        </div>
       </fieldset>
 
       <div className={styles.colors}>

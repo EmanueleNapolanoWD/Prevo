@@ -3,7 +3,6 @@
 namespace App\Domains\Companies\Requests;
 
 use Closure;
-use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Str;
@@ -25,6 +24,8 @@ use Illuminate\Validation\Validator;
 class CompanyRequest extends FormRequest
 {
     private const COUNTRIES = ['IT', 'DE', 'FR', 'ES', 'AT', 'CH', 'BE', 'NL', 'PT', 'GB'];
+
+    private const ADDRESS_TYPES = ['legal', 'operational', 'administrative', 'billing', 'shipping'];
 
     private const LEGAL_FORMS = [
         'DITTA_INDIVIDUALE',
@@ -105,17 +106,17 @@ class CompanyRequest extends FormRequest
             'pec' => ($pec = self::trimmed($this->input('pec'))) !== null ? strtolower($pec) : null,
 
             // --- liste correlate ---
-            'emails' => $this->rows('emails', fn (array $r) => [
+            'emails' => $this->rows('emails', fn(array $r) => [
                 ...$r,
                 'label' => self::trimmed($r['label'] ?? null),
                 'email' => ($email = self::trimmed($r['email'] ?? null)) !== null ? strtolower($email) : null,
                 'is_primary' => self::toBool($r['is_primary'] ?? false),
             ]),
 
-            'phones' => $this->rows('phones', fn (array $r) => [
+            'phones' => $this->rows('phones', fn(array $r) => [
                 ...$r,
                 'label' => self::trimmed($r['label'] ?? null),
-                'number' => self::trimmed($r['number'] ?? null),
+                'phone' => self::trimmed($r['phone'] ?? null),
                 'is_primary' => self::toBool($r['is_primary'] ?? false),
             ]),
 
@@ -127,6 +128,7 @@ class CompanyRequest extends FormRequest
                     ...$r,
                     'label' => self::trimmed($r['label'] ?? null),
                     'address' => self::trimmed($r['address'] ?? null),
+                    'address_extra' => self::trimmed($r['address_extra'] ?? null),
                     'city' => self::trimmed($r['city'] ?? null),
                     'postal_code' => self::trimmed($r['postal_code'] ?? null),
                     // Provincia italiana: sigla maiuscola senza spazi ("na" -> "NA").
@@ -144,7 +146,6 @@ class CompanyRequest extends FormRequest
     /**
      * Regole di validazione.
      *
-     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
@@ -155,19 +156,19 @@ class CompanyRequest extends FormRequest
         return [
             // ---------- AZIENDA - anagrafica ----------
             'name' => ['required', 'string', 'max:150'],
-            'legal_name' => ['required', 'string', 'max:255'],
+            'legal_name' => ['nullable', 'string', 'max:255'],
             'legal_form' => ['nullable', 'string', Rule::in(self::LEGAL_FORMS)],
 
             // ---------- AZIENDA - dati fiscali ----------
             'country_code' => ['required', 'string', Rule::in(self::COUNTRIES)],
             'vat_number' => [
                 'bail',
-                'required',
+                'nullable',
                 'string',
                 'max:20',
                 // prima il controllo formale (economico), poi la query di unicità
                 function (string $attribute, mixed $value, Closure $fail) use ($isItaly) {
-                    if ($isItaly && ! self::isValidItalianVat((string) $value)) {
+                    if ($isItaly && !self::isValidItalianVat((string) $value)) {
                         $fail('La partita IVA non è valida.');
                     }
                 },
@@ -201,7 +202,7 @@ class CompanyRequest extends FormRequest
                 'string',
                 'max:34',
                 function (string $attribute, mixed $value, Closure $fail) {
-                    if (! self::isValidIban((string) $value)) {
+                    if (!self::isValidIban((string) $value)) {
                         $fail('L\'IBAN non è valido.');
                     }
                 },
@@ -220,7 +221,7 @@ class CompanyRequest extends FormRequest
             'phones' => ['required', 'array', 'min:1', 'max:10'],
             'phones.*.id' => ['nullable', 'uuid', ...$this->ownedRowRule('company_phones', $companyId)],
             'phones.*.label' => ['nullable', 'string', 'max:50'],
-            'phones.*.number' => ['required', 'string', 'max:30', 'regex:/^\+?[0-9\s().\-]{6,30}$/', 'distinct'],
+            'phones.*.phone' => ['required', 'string', 'max:30', 'regex:/^\+?[0-9\s().\-]{6,30}$/', 'distinct'],
             'phones.*.is_primary' => ['required', 'boolean'],
 
             // ---------- INDIRIZZI (sede legale = riga principale) ----------
@@ -232,13 +233,15 @@ class CompanyRequest extends FormRequest
             'addresses.*.country_code' => ['required', 'string', Rule::in(self::COUNTRIES)],
             // CAP e provincia dipendono dal paese DELLA RIGA (un'azienda italiana
             // può avere una sede operativa all'estero e viceversa): regole per-riga.
-            'addresses.*.postal_code' => Rule::forEach(fn (mixed $value, string $attribute) => [
+            'addresses.*.postal_code' => Rule::forEach(fn(mixed $value, string $attribute) => [
                 'required',
                 'string',
                 'max:10',
                 ...($this->isItalianAddress($attribute) ? ['regex:/^\d{5}$/'] : []),
             ]),
-            'addresses.*.province' => Rule::forEach(fn (mixed $value, string $attribute) => $this->isItalianAddress($attribute)
+            'addresses.*.type' => ['required', Rule::in(self::ADDRESS_TYPES)],
+            'addresses.*.address_extra' => ['nullable', 'string', 'max:255'],
+            'addresses.*.province' => Rule::forEach(fn(mixed $value, string $attribute) => $this->isItalianAddress($attribute)
                 ? ['required', 'string', 'size:2', 'alpha']
                 : ['required', 'string', 'max:100']),
             'addresses.*.is_primary' => ['required', 'boolean'],
@@ -259,26 +262,28 @@ class CompanyRequest extends FormRequest
      */
     public function after(): array
     {
-        return [function (Validator $validator) {
-            $labels = ['emails' => 'email', 'phones' => 'telefono', 'addresses' => 'indirizzo'];
+        return [
+            function (Validator $validator) {
+                $labels = ['emails' => 'email', 'phones' => 'telefono', 'addresses' => 'indirizzo'];
 
-            foreach ($labels as $key => $label) {
-                $rows = $this->input($key);
+                foreach ($labels as $key => $label) {
+                    $rows = $this->input($key);
 
-                // Se la lista è già invalida (mancante, non array...) l'errore c'è già
-                if (! is_array($rows) || $validator->errors()->has($key)) {
-                    continue;
-                }
+                    // Se la lista è già invalida (mancante, non array...) l'errore c'è già
+                    if (!is_array($rows) || $validator->errors()->has($key)) {
+                        continue;
+                    }
 
-                $primaries = collect($rows)
-                    ->filter(fn ($row) => is_array($row) && ($row['is_primary'] ?? false) === true)
-                    ->count();
+                    $primaries = collect($rows)
+                        ->filter(fn($row) => is_array($row) && ($row['is_primary'] ?? false) === true)
+                        ->count();
 
-                if ($primaries !== 1) {
-                    $validator->errors()->add($key, "Seleziona esattamente un {$label} principale.");
+                    if ($primaries !== 1) {
+                        $validator->errors()->add($key, "Seleziona esattamente un {$label} principale.");
+                    }
                 }
             }
-        }];
+        ];
     }
 
     /** Nomi leggibili degli attributi nei messaggi di errore. */
@@ -306,10 +311,12 @@ class CompanyRequest extends FormRequest
             'emails.*.email' => 'email',
             'emails.*.label' => 'etichetta email',
             'phones' => 'telefono',
-            'phones.*.number' => 'telefono',
+            'phones.*.phone' => 'telefono',
             'phones.*.label' => 'etichetta telefono',
             'addresses' => 'indirizzo',
             'addresses.*.address' => 'indirizzo',
+            'addresses.*.type' => 'tipo indirizzo',
+            'addresses.*.address_extra' => 'dettagli indirizzo',
             'addresses.*.city' => 'città',
             'addresses.*.province' => 'provincia',
             'addresses.*.postal_code' => 'CAP',
@@ -369,9 +376,9 @@ class CompanyRequest extends FormRequest
             'phones.min' => 'Inserisci almeno un numero di telefono.',
             'phones.max' => 'Puoi inserire al massimo 10 numeri di telefono.',
             'phones.*.id.exists' => 'Il numero di telefono selezionato non appartiene a questa azienda.',
-            'phones.*.number.required' => 'Il campo telefono è obbligatorio.',
-            'phones.*.number.regex' => 'Il numero di telefono non è valido.',
-            'phones.*.number.distinct' => 'Hai inserito lo stesso numero di telefono più volte.',
+            'phones.*.phone.required' => 'Il campo telefono è obbligatorio.',
+            'phones.*.phone.regex' => 'Il numero di telefono non è valido.',
+            'phones.*.phone.distinct' => 'Hai inserito lo stesso numero di telefono più volte.',
 
             // Indirizzi
             'addresses.required' => 'Inserisci almeno un indirizzo.',
@@ -386,6 +393,7 @@ class CompanyRequest extends FormRequest
             'addresses.*.province.required' => 'Il campo provincia è obbligatorio.',
             'addresses.*.province.size' => 'La provincia deve essere di 2 lettere (es. NA).',
             'addresses.*.province.alpha' => 'La provincia deve contenere solo lettere.',
+            'addresses.*.type.in' => 'Il tipo di indirizzo selezionato non è valido.',
 
             // Sito e logo
             'website.url' => 'Il sito web deve essere un URL valido (es. https://esempio.it).',
@@ -425,7 +433,6 @@ class CompanyRequest extends FormRequest
      * l'id di una riga di un'altra azienda e modificarla. In creazione nessuna
      * riga può esistere ancora, quindi la regola non si applica.
      *
-     * @return array<int, ValidationRule>
      */
     private function ownedRowRule(string $table, int|string|null $companyId): array
     {
@@ -461,7 +468,7 @@ class CompanyRequest extends FormRequest
         $rows = $this->input($key);
 
         return is_array($rows)
-            ? array_map(fn ($row) => is_array($row) ? $fn($row) : $row, $rows)
+            ? array_map(fn($row) => is_array($row) ? $fn($row) : $row, $rows)
             : [];
     }
 
@@ -472,7 +479,7 @@ class CompanyRequest extends FormRequest
      */
     private static function clean(mixed $value): ?string
     {
-        if (! is_string($value)) {
+        if (!is_string($value)) {
             return null;
         }
 
@@ -487,7 +494,7 @@ class CompanyRequest extends FormRequest
      */
     private static function trimmed(mixed $value): ?string
     {
-        if (! is_string($value)) {
+        if (!is_string($value)) {
             return null;
         }
 
@@ -512,7 +519,7 @@ class CompanyRequest extends FormRequest
      */
     private static function isValidItalianVat(string $vat): bool
     {
-        if (! preg_match('/^\d{11}$/', $vat)) {
+        if (!preg_match('/^\d{11}$/', $vat)) {
             return false;
         }
 
@@ -539,7 +546,7 @@ class CompanyRequest extends FormRequest
      */
     private static function isValidIban(string $iban): bool
     {
-        if (! preg_match('/^[A-Z]{2}\d{2}[A-Z0-9]{11,30}$/', $iban)) {
+        if (!preg_match('/^[A-Z]{2}\d{2}[A-Z0-9]{11,30}$/', $iban)) {
             return false;
         }
 
@@ -548,7 +555,7 @@ class CompanyRequest extends FormRequest
         }
 
         // Sposta i primi 4 caratteri in coda e converte le lettere in numeri (A=10 ... Z=35)
-        $rearranged = substr($iban, 4).substr($iban, 0, 4);
+        $rearranged = substr($iban, 4) . substr($iban, 0, 4);
 
         $numeric = '';
         foreach (str_split($rearranged) as $char) {
@@ -558,7 +565,7 @@ class CompanyRequest extends FormRequest
         // mod 97 a blocchi, per non superare PHP_INT_MAX
         $remainder = 0;
         foreach (str_split($numeric, 7) as $chunk) {
-            $remainder = (int) ($remainder.$chunk) % 97;
+            $remainder = (int) ($remainder . $chunk) % 97;
         }
 
         return $remainder === 1;

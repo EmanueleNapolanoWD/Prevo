@@ -1,11 +1,10 @@
 import type { CSSProperties } from "react";
 
 import type {
-  QuoteSettingsData,
   QuoteItem,
   QuoteAppearanceValues,
-  QuoteCompany,
-} from "@/types/quote";
+} from "@/lib/Utility/Quote/quote.types";
+import type { QuoteSettingsData } from "@/lib/Utility/QuoteSettings/quote-settings.types";
 import type {
   QuoteHeaderValues,
   TaxQuoteValue,
@@ -22,12 +21,13 @@ import { QuoteTotals } from "./QuoteTotals";
 import { QuotePaymentInfo } from "./QuotePaymentInfo";
 import { QuoteTextSection } from "./QuoteTextSection";
 import styles from "./QuoteDocument.module.css";
+import { Company } from "@/lib/Utility/Companies/companies.type";
 
 type CalculatedTotals = ReturnType<typeof calcTotals>;
 
 export interface QuoteDocumentProps {
   settings: QuoteSettingsData | null;
-  company: QuoteCompany | null;
+  company: Company | null;
   header: QuoteHeaderValues;
   tax: TaxQuoteValue;
   appearance: QuoteAppearanceValues;

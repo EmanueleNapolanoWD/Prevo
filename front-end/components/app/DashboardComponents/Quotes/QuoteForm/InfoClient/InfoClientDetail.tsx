@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import type { ClientDetail } from "@/types/client";
+import styles from "./info-client.module.css";
 
 type ContactId = string | number;
 
@@ -19,19 +20,17 @@ function Row({ label, children }: { label: string; children?: ReactNode }) {
     return null;
   }
   return (
-    <div className="flex gap-2">
-      <dt className="w-32 shrink-0 text-muted-foreground">{label}</dt>
-      <dd className="min-w-0 break-words">{children}</dd>
+    <div className={styles.row}>
+      <dt className={styles.rowLabel}>{label}</dt>
+      <dd className={styles.rowValue}>{children}</dd>
     </div>
   );
 }
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <section className="space-y-2">
-      <h5 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-        {title}
-      </h5>
+    <section className={styles.section}>
+      <h5 className={styles.sectionTitle}>{title}</h5>
       {children}
     </section>
   );
@@ -51,13 +50,12 @@ export default function InfoClientDetail({
     .filter(Boolean)
     .join(" ");
 
-
   return (
-    <div className="mt-4 space-y-5 rounded-md border p-4 text-sm">
+    <div className={styles.card}>
       {/* Intestazione */}
-      <div className="space-y-1">
-        <h4 className="text-base font-medium">{client.display_name}</h4>
-        <p className="text-xs text-muted-foreground">
+      <div className={styles.header}>
+        <h4 className={styles.headerTitle}>{client.display_name}</h4>
+        <p className={styles.headerMeta}>
           {isCompany ? "Azienda" : "Persona"}
           {client.is_public_administration && " · Pubblica Amministrazione"}
         </p>
@@ -65,20 +63,20 @@ export default function InfoClientDetail({
 
       {/* Anagrafica */}
       <Section title="Anagrafica">
-        <dl className="space-y-1">
-          {isCompany && (
-            <Row label="Ragione sociale">{client.company_name}</Row>
-          )}
+        <dl className={styles.list}>
+          {isCompany && <Row label="Ragione sociale">{client.company_name}</Row>}
           <Row label={isCompany ? "Referente" : "Nome"}>{personName}</Row>
           <Row label="Paese">{client.country_code}</Row>
           <Row label="Sito web">
             {client.website && (
-              <p
+              <a
+                href={client.website}
+                target="_blank"
                 rel="noopener noreferrer"
-                className="underline underline-offset-2"
+                className={styles.link}
               >
                 {client.website}
-              </p>
+              </a>
             )}
           </Row>
         </dl>
@@ -86,7 +84,7 @@ export default function InfoClientDetail({
 
       {/* Dati fiscali */}
       <Section title="Dati fiscali">
-        <dl className="space-y-1">
+        <dl className={styles.list}>
           <Row label="Codice fiscale">{client.tax_code}</Row>
           <Row label="Partita IVA">{client.vat_number}</Row>
           <Row label="PEC">{client.pec}</Row>
@@ -101,17 +99,15 @@ export default function InfoClientDetail({
       {/* Email */}
       <Section title="Email per il preventivo">
         {client.emails.length === 0 ? (
-          <p className="text-muted-foreground">Nessuna email disponibile.</p>
+          <p className={styles.empty}>Nessuna email disponibile.</p>
         ) : (
-          <div className="space-y-2">
+          <div className={styles.choices}>
             {client.emails.map((e) => (
-              <label
-                key={e.id}
-                className="flex cursor-pointer items-center gap-2"
-              >
+              <label key={e.id} className={styles.choice}>
                 <input
                   type="radio"
                   name="quote-email"
+                  className={styles.radio}
                   checked={selectedEmailId === e.id}
                   onChange={() => onEmailChange(e.id)}
                 />
@@ -125,17 +121,15 @@ export default function InfoClientDetail({
       {/* Telefono */}
       <Section title="Telefono per il preventivo">
         {client.phones.length === 0 ? (
-          <p className="text-muted-foreground">Nessun telefono disponibile.</p>
+          <p className={styles.empty}>Nessun telefono disponibile.</p>
         ) : (
-          <div className="space-y-2">
+          <div className={styles.choices}>
             {client.phones.map((p) => (
-              <label
-                key={p.id}
-                className="flex cursor-pointer items-center gap-2"
-              >
+              <label key={p.id} className={styles.choice}>
                 <input
                   type="radio"
                   name="quote-phone"
+                  className={styles.radio}
                   checked={selectedPhoneId === p.id}
                   onChange={() => onPhoneChange(p.id)}
                 />
@@ -149,36 +143,32 @@ export default function InfoClientDetail({
       {/* Indirizzi */}
       <Section title="Indirizzo per il preventivo">
         {client.addresses.length === 0 ? (
-          <p className="text-muted-foreground">Nessun indirizzo disponibile.</p>
+          <p className={styles.empty}>Nessun indirizzo disponibile.</p>
         ) : (
-          <div className="space-y-2">
+          <div className={styles.choices}>
             {client.addresses.map((a) => (
               <label
                 key={a.id}
-                className={`flex cursor-pointer items-start gap-2 rounded-md border p-2 ${
-                  selectedAddressId === a.id ? "border-primary bg-muted/50" : ""
-                }`}
+                className={`${styles.choice} ${styles.choiceTop}`}
               >
                 <input
                   type="radio"
                   name="quote-address"
-                  className="mt-1"
+                  className={styles.radio}
                   checked={selectedAddressId === a.id}
                   onChange={() => onAddressChange(a.id)}
                 />
                 <div>
-                  {a.type && (
-                    <p className="mb-1 text-xs text-muted-foreground">
-                      {a.type}
-                    </p>
-                  )}
-                  <p>{a.street}</p>
-                  <p>
+                  {a.type && <p className={styles.addressType}>{a.type}</p>}
+                  <p className={styles.addressLine}>{a.street}</p>
+                  <p className={styles.addressLine}>
                     {[a.postal_code, a.city, a.province && `(${a.province})`]
                       .filter(Boolean)
                       .join(" ")}
                   </p>
-                  {a.country_code && <p>{a.country_code}</p>}
+                  {a.country_code && (
+                    <p className={styles.addressLine}>{a.country_code}</p>
+                  )}
                 </div>
               </label>
             ))}
@@ -189,7 +179,7 @@ export default function InfoClientDetail({
       {/* Note */}
       {client.note && (
         <Section title="Note">
-          <p className="whitespace-pre-wrap">{client.note}</p>
+          <p className={styles.note}>{client.note}</p>
         </Section>
       )}
     </div>

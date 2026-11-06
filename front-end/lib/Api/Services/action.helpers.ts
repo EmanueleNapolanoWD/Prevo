@@ -1,7 +1,7 @@
 import { isAxiosError } from "axios";
 
 export type ApiError = {
-  ok: boolean;
+  ok: false;
   message: string;
   errors?: Record<string, string[]>;
 };

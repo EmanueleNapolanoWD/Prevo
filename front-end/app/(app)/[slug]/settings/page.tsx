@@ -1,9 +1,10 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import { getQuoteSettingsAction } from "@/lib/Api/Quote/quote.action";
-import { getCompany } from "@/lib/Api/Company/company.server";
-import SettingsForm from "@/components/app/DashboardComponents/Company/CompanySettings/SettingsForm";
-import CompanyForm from "@/components/app/DashboardComponents/Company/CompanyForm/CompanyForm";
+import { getQuoteSettingsAction } from "@/lib/Api/QuoteSettings/quote-settings.action";
+import { fetchCompany } from "@/lib/Api/Company/company.server";
+import { companyToValues } from "@/lib/Utility/Companies/companies.mapper";
+import QuoteSettingsForm from "@/components/app/DashboardComponents/Settings/QuoteSettings/QuoteSettingsForm";
+import CompanyForm from "@/components/app/DashboardComponents/Settings/CompanyForm/CompanyForm";
 import styles from "./page.module.css";
 
 const TABS = [
@@ -79,14 +80,19 @@ async function SettingsTabs({
 }
 
 async function CompanyContent({ slug }: { slug: string }) {
-  const company = await getCompany(slug);
-  console.log("company: ", company);
-  return <CompanyForm slug={slug} initialValues={company} />;
+  const company = await fetchCompany(slug);
+  return (
+    <CompanyForm
+      key={company.updated_at}
+      slug={slug}
+      initialValues={companyToValues(company)}
+    />
+  );
 }
 
 async function QuotesContent({ slug }: { slug: string }) {
   const settings = await getQuoteSettingsAction(slug);
-  return <SettingsForm slug={slug} initialValues={settings} />;
+  return <QuoteSettingsForm slug={slug} initialValues={settings} />;
 }
 
 function SettingsSkeleton() {

@@ -3,6 +3,7 @@
 import InfoClientSearchBar from "./InfoClientSearchBar";
 import InfoClientDetail from "./InfoClientDetail";
 import type { ClientDetail } from "@/types/client";
+import styles from "./info-client.module.css";
 
 type ContactId = string | number;
 
@@ -42,7 +43,7 @@ export default function InfoClient({
   onAddressChange,
 }: InfoClientProps) {
   return (
-    <>
+    <div className={styles.root}>
       {/* Ricerca cliente */}
       <InfoClientSearchBar
         clients={clients}
@@ -66,6 +67,6 @@ export default function InfoClient({
           onAddressChange={onAddressChange}
         />
       )}
-    </>
+    </div>
   );
 }

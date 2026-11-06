@@ -5,12 +5,12 @@ import { useParams, useRouter } from "next/navigation";
 import QuoteForm from "../QuoteForm/QuoteForm";
 import { QuotePreview } from "../QuoteReview/QuotePreview";
 import { useQuoteForm } from "../hooks/useQuoteForm";
-import type { QuoteDetail } from "@/types/quote";
+import type { QuoteDetail } from "@/lib/Utility/Quote/quote.types";
 import type { ClientDetail } from "@/types/client";
 import styles from "./quote-editor.module.css";
 
 type QuoteEditorProps =
-  | { mode?: "create"; quote?: undefined; initialClient?: undefined }
+  | { mode?: "create"; quote?: QuoteDetail; initialClient?: ClientDetail | null }
   | { mode: "edit"; quote: QuoteDetail; initialClient?: ClientDetail | null };
 
 export default function QuoteEditor({
@@ -27,6 +27,9 @@ export default function QuoteEditor({
     router.push(`/${slug}/quotes`);
     router.refresh();
   }
+
+    console.log("appaerance in quote editor: ", form.appearance);
+
 
   return (
     <div className={styles.layout}>

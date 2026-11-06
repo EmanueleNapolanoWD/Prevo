@@ -18,16 +18,10 @@ export const registerSchema = z
     name: z.string().trim().min(1, "Inserisci il nome").max(255),
     surname: z.string().trim().min(1, "Inserisci il cognome").max(255),
 
-    email: z
-      .string()
-      .trim()
-      .email("Email personale non valida")
-      .max(255),
+    email: z.string().trim().email("Email personale non valida").max(255),
 
     password: z.string().min(8, "Minimo 8 caratteri"),
-    password_confirmation: z
-      .string()
-      .min(1, "Conferma la password"),
+    password_confirmation: z.string().min(1, "Conferma la password"),
 
     // Anagrafica aziendale
     company_name: z
@@ -36,101 +30,12 @@ export const registerSchema = z
       .min(1, "Inserisci il nome azienda")
       .max(150),
 
-    legal_name: z
-      .string()
-      .trim()
-      .min(1, "Inserisci la ragione sociale")
-      .max(255),
-
-    legal_form: z
-      .string()
-      .max(30, "Massimo 30 caratteri"),
-
-    // Dati fiscali
-    country_code: z
-      .string()
-      .trim()
-      .length(2, "Inserisci il codice paese di 2 lettere")
-      .transform((value) => value.toUpperCase()),
-
-    vat_number: z
-      .string()
-      .trim()
-      .min(1, "Inserisci la partita IVA")
-      .max(20),
-
-    tax_code: z
-      .string()
-      .trim()
-      .min(1, "Inserisci il codice fiscale")
-      .max(20),
-
-    tax_regime: z
-      .string()
-      .max(4, "Massimo 4 caratteri"),
-
-    sdi_code: z
-      .string()
-      .trim()
-      .max(7, "Massimo 7 caratteri"),
-
-    pec: z.union([
-      z.literal(""),
-      z.string().trim().email("Inserisci una PEC valida").max(255),
-    ]),
-
-    // Dati REA
-    rea_office: z
-      .string()
-      .trim()
-      .max(2, "Massimo 2 caratteri")
-      .transform((value) => value.toUpperCase()),
-
-    rea_number: z
-      .string()
-      .trim()
-      .max(20, "Massimo 20 caratteri"),
-
-    // Capitale sociale: stringa vuota oppure importo numerico non negativo
-    share_capital: z.union([
-      z.literal(""),
-      z
-        .string()
-        .trim()
-        .regex(
-          /^\d{1,10}([.,]\d{1,2})?$/,
-          "Inserisci un importo valido, con massimo 2 decimali",
-        ),
-    ]),
-
-    ateco_code: z
-      .string()
-      .trim()
-      .max(10, "Massimo 10 caratteri"),
-
-    iban: z
-      .string()
-      .trim()
-      .max(34, "Massimo 34 caratteri"),
-
     // Sede legale
-    address: z
-      .string()
-      .trim()
-      .min(1, "Inserisci l'indirizzo")
-      .max(255),
+    address: z.string().trim().min(1, "Inserisci l'indirizzo").max(255),
 
-    postal_code: z
-      .string()
-      .trim()
-      .min(1, "Inserisci il CAP")
-      .max(10),
+    postal_code: z.string().trim().min(1, "Inserisci il CAP").max(10),
 
-    city: z
-      .string()
-      .trim()
-      .min(1, "Inserisci la città")
-      .max(100),
+    city: z.string().trim().min(1, "Inserisci la città").max(100),
 
     province: z
       .string()
@@ -145,11 +50,17 @@ export const registerSchema = z
       .email("Email aziendale non valida")
       .max(255),
 
-    phone: z
-      .string()
-      .trim()
-      .min(1, "Inserisci il telefono")
-      .max(30),
+    phone: z.string().trim().min(1, "Inserisci il telefono").max(30),
+
+    // Opzionali: la stringa vuota è valida
+    vat_number: z.string().trim().max(20, "Massimo 20 caratteri"),
+    tax_code: z.string().trim().max(20, "Massimo 20 caratteri"),
+    iban: z.string().trim().max(34, "Massimo 34 caratteri"),
+
+    pec: z.union([
+      z.literal(""),
+      z.string().trim().email("Inserisci un indirizzo PEC valido").max(255),
+    ]),
 
     website: z.union([
       z.literal(""),

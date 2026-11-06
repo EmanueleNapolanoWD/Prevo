@@ -1,6 +1,6 @@
 "use client";
 
-import { AuthUser } from "@/types/auth";
+import { AuthUser } from "@/lib/Utility/Auth/auth.types";
 import { Bell, Menu } from "lucide-react";
 
 interface PageHeaderProps {

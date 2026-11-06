@@ -54,7 +54,7 @@ export type ProductFilters = {
 };
 
 export type GetProductsResult = PaginatedProducts | ApiError;
-export type GetProductResult = { data: Product } | ApiError;
+export type GetProductResult = { data: Product[] } | ApiError;
 export type ProductActionResult = ApiError; // create/update tornano solo in caso di errore (poi redirect)
 export type DeleteProductResult = { ok: true } | ApiError;
 

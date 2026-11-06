@@ -3,6 +3,7 @@
 namespace App\Domains\Auth\Actions;
 
 use App\Domains\Audit\Services\AuditLogger;
+use App\Domains\Auth\DTOs\ResetPasswordData;
 use App\Domains\Auth\Models\User;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Facades\Hash;
@@ -16,16 +17,24 @@ public function __construct(
     private readonly AuditLogger $audit
 ){}
 
-    public function execute(array $data): string
+    public function execute(ResetPasswordData $data): string
     {
 
     $resetUser = null;
 
+    $credentials = [
+            'email' => $data->email,
+            'password' => $data->password,
+            'password_confirmation' => $data->password_confirmation,
+            'token' => $data->token,
+        ];
+
         // Logica per reimpostare la password dell'utente
         // Ad esempio, puoi utilizzare il modello User per trovare l'utente e aggiornare la password
         $status = Password::reset(
-            $data,
             function (User $user, string $password) use (&$resetUser): void {
+                $resetUser = $user;
+                
                 $user->forceFill([
                     'password' => Hash::make($password),
                     'remember_token' => Str::random(60),
