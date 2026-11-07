@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import type { Client, ClientDetail } from "@/types/client";
+import type { Client, ClientDetail } from "@/lib/Utility/Clients/clients.types";
 import styles from "./info-client.module.css";
 
 interface InfoClientSearchBarProps {

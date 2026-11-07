@@ -1,7 +1,7 @@
 // quote-preview-data.ts
 import type { QuoteCompany, QuoteItem } from "@/types/quote"; // o il path corretto dei tuoi tipi
 import type { QuoteContact } from "@/components/app/DashboardComponents/Quotes/hooks/useQuoteForm";
-import type { ClientDetail } from "@/types/client";
+import type { ClientDetail } from "@/lib/Utility/Clients/clients.types";
 
 export const PREVIEW_COMPANY: QuoteCompany = {
   name: "La Tua Azienda S.r.l.",

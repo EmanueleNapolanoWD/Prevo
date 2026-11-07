@@ -10,8 +10,11 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { getClientById } from "@/lib/Api/Clients/clients.actions";
-import type { ClientAddress } from "@/types/client";
+import {
+  getClientById,
+  isErrorResult,
+} from "@/lib/Api/Clients/clients.server";
+import type { ClientAddress } from "@/lib/Utility/Clients/clients.types";
 import styles from "./page.module.css";
 
 interface DetailClientPageProps {
@@ -25,14 +28,31 @@ const ADDRESS_TYPES: Record<ClientAddress["type"], string> = {
 };
 
 function formatDate(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "—";
+
+  // Il fuso è fissato: sul server l'ora altrimenti uscirebbe in UTC
   return new Intl.DateTimeFormat("it-IT", {
     dateStyle: "long",
     timeStyle: "short",
-  }).format(new Date(value));
+    timeZone: "Europe/Rome",
+  }).format(date);
 }
 
 function orDash(value: string | null | undefined, fallback = "Non indicato") {
   return value && value.trim() !== "" ? value : fallback;
+}
+
+/** Link sicuro: solo http/https (niente "javascript:") e protocollo aggiunto se manca. */
+function toWebUrl(value: string): string | null {
+  try {
+    const url = new URL(/^https?:\/\//i.test(value) ? value : `https://${value}`);
+    return url.protocol === "http:" || url.protocol === "https:"
+      ? url.href
+      : null;
+  } catch {
+    return null;
+  }
 }
 
 export default async function DetailClientPage({
@@ -41,14 +61,20 @@ export default async function DetailClientPage({
   const { slug, id } = await params;
   const result = await getClientById(slug, id);
 
-  const client = "data" in result ? result.data : null;
+  if (isErrorResult(result)) {
+    const isMissing = result.status === 404;
 
-  if (!client) {
     return (
       <main className={styles.page}>
-        <div className={styles.errorState}>
-          <strong>Contatto non trovato</strong>
-          <span>Il cliente richiesto non esiste o non è più disponibile.</span>
+        <div className={styles.errorState} role="alert">
+          <strong>
+            {isMissing ? "Contatto non trovato" : "Impossibile caricare il contatto"}
+          </strong>
+          <span>
+            {isMissing
+              ? "Il cliente richiesto non esiste o non è più disponibile."
+              : result.message}
+          </span>
           <Button variant="outline" render={<Link href={`/${slug}/clients`} />}>
             Torna ai contatti
           </Button>
@@ -57,10 +83,13 @@ export default async function DetailClientPage({
     );
   }
 
+  const client = result;
   const isCompany = client.type === "COMPANY";
   const emails = client.emails ?? [];
   const phones = client.phones ?? [];
   const addresses = client.addresses ?? [];
+  const websiteUrl = client.website ? toWebUrl(client.website) : null;
+  const vatRate = client.default_vat_rate;
 
   return (
     <main className={styles.page}>
@@ -87,11 +116,14 @@ export default async function DetailClientPage({
             </div>
           </div>
         </div>
-        <Button 
-        variant="outline"
-        render={<Link href={`/${slug}/clients/contacts/${client.id}/update`} />}>
-            Modifica cliente
-            </Button>
+        <Button
+          variant="outline"
+          render={
+            <Link href={`/${slug}/clients/contacts/${client.id}/update`} />
+          }
+        >
+          Modifica cliente
+        </Button>
       </header>
 
       <div className={styles.grid}>
@@ -126,9 +158,13 @@ export default async function DetailClientPage({
               <dt>Sito web</dt>
               <dd>
                 {client.website ? (
-                  <a href={client.website} target="_blank" rel="noreferrer">
-                    {client.website}
-                  </a>
+                  websiteUrl ? (
+                    <a href={websiteUrl} target="_blank" rel="noopener noreferrer">
+                      {client.website}
+                    </a>
+                  ) : (
+                    client.website
+                  )
                 ) : (
                   "Non indicato"
                 )}
@@ -172,8 +208,9 @@ export default async function DetailClientPage({
             <div>
               <dt>Aliquota IVA predefinita</dt>
               <dd>
-                {client.default_vat_rate !== null
-                  ? `${client.default_vat_rate}%`
+                {/* Laravel può restituire "22.00": Number() la riporta a 22 */}
+                {vatRate !== null && vatRate !== undefined
+                  ? `${Number(vatRate)}%`
                   : "Non indicata"}
               </dd>
             </div>

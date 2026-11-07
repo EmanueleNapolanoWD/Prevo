@@ -12,7 +12,7 @@ class ClientGroup extends Model
 {
     use HasUuids;
 
-    protected $table = 'clients_group';
+    protected $table = 'client_groups';
 
     protected $fillable = [
         'name',

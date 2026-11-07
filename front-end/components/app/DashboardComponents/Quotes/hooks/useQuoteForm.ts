@@ -6,7 +6,7 @@ import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 // IMPORT: actions e utility
 // ============================================================================
 import { getProduct } from "@/lib/Api/Product/product.actions";
-import { getClients } from "@/lib/Api/Clients/clients.actions";
+import { searchClients } from "@/lib/Api/Clients/clients.client";
 import {
   createQuoteAction,
   updateQuoteAction,
@@ -17,7 +17,7 @@ import { calcTotals, parseNumber } from "@/lib/utils";
 // IMPORT: tipi esterni
 // ============================================================================
 import type { Product } from "@/types/product";
-import type { ClientDetail } from "@/types/client";
+import type { ClientDetail } from "@/lib/Utility/Clients/clients.types";
 import type {
   QuoteItem,
   QuoteAppearanceValues,
@@ -254,7 +254,7 @@ export function useQuoteForm({
   // RICERCA E SELEZIONE CLIENTE
   // --------------------------------------------------------------------------
   const fetchClients = useCallback(
-    (q: string) => getClients(slug, { q }),
+    (q: string) => searchClients(slug, { q }),
     [slug],
   );
 

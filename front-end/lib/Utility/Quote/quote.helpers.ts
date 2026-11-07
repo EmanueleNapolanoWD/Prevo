@@ -13,7 +13,7 @@ import {
   type QuoteItem,
   type QuotePayload,
 } from "./quote.types";
-import type { ClientDetail } from "@/types/client";
+import type { ClientDetail } from "@/lib/Utility/Clients/clients.types";
 import type { QuoteSettingsData } from "@/lib/Utility/QuoteSettings/quote-settings.types";
 import type {
   ClientAddress,

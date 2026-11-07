@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { getQuoteAction } from "@/lib/Api/Quote/quote.action";
-import { getClientById } from "@/lib/Api/Clients/clients.actions"; // adatta il nome reale
+import { getClientById } from "@/lib/Api/Clients/clients.server"; // adatta il nome reale
 import QuoteEditor from "@/components/app/DashboardComponents/Quotes/QuoteEditor/QuoteEditor";
 import styles from "./page.module.css";
 
@@ -20,9 +20,7 @@ export default async function EditQuotePage({ params }: EditQuotePageProps) {
 
   return (
     <main className={styles.page}>
-      <h1 className={styles.title}>
-        Modifica preventivo
-      </h1>
+      <h1 className={styles.title}>Modifica preventivo</h1>
       <QuoteEditor
         key={quote.id}
         mode="edit"

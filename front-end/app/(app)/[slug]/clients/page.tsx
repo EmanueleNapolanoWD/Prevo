@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { getClients } from "@/lib/Api/Clients/clients.actions";
+import { getClients } from "@/lib/Api/Clients/clients.server";
+import type { ApiError, GetClientsResult } from "@/lib/Utility/Clients/clients.types";
 import { ClientsToolbar } from "@/components/app/DashboardComponents/Clients/ClientList/ClientsToolbars";
 import { ClientsTable } from "@/components/app/DashboardComponents/Clients/ClientList/ClientsTable";
 import { ClientsPagination } from "@/components/app/DashboardComponents/Clients/ClientList/ClientsPagination";
@@ -25,8 +26,13 @@ export default async function ClientsPage({
     page: currentPage,
   });
 
+  // Type guard per restringere GetClientsResult al tipo di successo
+  function isApiError(result: GetClientsResult): result is ApiError {
+    return "ok" in result && result.ok === false;
+  }
+
   // Gestione degli errori restituiti da getClients().
-  if ("ok" in result && result.ok === false) {
+  if (isApiError(result)) {
     return (
       <main className={styles.page}>
         <div className={styles.errorState} role="alert">
@@ -38,7 +44,7 @@ export default async function ClientsPage({
   }
 
   const clients = result.data ?? [];
-  const lastPage = result.last_page ?? 1;
+  const lastPage = result.meta?.last_page ?? 1;
   const hasFilters = Boolean(filters.q || filters.tipo);
 
   return (

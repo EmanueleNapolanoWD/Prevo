@@ -9,19 +9,14 @@ export default async function CreateClientsPage({
 }) {
   const { slug } = await params;
 
-  // server action con slug agganciato
-  async function onSubmit(payload: Parameters<typeof createClient>[1]) {
-    "use server";
-    return createClient(slug, payload);
-  }
-
   return (
     <div className={styles.page}>
       <header className={styles.header}>
         <h1 className={styles.title}>Nuovo contatto</h1>
       </header>
-      {/* body */}
-      <ClientsForm mode="create" onSubmit={onSubmit} />
+
+      {/* createClient è già una server action: bind aggancia lo slug come primo argomento */}
+      <ClientsForm mode="create" onSubmit={createClient.bind(null, slug)} />
     </div>
   );
 }

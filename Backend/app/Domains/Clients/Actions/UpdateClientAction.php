@@ -2,6 +2,7 @@
 
 namespace App\Domains\Clients\Actions;
 
+use App\Domains\Clients\Dtos\UpdateClientData;
 use App\Domains\Clients\Models\Client;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -28,22 +29,24 @@ class UpdateClientAction
     ];
 
 
-    public function execute(Client $client, array $data)
+    public function execute(Client $client, UpdateClientData $data)
     {
 
         Log::debug('Aggiornamento cliente richiesto', [
             'client_id' => $client->id,
             'company_id' => $client->company_id,
-            'fields' => array_keys($data),
-            'relations' => array_values(array_filter(
-                ['emails', 'phones', 'addresses', 'group_ids'],
-                fn(string $relation) => array_key_exists($relation, $data)
-            )),
+            'fields' => array_keys($data->attributes),
+            'relations' => array_values(array_filter([
+                $data->emailsProvided ? 'emails' : null,
+                $data->phonesProvided ? 'phones' : null,
+                $data->addressesProvided ? 'addresses' : null,
+                $data->groupIdsProvided ? 'group_ids' : null,
+            ])),
         ]);
 
 
-        return DB::transaction(function () use ($client, $data) {
-            $fields = Arr::only($data, self::CLIENT_FIELDS);
+        return DB::transaction(function () use ($client, $data): Client {
+            $fields = Arr::only($data->attributes, self::CLIENT_FIELDS);
 
             //coerenza tra tipo e dato anagrafico
             if (($fields['type'] ?? $client->type) === 'PERSON') {
@@ -54,32 +57,53 @@ class UpdateClientAction
                 $fields['surname'] = null;
             }
 
+            if ($fields !== []) {
+                $client->update($fields);
+            }
+
 
             $client->update($fields);
 
             // relazioni solo se presenti in payload
 
-            // se presente email
-            if (array_key_exists('emails', $data)) {
-                $this->syncChildren($client, 'emails', $data['emails'], ['company_id' => $client->company_id]);
+            // Sincronizzazione email.
+            if ($data->emailsProvided) {
+                $this->syncChildren(
+                    $client,
+                    'emails',
+                    $data->emails,
+                );
             }
 
-            // se presente phone
-            if (array_key_exists('phones', $data)) {
-                $this->syncChildren($client, 'phones', $data['phones'], ['company_id' => $client->company_id]);
+            // Sincronizzazione telefoni.
+            if ($data->phonesProvided) {
+                $this->syncChildren(
+                    $client,
+                    'phones',
+                    $data->phones,
+                );
             }
 
-            // se presente addresses
-            if (array_key_exists('addresses', $data)) {
-                $this->syncChildren($client, 'addresses', $data['addresses'], ['company_id' => $client->company_id]);
+            // Sincronizzazione indirizzi.
+            if ($data->addressesProvided) {
+                $this->syncChildren(
+                    $client,
+                    'addresses',
+                    $data->addresses,
+                );
             }
 
-            if (array_key_exists('group_ids', $data)) {
-                $client->groups()->sync($data['group_ids']);
+            // Sincronizzazione gruppi.
+            if ($data->groupIdsProvided) {
+                $client->groups()->sync($data->groupIds);
             }
 
-            return $client->refresh()->load(['emails', 'phones', 'addresses']);
-
+            return $client->refresh()->load([
+                'emails',
+                'phones',
+                'addresses',
+                'groups',
+            ]);
         });
     }
 

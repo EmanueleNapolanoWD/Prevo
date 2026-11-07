@@ -11,7 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Client } from "@/types/client";
+import { Client } from "@/lib/Utility/Clients/clients.types";
 import styles from "../../../../../app/(app)/[slug]/clients/page.module.css";
 import { DeleteClientButton } from "./DeleteClientButton";
 

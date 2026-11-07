@@ -1,39 +1,71 @@
-'use client';
+"use client";
 
-import { useId, type ComponentProps, type ReactNode } from 'react';
-import { Info } from 'lucide-react';
-import { Controller, useFormContext, type ControllerRenderProps, type FieldValues } from 'react-hook-form';
-import { Field, FieldError, FieldLabel } from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
-
-/** Griglia etichetta (143px) + campo, come nel design. Sotto sm le etichette vanno sopra. */
-export const ROW = 'grid grid-cols-1 items-start gap-1 sm:grid-cols-[143px_minmax(0,1fr)] sm:gap-2';
-export const CONTROL = 'w-full max-w-[390px]';
+import { useId, type ComponentProps, type ReactNode } from "react";
+import { ChevronDown, type LucideIcon } from "lucide-react";
+import {
+  Controller,
+  useFormContext,
+  type ControllerRenderProps,
+  type FieldValues,
+} from "react-hook-form";
+import styles from "../clients-form.module.css";
 
 // I campi usano i nomi come stringhe ("addresses.0.street"), quindi qui il form è tipizzato in modo largo.
 type RenderField = ControllerRenderProps<FieldValues, string>;
 type FieldMeta = { id: string; invalid: boolean };
 
-export function Section({ title, hint, children }: { title: string; hint?: string; children: ReactNode }) {
+/** Card di sezione: icona, eyebrow numerato ("01 · IDENTITÀ"), titolo e descrizione. */
+export function Section({
+  step,
+  eyebrow,
+  icon: Icon,
+  title,
+  description,
+  children,
+}: {
+  step: number;
+  eyebrow: string;
+  icon: LucideIcon;
+  title: string;
+  description?: string;
+  children: ReactNode;
+}) {
   return (
-    <section className="space-y-3 border-b py-5 last:border-b-0">
-      <h2 className="flex items-center gap-2 text-lg font-bold">
-        {title}
-        {hint && (
-          <span title={hint}>
-            <Info className="size-4 text-blue-600" aria-label={hint} />
-          </span>
-        )}
-      </h2>
-      {children}
+    <section className={styles.card}>
+      <header className={styles.cardHeader}>
+        <span className={styles.cardIcon}>
+          <Icon aria-hidden="true" />
+        </span>
+        <div>
+          <p className={styles.eyebrow}>
+            {String(step).padStart(2, "0")} · {eyebrow}
+          </p>
+          <h2 className={styles.cardTitle}>{title}</h2>
+          {description && (
+            <p className={styles.cardDescription}>{description}</p>
+          )}
+        </div>
+      </header>
+
+      <div className={styles.body}>{children}</div>
     </section>
   );
 }
 
-/** Riga etichetta + controllo + errore, collegata a react-hook-form con Controller. */
+/** Griglia dei campi: 2 colonne di default, 3 per CAP / città / provincia. */
+export function FieldGrid({
+  columns = 2,
+  children,
+}: {
+  columns?: 2 | 3;
+  children: ReactNode;
+}) {
+  return (
+    <div className={columns === 3 ? styles.grid3 : styles.grid}>{children}</div>
+  );
+}
+
+/** Etichetta sopra + controllo + errore, collegata a react-hook-form con Controller. */
 export function FieldRow({
   name,
   label,
@@ -52,50 +84,74 @@ export function FieldRow({
       control={control}
       name={name}
       render={({ field, fieldState }) => (
-        <div className={ROW}>
-          <FieldLabel htmlFor={id} className="pt-2.5 font-normal">
+        <div className={styles.field}>
+          <label htmlFor={id} className={styles.label}>
             {label}
-          </FieldLabel>
-          <Field data-invalid={fieldState.invalid} className="gap-1">
-            {children(field, { id, invalid: fieldState.invalid })}
-            {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-          </Field>
+          </label>
+          {children(field, { id, invalid: fieldState.invalid })}
+          {fieldState.invalid && (
+            <p role="alert" className={styles.error}>
+              {fieldState.error?.message}
+            </p>
+          )}
         </div>
       )}
     />
   );
 }
 
+type InputProps = Omit<
+  ComponentProps<"input">,
+  "name" | "value" | "onChange" | "className"
+>;
+
 export function TextField({
   name,
   label,
+  uppercase,
   ...props
-}: { name: string; label: string } & Omit<ComponentProps<'input'>, 'name' | 'value' | 'onChange'>) {
+}: { name: string; label: string; uppercase?: boolean } & InputProps) {
   return (
     <FieldRow name={name} label={label}>
       {(field, { id, invalid }) => (
-        <Input id={id} aria-invalid={invalid} {...props} {...field} className={`${CONTROL} ${props.className ?? ''}`} />
+        <input
+          id={id}
+          aria-invalid={invalid || undefined}
+          className={`${styles.input} ${uppercase ? styles.uppercase : ""}`}
+          {...props}
+          {...field}
+          value={field.value ?? ""}
+        />
       )}
     </FieldRow>
   );
 }
+
+type TextareaProps = Omit<
+  ComponentProps<"textarea">,
+  "name" | "value" | "onChange" | "className"
+>;
 
 export function TextareaField({
   name,
   label,
   ...props
-}: { name: string; label: string } & Omit<ComponentProps<'textarea'>, 'name' | 'value' | 'onChange'>) {
+}: { name: string; label: string } & TextareaProps) {
   return (
     <FieldRow name={name} label={label}>
       {(field, { id, invalid }) => (
-        <Textarea id={id} aria-invalid={invalid} className={`${CONTROL} min-h-14`} {...props} {...field} />
+        <textarea
+          id={id}
+          aria-invalid={invalid || undefined}
+          className={`${styles.input} ${styles.textarea}`}
+          {...props}
+          {...field}
+          value={field.value ?? ""}
+        />
       )}
     </FieldRow>
   );
 }
-
-// Radix non accetta value="" su SelectItem: la voce "nessuno" usa un valore sentinella
-const NONE = '__none__';
 
 export function SelectField({
   name,
@@ -111,31 +167,82 @@ export function SelectField({
   /** Se presente, aggiunge una voce per svuotare la selezione */
   clearLabel?: string;
 }) {
+  const hasEmptyOption = Boolean(placeholder || clearLabel);
+
   return (
     <FieldRow name={name} label={label}>
-      {(field, { id, invalid }) => (
-        <Select value={field.value ?? ''} onValueChange={(v) => field.onChange(v === NONE ? '' : v)}>
-          <SelectTrigger id={id} aria-invalid={invalid} onBlur={field.onBlur} className={CONTROL}>
-            <SelectValue placeholder={placeholder} />
-          </SelectTrigger>
-          <SelectContent>
-            {clearLabel && <SelectItem value={NONE}>{clearLabel}</SelectItem>}
-            {options.map((o) => (
-              <SelectItem key={o.value} value={o.value}>
-                {o.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      )}
+      {(field, { id, invalid }) => {
+        const isEmpty = !field.value;
+
+        return (
+          <div className={styles.selectWrap}>
+            <select
+              id={id}
+              name={field.name}
+              ref={field.ref}
+              aria-invalid={invalid || undefined}
+              className={`${styles.select} ${isEmpty ? styles.selectEmpty : ""}`}
+              value={field.value ?? ""}
+              onChange={(e) => field.onChange(e.target.value)}
+              onBlur={field.onBlur}
+            >
+              {/* Da vuoto mostra il placeholder; con un valore scelto la voce diventa "svuota" */}
+              {hasEmptyOption && (
+                <option value="">
+                  {isEmpty
+                    ? (placeholder ?? clearLabel)
+                    : (clearLabel ?? placeholder)}
+                </option>
+              )}
+              {options.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+            <ChevronDown className={styles.chevron} aria-hidden="true" />
+          </div>
+        );
+      }}
     </FieldRow>
   );
 }
 
-export function SwitchField({ name, label }: { name: string; label: string }) {
+/** Switch nativo con etichetta a destra: switch e testo restano sempre allineati. */
+export function Toggle({
+  label,
+  ...props
+}: { label: string } & Omit<ComponentProps<"input">, "type" | "className">) {
   return (
-    <FieldRow name={name} label={label}>
-      {(field, { id }) => <Switch id={id} checked={!!field.value} onCheckedChange={field.onChange} />}
-    </FieldRow>
+    <label className={styles.toggle}>
+      <input
+        type="checkbox"
+        role="switch"
+        className={styles.toggleInput}
+        {...props}
+      />
+      <span className={styles.track} aria-hidden="true" />
+      <span>{label}</span>
+    </label>
+  );
+}
+
+export function SwitchField({ name, label }: { name: string; label: string }) {
+  const { control } = useFormContext();
+
+  return (
+    <Controller
+      control={control}
+      name={name}
+      render={({ field }) => (
+        <Toggle
+          label={label}
+          name={field.name}
+          checked={!!field.value}
+          onChange={(e) => field.onChange(e.target.checked)}
+          onBlur={field.onBlur}
+        />
+      )}
+    />
   );
 }

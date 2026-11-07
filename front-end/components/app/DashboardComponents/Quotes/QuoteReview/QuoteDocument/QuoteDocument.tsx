@@ -10,7 +10,7 @@ import type {
   TaxQuoteValue,
   QuoteContact,
 } from "../../hooks/useQuoteForm";
-import type { ClientDetail } from "@/types/client";
+import type { ClientDetail } from "@/lib/Utility/Clients/clients.types";
 import { parseNumber, type calcTotals } from "@/lib/utils";
 
 import { QuoteDocumentHeader } from "./QuoteDocumentHeader";

@@ -1,4 +1,4 @@
-import type { ClientDetail } from "@/types/client";
+import type { ClientDetail } from "@/lib/Utility/Clients/clients.types";
 import type { ClientFormValues } from "./clients.schema";
 
 export function toFormValues(c: ClientDetail & { group_ids?: string[] }): Partial<ClientFormValues> {

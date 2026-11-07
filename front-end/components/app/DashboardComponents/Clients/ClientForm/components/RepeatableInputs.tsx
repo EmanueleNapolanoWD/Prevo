@@ -1,17 +1,14 @@
-'use client';
+"use client";
 
-import { CirclePlus, X } from 'lucide-react';
-import { Controller, useFieldArray, useFormContext } from 'react-hook-form';
-import { Button } from '@/components/ui/button';
-import { Field, FieldError } from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { CONTACTS_LABEL } from '@/lib/Api/Clients/clients.schema';
-import { ROW } from './Fields';
+import { useId } from "react";
+import { ChevronDown, Plus, Trash2 } from "lucide-react";
+import { Controller, useFieldArray, useFormContext } from "react-hook-form";
+import { CONTACTS_LABEL } from "@/lib/Utility/Clients/clients.schema";
+import styles from "../clients-form.module.css";
 
 type Props = {
-  name: 'emails' | 'phones';
-  valueKey: 'email' | 'phone';
+  name: "emails" | "phones";
+  valueKey: "email" | "phone";
   label: string;
   placeholder: string;
   addLabel: string;
@@ -19,32 +16,52 @@ type Props = {
 };
 
 /** Lista di input ripetibili (email, telefoni) con etichetta Lavoro/Privato/Altro. */
-export function RepeatableInputs({ name, valueKey, label, placeholder, addLabel, inputType = 'text' }: Props) {
+export function RepeatableInputs({
+  name,
+  valueKey,
+  label,
+  placeholder,
+  addLabel,
+  inputType = "text",
+}: Props) {
   const { control } = useFormContext();
+  const labelId = useId();
   // keyName diverso da "id": le righe in update hanno già un loro id dal database
-  const { fields, append, remove } = useFieldArray({ control, name, keyName: 'fieldKey' });
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name,
+    keyName: "fieldKey",
+  });
 
   return (
-    <div className={ROW}>
-      <span className="pt-2.5 text-sm">{label}</span>
+    <div className={styles.field}>
+      <span id={labelId} className={styles.label}>
+        {label}
+      </span>
 
-      <div className="space-y-2">
+      <div className={styles.repeatList} role="group" aria-labelledby={labelId}>
         {fields.map((row, i) => (
-          <div key={row.fieldKey} className="flex items-start gap-2">
+          <div key={row.fieldKey} className={styles.repeatRow}>
             <Controller
               control={control}
               name={`${name}.${i}.${valueKey}`}
               render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid} className="w-full max-w-[390px] flex-1 gap-1">
-                  <Input
+                <div className={styles.repeatMain}>
+                  <input
                     type={inputType}
                     placeholder={placeholder}
                     aria-label={label}
-                    aria-invalid={fieldState.invalid}
+                    aria-invalid={fieldState.invalid || undefined}
+                    className={styles.input}
                     {...field}
+                    value={field.value ?? ""}
                   />
-                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                </Field>
+                  {fieldState.invalid && (
+                    <p role="alert" className={styles.error}>
+                      {fieldState.error?.message}
+                    </p>
+                  )}
+                </div>
               )}
             />
 
@@ -52,47 +69,48 @@ export function RepeatableInputs({ name, valueKey, label, placeholder, addLabel,
               control={control}
               name={`${name}.${i}.label`}
               render={({ field }) => (
-                <Field className="w-[116px] shrink-0">
-                  <Select value={field.value ?? ''} onValueChange={field.onChange}>
-                    <SelectTrigger aria-label={`Etichetta ${label.toLowerCase()}`} onBlur={field.onBlur}>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {CONTACTS_LABEL.map((l) => (
-                        <SelectItem key={l} value={l}>
-                          {l}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </Field>
+                <div className={`${styles.selectWrap} ${styles.repeatLabel}`}>
+                  <select
+                    aria-label={`Etichetta ${label.toLowerCase()}`}
+                    name={field.name}
+                    ref={field.ref}
+                    className={styles.select}
+                    value={field.value ?? ""}
+                    onChange={(e) => field.onChange(e.target.value)}
+                    onBlur={field.onBlur}
+                  >
+                    {CONTACTS_LABEL.map((l) => (
+                      <option key={l} value={l}>
+                        {l}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className={styles.chevron} aria-hidden="true" />
+                </div>
               )}
             />
 
             {fields.length > 1 && (
-              <Button
+              <button
                 type="button"
-                variant="ghost"
-                size="icon"
+                className={styles.iconButton}
                 aria-label={`Rimuovi ${label.toLowerCase()}`}
                 onClick={() => remove(i)}
               >
-                <X />
-              </Button>
+                <Trash2 aria-hidden="true" />
+              </button>
             )}
           </div>
         ))}
 
-        <Button
+        <button
           type="button"
-          variant="ghost"
-          size="sm"
-          className="font-semibold"
-          onClick={() => append({ [valueKey]: '', label: 'Lavoro' })}
+          className={styles.addButton}
+          onClick={() => append({ [valueKey]: "", label: "Lavoro" })}
         >
-          <CirclePlus />
+          <Plus aria-hidden="true" />
           {addLabel}
-        </Button>
+        </button>
       </div>
     </div>
   );

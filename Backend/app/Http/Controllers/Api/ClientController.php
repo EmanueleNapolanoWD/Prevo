@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Domains\Clients\Actions\CreateClientAction;
 use App\Domains\Clients\Actions\UpdateClientAction;
+use App\Domains\Clients\Dtos\StoreClientData;
+use App\Domains\Clients\Dtos\UpdateClientData;
 use App\Domains\Clients\Models\Client;
 use App\Domains\Clients\Requests\StoreClientRequest;
 use App\Domains\Clients\Requests\UpdateClientRequest;
@@ -20,8 +22,6 @@ class ClientController extends Controller
         Request $request,
         Company $company
     ): ClientResources {
-        $this->ensureCompanyMembership($request, $company->id);
-
         $this->authorize('viewAny', [
             Client::class,
             $company->id,
@@ -29,13 +29,16 @@ class ClientController extends Controller
 
         $clients = $company->clients()
             ->with(['emails', 'phones', 'addresses'])
-            ->when($request->filled('q'), function ($query) use ($request) {
-                $term = '%' . $request->string('q')->trim() . '%';
-                $query->where(fn($q) => $q
-                    ->where('name', 'like', $term)
-                    ->orWhere('surname', 'like', $term)
-                    ->orWhere('company_name', 'like', $term));
-            })
+            ->when(
+                $request->filled('q'),
+                function ($query) use ($request) {
+                    $term = '%' . $request->string('q')->trim() . '%';
+                    $query->where(fn($q) => $q
+                        ->where('name', 'like', $term)
+                        ->orWhere('surname', 'like', $term)
+                        ->orWhere('company_name', 'like', $term));
+                }
+            )
             ->when($request->filled('type'), fn($query) => $query->where('type', $request->string('type')))
             ->latest()
             ->paginate(15)
@@ -49,17 +52,13 @@ class ClientController extends Controller
         CreateClientAction $action,
         Company $company
     ): JsonResponse {
-        $this->ensureCompanyMembership($request, $company->id);
 
         $this->authorize('create', [
             Client::class,
             $company->id
         ]);
 
-        $company = Company::query()
-            ->findOrFail($company->id);
-
-        $client = $action->execute($company, $request->validated());
+        $client = $action->execute($company, StoreClientData::from($request->validated()));
 
         return (new ClientResources($client))
             ->additional(['message' => 'Cliente aggiunto correttamente'])
@@ -72,8 +71,6 @@ class ClientController extends Controller
         Company $company,
         string $clientId
     ): ClientResources {
-        $this->ensureCompanyMembership($request, $company->id);
-
         $client = $company->clients()
             ->with(['emails', 'phones', 'addresses'])
             ->findOrFail($clientId);
@@ -89,13 +86,11 @@ class ClientController extends Controller
         Company $company,
         string $clientId
     ): ClientResources {
-        $this->ensureCompanyMembership($request, $company->id);
-
         $client = $company->clients()->findOrFail($clientId);
 
         $this->authorize('update', $client);
 
-        $client = $action->execute($client, $request->validated());
+        $client = $action->execute($client, UpdateClientData::from($request->validated()));
 
         return (new ClientResources($client))->additional(['message' => 'Cliente aggiornato con successo!']);
     }
@@ -105,8 +100,6 @@ class ClientController extends Controller
         Company $company,
         string $clientId
     ): JsonResponse {
-        $this->ensureCompanyMembership($request, $company->id);
-
         $client = $company->clients()->findOrFail($clientId);
 
         $this->authorize('delete', $client);
@@ -114,17 +107,5 @@ class ClientController extends Controller
         $client->delete();
 
         return response()->json(null, 204);
-    }
-
-    private function ensureCompanyMembership(
-        Request $request,
-        string $companyId
-    ): void {
-        $isMember = $request->user()
-            ->companies()
-            ->where('companies.id', $companyId)
-            ->exists();
-
-        abort_unless($isMember, 404);
     }
 }

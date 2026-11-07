@@ -1,4 +1,4 @@
-import type { QuoteAppearanceValues } from "@/lib/Utility/Quote/quote.types";
+import type { QuoteAppearanceValues, QuoteCompany } from "@/lib/Utility/Quote/quote.types";
 import { Company } from "../Companies/companies.type";
 
 export type QuoteSettingsData = {
@@ -36,7 +36,7 @@ export type QuoteSettingsData = {
 
   updated_at: string | null;
 
-  company?: Company;
+  company?: QuoteCompany;
 };
 
 export type QuoteSettingsDataWithCompany = QuoteSettingsData & {

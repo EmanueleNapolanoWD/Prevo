@@ -10,7 +10,7 @@ import {
   toClientPayload,
   type ClientFormValues,
   type ClientPayload,
-} from '@/lib/Api/Clients/clients.schema';
+} from '@/lib/Utility/Clients/clients.schema';
 
 /** Risultato che la server action deve restituire (errors = errori 422 di Laravel). */
 export type ClientActionResult =

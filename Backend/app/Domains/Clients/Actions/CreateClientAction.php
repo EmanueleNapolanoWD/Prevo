@@ -2,36 +2,45 @@
 
 namespace App\Domains\Clients\Actions;
 
+use App\Domains\Clients\Dtos\StoreClientData;
 use App\Domains\Clients\Models\Client;
 use App\Domains\Companies\Models\Company;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 
 class CreateClientAction
 {
-
-    private const RELATIONS = ['emails', 'phones', 'addresses'];
-
-    public function execute(Company $company, array $data): Client
+    public function execute(Company $company, StoreClientData $data): Client
     {
         return DB::transaction(function () use ($company, $data) {
-            $children = Arr::only($data, self::RELATIONS);
-            $attributes = Arr::except($data, self::RELATIONS);
 
-            // tenant preso da relazione no da payload
-            unset($attributes['company_id']);
+            $client = $company->clients()->create($data->attributes);
 
-            $client = $company->clients()->create($attributes);
-
-            foreach ($children as $relation => $rows) {
-                $rows = array_values(array_filter($rows, fn(array $row) => filled(array_filter($row))));
-
-                if ($rows !== []) {
-                    $client->{$relation}()->createMany($rows);
-                }
+            // email
+            if ($data->emails !== []) {
+                $client->emails()->createMany($data->emails);
             }
 
-            return $client->load(self::RELATIONS);
+            // telefono
+            if ($data->phones !== []) {
+                $client->phones()->createMany($data->phones);
+            }
+
+            // Creazione indirizzi.
+            if ($data->addresses !== []) {
+                $client->addresses()->createMany($data->addresses);
+            }
+
+            // Associazione gruppi.
+            if ($data->groupIds !== []) {
+                $client->groups()->sync($data->groupIds);
+            }
+
+            return $client->load([
+                'emails',
+                'phones',
+                'addresses',
+                'groups',
+            ]);
         });
     }
 }

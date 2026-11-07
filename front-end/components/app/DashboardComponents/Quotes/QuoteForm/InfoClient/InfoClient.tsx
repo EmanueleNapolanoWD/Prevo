@@ -2,7 +2,7 @@
 
 import InfoClientSearchBar from "./InfoClientSearchBar";
 import InfoClientDetail from "./InfoClientDetail";
-import type { ClientDetail } from "@/types/client";
+import type { ClientDetail } from "@/lib/Utility/Clients/clients.types";
 import styles from "./info-client.module.css";
 
 type ContactId = string | number;

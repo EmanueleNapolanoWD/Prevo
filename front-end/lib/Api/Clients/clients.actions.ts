@@ -4,21 +4,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import * as clientsApi from "./clients.server";
-import type { ClientsFilters } from "./clients.server";
-import type { ClientPayload } from "./clients.schema";
-import type { ClientActionResult } from "@/components/app/DashboardComponents/Clients/ClientForm/hooks/useClientForm";
-
-// ============================================================================
-// LETTURA
-// ============================================================================
-
-export async function getClients(slug: string, filters: ClientsFilters = {}) {
-  return clientsApi.getClients(slug, filters);
-}
-
-export async function getClientById(slug: string, clientId: string) {
-  return clientsApi.getClientById(slug, clientId);
-}
+import type { MutationResult } from "./clients.server";
+import type { ClientPayload } from "../../Utility/Clients/clients.schema";
 
 // ============================================================================
 // SCRITTURA
@@ -27,7 +14,7 @@ export async function getClientById(slug: string, clientId: string) {
 export async function createClient(
   slug: string,
   payload: ClientPayload,
-): Promise<ClientActionResult> {
+): Promise<MutationResult> {
   const res = await clientsApi.createClient(slug, payload);
   if (!res.ok) return res;
 
@@ -39,7 +26,7 @@ export async function updateClient(
   slug: string,
   clientId: string,
   payload: ClientPayload,
-): Promise<ClientActionResult> {
+): Promise<MutationResult> {
   const res = await clientsApi.updateClient(slug, clientId, payload);
   if (!res.ok) return res;
 
@@ -51,7 +38,7 @@ export async function updateClient(
 export async function deleteClient(
   slug: string,
   clientId: string,
-): Promise<ClientActionResult> {
+): Promise<MutationResult> {
   const res = await clientsApi.deleteClient(slug, clientId);
   if (!res.ok) return res;
 

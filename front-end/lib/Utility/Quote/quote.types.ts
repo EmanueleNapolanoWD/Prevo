@@ -1,6 +1,6 @@
 import type { calcTotals } from "@/lib/utils";
 import type { Product } from "@/types/product";
-import type { ClientDetail } from "@/types/client";
+import type { ClientDetail } from "@/lib/Utility/Clients/clients.types";
 import type { QuoteSettingsData } from "@/lib/Utility/QuoteSettings/quote-settings.types";
 import { Company } from "../Companies/companies.type";
 

@@ -1,6 +1,6 @@
 'use client'
 
-import type { ClientDetail } from "@/types/client";
+import type { ClientDetail } from "@/lib/Utility/Clients/clients.types";
 
 import { QuoteSectionTitle } from "./QuoteSectionTitle";
 import styles from "./QuoteRecipient.module.css";

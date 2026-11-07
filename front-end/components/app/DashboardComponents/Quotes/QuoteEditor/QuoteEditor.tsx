@@ -6,7 +6,7 @@ import QuoteForm from "../QuoteForm/QuoteForm";
 import { QuotePreview } from "../QuoteReview/QuotePreview";
 import { useQuoteForm } from "../hooks/useQuoteForm";
 import type { QuoteDetail } from "@/lib/Utility/Quote/quote.types";
-import type { ClientDetail } from "@/types/client";
+import type { ClientDetail } from "@/lib/Utility/Clients/clients.types";
 import styles from "./quote-editor.module.css";
 
 type QuoteEditorProps =
@@ -28,7 +28,6 @@ export default function QuoteEditor({
     router.refresh();
   }
 
-    console.log("appaerance in quote editor: ", form.appearance);
 
 
   return (
