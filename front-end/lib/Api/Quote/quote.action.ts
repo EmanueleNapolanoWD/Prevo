@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import type { QuotePayload } from "@/types/quote";
+import type { QuotePayload } from "@/lib/Utility/Quote/quote.types";
 import {
   createQuote,
   deleteQuote,
@@ -13,7 +13,6 @@ import {
 // ============================================================================
 // Letture
 // ============================================================================
-
 
 export async function getQuotesAction(slug: string, page: number) {
   return fetchQuotes(slug, page);

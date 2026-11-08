@@ -154,6 +154,7 @@
       --tw-skew-y: initial;
       --tw-space-y-reverse: 0;
       --tw-space-x-reverse: 0;
+      --tw-divide-y-reverse: 0;
       --tw-border-style: solid;
       --tw-leading: initial;
       --tw-font-weight: initial;
@@ -191,18 +192,6 @@
       --tw-drop-shadow-color: initial;
       --tw-drop-shadow-alpha: 100%;
       --tw-drop-shadow-size: initial;
-      --tw-duration: initial;
-      --tw-ease: initial;
-      --tw-content: "";
-      --tw-gradient-position: initial;
-      --tw-gradient-from: #0000;
-      --tw-gradient-via: #0000;
-      --tw-gradient-to: #0000;
-      --tw-gradient-stops: initial;
-      --tw-gradient-via-stops: initial;
-      --tw-gradient-from-position: 0%;
-      --tw-gradient-via-position: 50%;
-      --tw-gradient-to-position: 100%;
       --tw-backdrop-blur: initial;
       --tw-backdrop-brightness: initial;
       --tw-backdrop-contrast: initial;
@@ -212,6 +201,9 @@
       --tw-backdrop-opacity: initial;
       --tw-backdrop-saturate: initial;
       --tw-backdrop-sepia: initial;
+      --tw-duration: initial;
+      --tw-ease: initial;
+      --tw-content: "";
       --tw-animation-delay: 0s;
       --tw-animation-direction: normal;
       --tw-animation-duration: initial;
@@ -247,18 +239,21 @@
       "Segoe UI Symbol", "Noto Color Emoji";
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
       "Courier New", monospace;
+    --color-red-50: #fef2f2;
+    --color-red-200: #ffcaca;
+    --color-red-700: #bf000f;
     --color-amber-50: #fffbeb;
     --color-amber-200: #fee685;
     --color-amber-700: #b75000;
-    --color-green-400: #05df72;
-    --color-green-500: #00c758;
+    --color-green-50: #f0fdf4;
+    --color-green-200: #b9f8cf;
     --color-green-600: #00a544;
+    --color-green-700: #008138;
     --color-emerald-50: #ecfdf5;
     --color-emerald-200: #a4f4cf;
     --color-emerald-700: #007956;
     --color-blue-50: #eff6ff;
     --color-blue-200: #bedbff;
-    --color-blue-600: #155dfc;
     --color-blue-700: #1447e6;
     --color-violet-50: #f5f3ff;
     --color-violet-200: #ddd6ff;
@@ -267,9 +262,7 @@
     --color-rose-200: #ffccd3;
     --color-rose-700: #c20039;
     --color-slate-50: #f8fafc;
-    --color-slate-100: #f1f5f9;
     --color-slate-200: #e2e8f0;
-    --color-slate-600: #45556c;
     --color-slate-700: #314158;
     --color-gray-50: #f9fafb;
     --color-black: #000;
@@ -277,9 +270,8 @@
     --spacing: .25rem;
     --container-xs: 20rem;
     --container-sm: 24rem;
+    --container-2xl: 42rem;
     --container-5xl: 64rem;
-    --container-6xl: 72rem;
-    --container-7xl: 80rem;
     --text-xs: .75rem;
     --text-xs--line-height: calc(1 / .75);
     --text-sm: .875rem;
@@ -297,14 +289,12 @@
     --font-weight-semibold: 600;
     --font-weight-bold: 700;
     --tracking-tight: -.025em;
-    --tracking-wide: .025em;
+    --tracking-wider: .05em;
     --tracking-widest: .1em;
     --leading-tight: 1.25;
     --leading-snug: 1.375;
     --leading-normal: 1.5;
     --radius-md: calc(var(--radius) * .8);
-    --radius-lg: var(--radius);
-    --radius-xl: calc(var(--radius) * 1.4);
     --ease-in-out: cubic-bezier(.4, 0, .2, 1);
     --animate-spin: spin 1s linear infinite;
     --animate-pulse: pulse 2s cubic-bezier(.4, 0, .6, 1) infinite;
@@ -320,18 +310,21 @@
 
   @supports (color: lab(0% 0 0)) {
     :root, :host {
+      --color-red-50: lab(96.5005% 4.18508 1.52328);
+      --color-red-200: lab(86.017% 19.8815 7.75869);
+      --color-red-700: lab(40.4273% 67.2623 53.7441);
       --color-amber-50: lab(98.6252% -.635922 8.42309);
       --color-amber-200: lab(91.7203% -.505269 49.9084);
       --color-amber-700: lab(47.2709% 42.9082 69.2966);
-      --color-green-400: lab(78.503% -64.9265 39.7492);
-      --color-green-500: lab(70.5521% -66.5147 45.8073);
+      --color-green-50: lab(98.1563% -5.60117 2.75915);
+      --color-green-200: lab(92.4222% -26.4702 12.9427);
       --color-green-600: lab(59.0978% -58.6621 41.2579);
+      --color-green-700: lab(47.0329% -47.0239 31.4788);
       --color-emerald-50: lab(97.8462% -6.94966 1.85487);
       --color-emerald-200: lab(90.2247% -31.039 9.47084);
       --color-emerald-700: lab(44.4871% -41.0396 11.0361);
       --color-blue-50: lab(96.492% -1.14644 -5.11479);
       --color-blue-200: lab(86.15% -4.04379 -21.0797);
-      --color-blue-600: lab(44.0605% 29.0279 -86.0352);
       --color-blue-700: lab(36.9089% 35.0961 -85.6872);
       --color-violet-50: lab(96.2416% 2.28849 -5.51657);
       --color-violet-200: lab(87.0888% 8.53688 -19.4189);
@@ -340,9 +333,7 @@
       --color-rose-200: lab(86.806% 19.1909 4.07754);
       --color-rose-700: lab(41.1651% 71.6251 30.3087);
       --color-slate-50: lab(98.1434% -.369519 -1.05966);
-      --color-slate-100: lab(96.286% -.852436 -2.46847);
       --color-slate-200: lab(91.7353% -.998765 -4.76968);
-      --color-slate-600: lab(35.5623% -1.74978 -15.4316);
       --color-slate-700: lab(26.9569% -1.47016 -15.6993);
       --color-gray-50: lab(98.2596% -.247031 -.706708);
     }
@@ -614,20 +605,12 @@
 @layer components;
 
 @layer utilities {
-  .\@container\/card {
-    container: card / inline-size;
-  }
-
   .\@container\/card-header {
     container: card-header / inline-size;
   }
 
   .\@container\/field-group {
     container: field-group / inline-size;
-  }
-
-  .\@container\/main {
-    container: main / inline-size;
   }
 
   .pointer-events-auto {
@@ -706,8 +689,12 @@
     top: calc(var(--spacing) * 3.5);
   }
 
-  .top-full {
-    top: 100%;
+  .top-6 {
+    top: calc(var(--spacing) * 6);
+  }
+
+  .top-24 {
+    top: calc(var(--spacing) * 24);
   }
 
   .right-0 {
@@ -730,8 +717,8 @@
     bottom: 0;
   }
 
-  .left-0 {
-    left: 0;
+  .bottom-4 {
+    bottom: calc(var(--spacing) * 4);
   }
 
   .left-1\/2 {
@@ -744,10 +731,6 @@
 
   .isolate {
     isolation: isolate;
-  }
-
-  .z-0 {
-    z-index: 0;
   }
 
   .z-10 {
@@ -810,8 +793,12 @@
     margin-block: var(--spacing);
   }
 
-  .my-4 {
-    margin-block: calc(var(--spacing) * 4);
+  .my-2 {
+    margin-block: calc(var(--spacing) * 2);
+  }
+
+  .mt-0\.5 {
+    margin-top: calc(var(--spacing) * .5);
   }
 
   .mt-1 {
@@ -822,6 +809,10 @@
     margin-top: calc(var(--spacing) * 2);
   }
 
+  .mt-3 {
+    margin-top: calc(var(--spacing) * 3);
+  }
+
   .mt-4 {
     margin-top: calc(var(--spacing) * 4);
   }
@@ -830,8 +821,20 @@
     margin-top: calc(var(--spacing) * 5);
   }
 
+  .mt-6 {
+    margin-top: calc(var(--spacing) * 6);
+  }
+
   .mt-auto {
     margin-top: auto;
+  }
+
+  .mr-1 {
+    margin-right: var(--spacing);
+  }
+
+  .mr-1\.5 {
+    margin-right: calc(var(--spacing) * 1.5);
   }
 
   .-mb-4 {
@@ -848,10 +851,6 @@
 
   .mb-2 {
     margin-bottom: calc(var(--spacing) * 2);
-  }
-
-  .mb-6 {
-    margin-bottom: calc(var(--spacing) * 6);
   }
 
   .mb-8 {
@@ -877,13 +876,6 @@
 
   .no-scrollbar::-webkit-scrollbar {
     display: none;
-  }
-
-  .line-clamp-1 {
-    -webkit-line-clamp: 1;
-    -webkit-box-orient: vertical;
-    display: -webkit-box;
-    overflow: hidden;
   }
 
   .block {
@@ -950,14 +942,24 @@
     aspect-ratio: var(--aspect-video);
   }
 
+  .size-1\.5 {
+    width: calc(var(--spacing) * 1.5);
+    height: calc(var(--spacing) * 1.5);
+  }
+
+  .size-2 {
+    width: calc(var(--spacing) * 2);
+    height: calc(var(--spacing) * 2);
+  }
+
   .size-2\.5 {
     width: calc(var(--spacing) * 2.5);
     height: calc(var(--spacing) * 2.5);
   }
 
-  .size-3 {
-    width: calc(var(--spacing) * 3);
-    height: calc(var(--spacing) * 3);
+  .size-3\.5 {
+    width: calc(var(--spacing) * 3.5);
+    height: calc(var(--spacing) * 3.5);
   }
 
   .size-4 {
@@ -1061,8 +1063,16 @@
     height: calc(var(--spacing) * 32);
   }
 
-  .h-\[250px\] {
-    height: 250px;
+  .h-64 {
+    height: calc(var(--spacing) * 64);
+  }
+
+  .h-72 {
+    height: calc(var(--spacing) * 72);
+  }
+
+  .h-80 {
+    height: calc(var(--spacing) * 80);
   }
 
   .h-\[calc\(100\%-1px\)\] {
@@ -1071,6 +1081,10 @@
 
   .h-auto {
     height: auto;
+  }
+
+  .h-fit {
+    height: fit-content;
   }
 
   .h-full {
@@ -1093,16 +1107,12 @@
     max-height: var(--drawer-content-max-height, none);
   }
 
-  .max-h-64 {
-    max-height: calc(var(--spacing) * 64);
+  .max-h-\[calc\(100vh-3rem\)\] {
+    max-height: calc(100vh - 3rem);
   }
 
   .min-h-0 {
     min-height: 0;
-  }
-
-  .min-h-14 {
-    min-height: calc(var(--spacing) * 14);
   }
 
   .min-h-16 {
@@ -1145,12 +1155,20 @@
     width: var(--spacing);
   }
 
+  .w-1\/2 {
+    width: 50%;
+  }
+
   .w-2 {
     width: calc(var(--spacing) * 2);
   }
 
   .w-2\.5 {
     width: calc(var(--spacing) * 2.5);
+  }
+
+  .w-2\/3 {
+    width: 66.6667%;
   }
 
   .w-4 {
@@ -1161,16 +1179,12 @@
     width: calc(var(--spacing) * 5);
   }
 
-  .w-8 {
-    width: calc(var(--spacing) * 8);
+  .w-10 {
+    width: calc(var(--spacing) * 10);
   }
 
-  .w-16 {
-    width: calc(var(--spacing) * 16);
-  }
-
-  .w-20 {
-    width: calc(var(--spacing) * 20);
+  .w-12 {
+    width: calc(var(--spacing) * 12);
   }
 
   .w-24 {
@@ -1181,20 +1195,20 @@
     width: calc(var(--spacing) * 32);
   }
 
-  .w-38 {
-    width: calc(var(--spacing) * 38);
+  .w-\[58\%\] {
+    width: 58%;
   }
 
-  .w-40 {
-    width: calc(var(--spacing) * 40);
+  .w-\[72\%\] {
+    width: 72%;
+  }
+
+  .w-\[84\%\] {
+    width: 84%;
   }
 
   .w-\[90px\] {
     width: 90px;
-  }
-
-  .w-\[116px\] {
-    width: 116px;
   }
 
   .w-auto {
@@ -1213,20 +1227,16 @@
     max-width: var(--skeleton-width);
   }
 
+  .max-w-2xl {
+    max-width: var(--container-2xl);
+  }
+
   .max-w-5xl {
     max-width: var(--container-5xl);
   }
 
-  .max-w-6xl {
-    max-width: var(--container-6xl);
-  }
-
-  .max-w-7xl {
-    max-width: var(--container-7xl);
-  }
-
-  .max-w-\[390px\] {
-    max-width: 390px;
+  .max-w-\[1500px\] {
+    max-width: 1500px;
   }
 
   .max-w-sm {
@@ -1271,6 +1281,14 @@
 
   .min-w-\[96px\] {
     min-width: 96px;
+  }
+
+  .min-w-\[140px\] {
+    min-width: 140px;
+  }
+
+  .min-w-\[540px\] {
+    min-width: 540px;
   }
 
   .flex-1 {
@@ -1318,10 +1336,6 @@
     rotate: 45deg;
   }
 
-  .transform {
-    transform: var(--tw-rotate-x, ) var(--tw-rotate-y, ) var(--tw-rotate-z, ) var(--tw-skew-x, ) var(--tw-skew-y, );
-  }
-
   .transform-\[translate3d\(var\(--translate-x\,0px\)\,var\(--translate-y\,0px\)\,0\)_scale\(var\(--stack-scale\)\)\] {
     transform: translate3d(var(--translate-x, 0px),var(--translate-y, 0px),0) scale(var(--stack-scale));
   }
@@ -1352,6 +1366,10 @@
 
   .scroll-my-1 {
     scroll-margin-block: var(--spacing);
+  }
+
+  .scroll-mt-24 {
+    scroll-margin-top: calc(var(--spacing) * 24);
   }
 
   .list-disc {
@@ -1430,10 +1448,6 @@
     justify-content: flex-end;
   }
 
-  .justify-start {
-    justify-content: flex-start;
-  }
-
   .gap-\(--card-spacing\) {
     gap: var(--card-spacing);
   }
@@ -1494,22 +1508,10 @@
     margin-block-end: calc(calc(var(--spacing) * 2) * calc(1 - var(--tw-space-y-reverse)));
   }
 
-  :where(.space-y-2\.5 > :not(:last-child)) {
+  :where(.space-y-4 > :not(:last-child)) {
     --tw-space-y-reverse: 0;
-    margin-block-start: calc(calc(var(--spacing) * 2.5) * var(--tw-space-y-reverse));
-    margin-block-end: calc(calc(var(--spacing) * 2.5) * calc(1 - var(--tw-space-y-reverse)));
-  }
-
-  :where(.space-y-3 > :not(:last-child)) {
-    --tw-space-y-reverse: 0;
-    margin-block-start: calc(calc(var(--spacing) * 3) * var(--tw-space-y-reverse));
-    margin-block-end: calc(calc(var(--spacing) * 3) * calc(1 - var(--tw-space-y-reverse)));
-  }
-
-  :where(.space-y-5 > :not(:last-child)) {
-    --tw-space-y-reverse: 0;
-    margin-block-start: calc(calc(var(--spacing) * 5) * var(--tw-space-y-reverse));
-    margin-block-end: calc(calc(var(--spacing) * 5) * calc(1 - var(--tw-space-y-reverse)));
+    margin-block-start: calc(calc(var(--spacing) * 4) * var(--tw-space-y-reverse));
+    margin-block-end: calc(calc(var(--spacing) * 4) * calc(1 - var(--tw-space-y-reverse)));
   }
 
   :where(.space-y-6 > :not(:last-child)) {
@@ -1518,18 +1520,22 @@
     margin-block-end: calc(calc(var(--spacing) * 6) * calc(1 - var(--tw-space-y-reverse)));
   }
 
-  .gap-x-4 {
-    column-gap: calc(var(--spacing) * 4);
-  }
-
   :where(.-space-x-2 > :not(:last-child)) {
     --tw-space-x-reverse: 0;
     margin-inline-start: calc(calc(var(--spacing) * -2) * var(--tw-space-x-reverse));
     margin-inline-end: calc(calc(var(--spacing) * -2) * calc(1 - var(--tw-space-x-reverse)));
   }
 
-  .gap-y-2 {
-    row-gap: calc(var(--spacing) * 2);
+  :where(.divide-y > :not(:last-child)) {
+    --tw-divide-y-reverse: 0;
+    border-bottom-style: var(--tw-border-style);
+    border-top-style: var(--tw-border-style);
+    border-top-width: calc(1px * var(--tw-divide-y-reverse));
+    border-bottom-width: calc(1px * calc(1 - var(--tw-divide-y-reverse)));
+  }
+
+  :where(.divide-border > :not(:last-child)) {
+    border-color: var(--border);
   }
 
   .self-start {
@@ -1570,6 +1576,10 @@
     overscroll-behavior: contain;
   }
 
+  .rounded {
+    border-radius: .25rem;
+  }
+
   .rounded-4xl {
     border-radius: calc(var(--radius) * 2.6);
   }
@@ -1604,10 +1614,6 @@
 
   .rounded-md {
     border-radius: calc(var(--radius) * .8);
-  }
-
-  .rounded-sm {
-    border-radius: calc(var(--radius) * .6);
   }
 
   .rounded-xl {
@@ -1680,6 +1686,16 @@
     }
   }
 
+  .border-current\/30 {
+    border-color: currentColor;
+  }
+
+  @supports (color: color-mix(in lab, red, red)) {
+    .border-current\/30 {
+      border-color: color-mix(in oklab, currentcolor 30%, transparent);
+    }
+  }
+
   .border-destructive\/30 {
     border-color: var(--destructive);
   }
@@ -1694,12 +1710,20 @@
     border-color: var(--color-emerald-200);
   }
 
+  .border-green-200 {
+    border-color: var(--color-green-200);
+  }
+
   .border-input {
     border-color: var(--input);
   }
 
   .border-primary {
     border-color: var(--primary);
+  }
+
+  .border-red-200 {
+    border-color: var(--color-red-200);
   }
 
   .border-rose-200 {
@@ -1726,12 +1750,36 @@
     background-color: var(--color-bg);
   }
 
+  .bg-accent {
+    background-color: var(--accent);
+  }
+
   .bg-amber-50 {
     background-color: var(--color-amber-50);
   }
 
+  .bg-amber-50\/50 {
+    background-color: #fffbeb80;
+  }
+
+  @supports (color: color-mix(in lab, red, red)) {
+    .bg-amber-50\/50 {
+      background-color: color-mix(in oklab, var(--color-amber-50) 50%, transparent);
+    }
+  }
+
   .bg-background {
     background-color: var(--background);
+  }
+
+  .bg-background\/95 {
+    background-color: var(--background);
+  }
+
+  @supports (color: color-mix(in lab, red, red)) {
+    .bg-background\/95 {
+      background-color: color-mix(in oklab, var(--background) 95%, transparent);
+    }
   }
 
   .bg-black\/10 {
@@ -1748,12 +1796,26 @@
     background-color: var(--color-blue-50);
   }
 
+  .bg-blue-50\/50 {
+    background-color: #eff6ff80;
+  }
+
+  @supports (color: color-mix(in lab, red, red)) {
+    .bg-blue-50\/50 {
+      background-color: color-mix(in oklab, var(--color-blue-50) 50%, transparent);
+    }
+  }
+
   .bg-border {
     background-color: var(--border);
   }
 
   .bg-card {
     background-color: var(--card);
+  }
+
+  .bg-current {
+    background-color: currentColor;
   }
 
   .bg-destructive\/10 {
@@ -1770,12 +1832,36 @@
     background-color: var(--color-emerald-50);
   }
 
+  .bg-emerald-50\/50 {
+    background-color: #ecfdf580;
+  }
+
+  @supports (color: color-mix(in lab, red, red)) {
+    .bg-emerald-50\/50 {
+      background-color: color-mix(in oklab, var(--color-emerald-50) 50%, transparent);
+    }
+  }
+
   .bg-foreground {
     background-color: var(--foreground);
   }
 
   .bg-gray-50 {
     background-color: var(--color-gray-50);
+  }
+
+  .bg-green-50\/50 {
+    background-color: #f0fdf480;
+  }
+
+  @supports (color: color-mix(in lab, red, red)) {
+    .bg-green-50\/50 {
+      background-color: color-mix(in oklab, var(--color-green-50) 50%, transparent);
+    }
+  }
+
+  .bg-green-600 {
+    background-color: var(--color-green-600);
   }
 
   .bg-muted {
@@ -1799,6 +1885,16 @@
   @supports (color: color-mix(in lab, red, red)) {
     .bg-muted\/30 {
       background-color: color-mix(in oklab, var(--muted) 30%, transparent);
+    }
+  }
+
+  .bg-muted\/40 {
+    background-color: var(--muted);
+  }
+
+  @supports (color: color-mix(in lab, red, red)) {
+    .bg-muted\/40 {
+      background-color: color-mix(in oklab, var(--muted) 40%, transparent);
     }
   }
 
@@ -1830,6 +1926,16 @@
     }
   }
 
+  .bg-red-50\/50 {
+    background-color: #fef2f280;
+  }
+
+  @supports (color: color-mix(in lab, red, red)) {
+    .bg-red-50\/50 {
+      background-color: color-mix(in oklab, var(--color-red-50) 50%, transparent);
+    }
+  }
+
   .bg-rose-50 {
     background-color: var(--color-rose-50);
   }
@@ -1850,8 +1956,14 @@
     background-color: var(--color-slate-50);
   }
 
-  .bg-slate-100 {
-    background-color: var(--color-slate-100);
+  .bg-slate-50\/50 {
+    background-color: #f8fafc80;
+  }
+
+  @supports (color: color-mix(in lab, red, red)) {
+    .bg-slate-50\/50 {
+      background-color: color-mix(in oklab, var(--color-slate-50) 50%, transparent);
+    }
   }
 
   .bg-transparent {
@@ -1874,10 +1986,6 @@
     fill: var(--foreground);
   }
 
-  .fill-green-500 {
-    fill: var(--color-green-500);
-  }
-
   .object-cover {
     object-fit: cover;
   }
@@ -1898,6 +2006,10 @@
     padding: calc(var(--spacing) * 2);
   }
 
+  .p-2\.5 {
+    padding: calc(var(--spacing) * 2.5);
+  }
+
   .p-3 {
     padding: calc(var(--spacing) * 3);
   }
@@ -1914,16 +2026,16 @@
     padding: calc(var(--spacing) * 6);
   }
 
+  .p-12 {
+    padding: calc(var(--spacing) * 12);
+  }
+
   .p-\[3px\] {
     padding: 3px;
   }
 
   .px-\(--card-spacing\) {
     padding-inline: var(--card-spacing);
-  }
-
-  .px-0 {
-    padding-inline: 0;
   }
 
   .px-1 {
@@ -2002,20 +2114,12 @@
     padding-top: 0;
   }
 
-  .pt-1 {
-    padding-top: var(--spacing);
-  }
-
-  .pt-2\.5 {
-    padding-top: calc(var(--spacing) * 2.5);
+  .pt-2 {
+    padding-top: calc(var(--spacing) * 2);
   }
 
   .pt-3 {
     padding-top: calc(var(--spacing) * 3);
-  }
-
-  .pt-4 {
-    padding-top: calc(var(--spacing) * 4);
   }
 
   .pr-2 {
@@ -2038,6 +2142,10 @@
     padding-bottom: calc(var(--spacing) * 3);
   }
 
+  .pb-4 {
+    padding-bottom: calc(var(--spacing) * 4);
+  }
+
   .pb-8 {
     padding-bottom: calc(var(--spacing) * 8);
   }
@@ -2048,6 +2156,10 @@
 
   .pl-2\.5 {
     padding-left: calc(var(--spacing) * 2.5);
+  }
+
+  .pl-4 {
+    padding-left: calc(var(--spacing) * 4);
   }
 
   .pl-10 {
@@ -2108,6 +2220,10 @@
     font-size: .8rem;
   }
 
+  .text-\[10px\] {
+    font-size: 10px;
+  }
+
   .leading-none {
     --tw-leading: 1;
     line-height: 1;
@@ -2153,9 +2269,9 @@
     letter-spacing: var(--tracking-tight);
   }
 
-  .tracking-wide {
-    --tw-tracking: var(--tracking-wide);
-    letter-spacing: var(--tracking-wide);
+  .tracking-wider {
+    --tw-tracking: var(--tracking-wider);
+    letter-spacing: var(--tracking-wider);
   }
 
   .tracking-widest {
@@ -2167,7 +2283,7 @@
     text-wrap: balance;
   }
 
-  .break-words, .wrap-break-word {
+  .wrap-break-word {
     overflow-wrap: break-word;
   }
 
@@ -2175,8 +2291,8 @@
     white-space: nowrap;
   }
 
-  .whitespace-pre-wrap {
-    white-space: pre-wrap;
+  .text-accent-foreground {
+    color: var(--accent-foreground);
   }
 
   .text-amber-700 {
@@ -2189,10 +2305,6 @@
 
   .text-black {
     color: var(--color-black);
-  }
-
-  .text-blue-600 {
-    color: var(--color-blue-600);
   }
 
   .text-blue-700 {
@@ -2243,6 +2355,10 @@
     color: var(--color-green-600);
   }
 
+  .text-green-700 {
+    color: var(--color-green-700);
+  }
+
   .text-muted-foreground {
     color: var(--muted-foreground);
   }
@@ -2257,6 +2373,10 @@
 
   .text-primary-foreground {
     color: var(--primary-foreground);
+  }
+
+  .text-red-700 {
+    color: var(--color-red-700);
   }
 
   .text-rose-700 {
@@ -2281,10 +2401,6 @@
     }
   }
 
-  .text-slate-600 {
-    color: var(--color-slate-600);
-  }
-
   .text-slate-700 {
     color: var(--color-slate-700);
   }
@@ -2293,8 +2409,8 @@
     color: var(--color-violet-700);
   }
 
-  .capitalize {
-    text-transform: capitalize;
+  .text-white {
+    color: var(--color-white);
   }
 
   .uppercase {
@@ -2304,14 +2420,6 @@
   .tabular-nums {
     --tw-numeric-spacing: tabular-nums;
     font-variant-numeric: var(--tw-ordinal, ) var(--tw-slashed-zero, ) var(--tw-numeric-figure, ) var(--tw-numeric-spacing, ) var(--tw-numeric-fraction, );
-  }
-
-  .underline {
-    text-decoration-line: underline;
-  }
-
-  .underline-offset-2 {
-    text-underline-offset: 2px;
   }
 
   .underline-offset-4 {
@@ -2426,6 +2534,12 @@
   .grayscale {
     --tw-grayscale: grayscale(100%);
     filter: var(--tw-blur, ) var(--tw-brightness, ) var(--tw-contrast, ) var(--tw-grayscale, ) var(--tw-hue-rotate, ) var(--tw-invert, ) var(--tw-saturate, ) var(--tw-sepia, ) var(--tw-drop-shadow, );
+  }
+
+  .backdrop-blur {
+    --tw-backdrop-blur: blur(8px);
+    -webkit-backdrop-filter: var(--tw-backdrop-blur, ) var(--tw-backdrop-brightness, ) var(--tw-backdrop-contrast, ) var(--tw-backdrop-grayscale, ) var(--tw-backdrop-hue-rotate, ) var(--tw-backdrop-invert, ) var(--tw-backdrop-opacity, ) var(--tw-backdrop-saturate, ) var(--tw-backdrop-sepia, );
+    backdrop-filter: var(--tw-backdrop-blur, ) var(--tw-backdrop-brightness, ) var(--tw-backdrop-contrast, ) var(--tw-backdrop-grayscale, ) var(--tw-backdrop-hue-rotate, ) var(--tw-backdrop-invert, ) var(--tw-backdrop-opacity, ) var(--tw-backdrop-saturate, ) var(--tw-backdrop-sepia, );
   }
 
   .transition {
@@ -3141,13 +3255,16 @@
     width: calc(var(--spacing) * .5);
   }
 
+  .first\:pt-0:first-child {
+    padding-top: 0;
+  }
+
   .last\:mt-0:last-child {
     margin-top: 0;
   }
 
-  .last\:border-b-0:last-child {
-    border-bottom-style: var(--tw-border-style);
-    border-bottom-width: 0;
+  .last\:pb-0:last-child {
+    padding-bottom: 0;
   }
 
   @media (hover: hover) {
@@ -3175,23 +3292,37 @@
       }
     }
 
-    .hover\:bg-input\/30:hover {
-      background-color: var(--input);
+    .hover\:bg-green-700:hover {
+      background-color: var(--color-green-700);
+    }
+
+    .hover\:bg-muted:hover, .hover\:bg-muted\/40:hover {
+      background-color: var(--muted);
     }
 
     @supports (color: color-mix(in lab, red, red)) {
-      .hover\:bg-input\/30:hover {
-        background-color: color-mix(in oklab, var(--input) 30%, transparent);
+      .hover\:bg-muted\/40:hover {
+        background-color: color-mix(in oklab, var(--muted) 40%, transparent);
       }
     }
 
-    .hover\:bg-muted:hover, .hover\:bg-muted\/50:hover {
+    .hover\:bg-muted\/50:hover {
       background-color: var(--muted);
     }
 
     @supports (color: color-mix(in lab, red, red)) {
       .hover\:bg-muted\/50:hover {
         background-color: color-mix(in oklab, var(--muted) 50%, transparent);
+      }
+    }
+
+    .hover\:bg-muted\/60:hover {
+      background-color: var(--muted);
+    }
+
+    @supports (color: color-mix(in lab, red, red)) {
+      .hover\:bg-muted\/60:hover {
+        background-color: color-mix(in oklab, var(--muted) 60%, transparent);
       }
     }
 
@@ -3291,11 +3422,6 @@
     z-index: 10;
   }
 
-  .focus-visible\:border:focus-visible {
-    border-style: var(--tw-border-style);
-    border-width: 1px;
-  }
-
   .focus-visible\:border-destructive\/40:focus-visible {
     border-color: var(--destructive);
   }
@@ -3308,10 +3434,6 @@
 
   .focus-visible\:border-ring:focus-visible {
     border-color: var(--ring);
-  }
-
-  .focus-visible\:bg-background:focus-visible {
-    background-color: var(--background);
   }
 
   .focus-visible\:ring-2:focus-visible {
@@ -3729,14 +3851,6 @@
     animation: none;
   }
 
-  .data-\[dragging\=true\]\:z-10[data-dragging="true"] {
-    z-index: 10;
-  }
-
-  .data-\[dragging\=true\]\:opacity-80[data-dragging="true"] {
-    opacity: .8;
-  }
-
   .data-\[invalid\=true\]\:text-destructive[data-invalid="true"] {
     color: var(--destructive);
   }
@@ -4016,67 +4130,6 @@
     --tw-ring-color: var(--background);
   }
 
-  :is(.\*\*\:data-\[slot\=badge\]\:size-5 *)[data-slot="badge"] {
-    width: calc(var(--spacing) * 5);
-    height: calc(var(--spacing) * 5);
-  }
-
-  :is(.\*\*\:data-\[slot\=badge\]\:rounded-full *)[data-slot="badge"] {
-    border-radius: 3.40282e38px;
-  }
-
-  :is(.\*\*\:data-\[slot\=badge\]\:bg-muted-foreground\/30 *)[data-slot="badge"] {
-    background-color: var(--muted-foreground);
-  }
-
-  @supports (color: color-mix(in lab, red, red)) {
-    :is(.\*\*\:data-\[slot\=badge\]\:bg-muted-foreground\/30 *)[data-slot="badge"] {
-      background-color: color-mix(in oklab, var(--muted-foreground) 30%, transparent);
-    }
-  }
-
-  :is(.\*\*\:data-\[slot\=badge\]\:px-1 *)[data-slot="badge"] {
-    padding-inline: var(--spacing);
-  }
-
-  :is(.\*\:data-\[slot\=card\]\:bg-linear-to-t > *)[data-slot="card"] {
-    --tw-gradient-position: to top;
-  }
-
-  @supports (background-image: linear-gradient(in lab, red, red)) {
-    :is(.\*\:data-\[slot\=card\]\:bg-linear-to-t > *)[data-slot="card"] {
-      --tw-gradient-position: to top in oklab;
-    }
-  }
-
-  :is(.\*\:data-\[slot\=card\]\:bg-linear-to-t > *)[data-slot="card"] {
-    background-image: linear-gradient(var(--tw-gradient-stops));
-  }
-
-  :is(.\*\:data-\[slot\=card\]\:from-primary\/5 > *)[data-slot="card"] {
-    --tw-gradient-from: var(--primary);
-  }
-
-  @supports (color: color-mix(in lab, red, red)) {
-    :is(.\*\:data-\[slot\=card\]\:from-primary\/5 > *)[data-slot="card"] {
-      --tw-gradient-from: color-mix(in oklab, var(--primary) 5%, transparent);
-    }
-  }
-
-  :is(.\*\:data-\[slot\=card\]\:from-primary\/5 > *)[data-slot="card"] {
-    --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
-  }
-
-  :is(.\*\:data-\[slot\=card\]\:to-card > *)[data-slot="card"] {
-    --tw-gradient-to: var(--card);
-    --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
-  }
-
-  :is(.\*\:data-\[slot\=card\]\:shadow-xs > *)[data-slot="card"] {
-    --tw-shadow: 0 1px 2px 0 var(--tw-shadow-color, #0000000d);
-    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
-  }
-
   .data-\[slot\=checkbox-group\]\:gap-3[data-slot="checkbox-group"] {
     gap: calc(var(--spacing) * 3);
   }
@@ -4128,26 +4181,8 @@
     gap: calc(var(--spacing) * 1.5);
   }
 
-  :is(.\*\*\:data-\[slot\=select-value\]\:block *)[data-slot="select-value"] {
-    display: block;
-  }
-
-  :is(.\*\*\:data-\[slot\=select-value\]\:truncate *)[data-slot="select-value"] {
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    overflow: hidden;
-  }
-
   .data-\[slot\=sidebar-menu-button\]\:p-1\.5\![data-slot="sidebar-menu-button"] {
     padding: calc(var(--spacing) * 1.5) !important;
-  }
-
-  :is(.\*\*\:data-\[slot\=table-cell\]\:first\:w-8 *)[data-slot="table-cell"]:first-child {
-    width: calc(var(--spacing) * 8);
-  }
-
-  :is(.\*\:data-\[slot\=toggle-group-item\]\:px-4\! > *)[data-slot="toggle-group-item"] {
-    padding-inline: calc(var(--spacing) * 4) !important;
   }
 
   .group-data-horizontal\/toggle-group\:data-\[spacing\=0\]\:first\:rounded-l-lg:is(:where(.group\/toggle-group):where([data-orientation="horizontal"]) *)[data-spacing="0"]:first-child {
@@ -4437,20 +4472,12 @@
       display: flex;
     }
 
-    .sm\:w-44 {
-      width: calc(var(--spacing) * 44);
-    }
-
     .sm\:grid-cols-2 {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .sm\:grid-cols-3 {
       grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-
-    .sm\:grid-cols-\[143px_minmax\(0\,1fr\)\] {
-      grid-template-columns: 143px minmax(0, 1fr);
     }
 
     .sm\:grid-cols-\[160px_1fr\] {
@@ -4461,24 +4488,8 @@
       flex-direction: row;
     }
 
-    .sm\:items-center {
-      align-items: center;
-    }
-
-    .sm\:justify-between {
-      justify-content: space-between;
-    }
-
     .sm\:justify-end {
       justify-content: flex-end;
-    }
-
-    .sm\:gap-2 {
-      gap: calc(var(--spacing) * 2);
-    }
-
-    .sm\:self-auto {
-      align-self: auto;
     }
 
     .sm\:px-6 {
@@ -4487,14 +4498,6 @@
 
     .sm\:px-8 {
       padding-inline: calc(var(--spacing) * 8);
-    }
-
-    .sm\:pt-6 {
-      padding-top: calc(var(--spacing) * 6);
-    }
-
-    .sm\:pl-\[151px\] {
-      padding-left: 151px;
     }
 
     .sm\:text-3xl {
@@ -4540,20 +4543,20 @@
       display: flex;
     }
 
+    .md\:grid-cols-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .md\:grid-cols-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
     .md\:gap-0\.5 {
       gap: calc(var(--spacing) * .5);
     }
 
-    .md\:gap-6 {
-      gap: calc(var(--spacing) * 6);
-    }
-
     .md\:p-10 {
       padding: calc(var(--spacing) * 10);
-    }
-
-    .md\:py-6 {
-      padding-block: calc(var(--spacing) * 6);
     }
 
     .md\:text-left {
@@ -4601,32 +4604,58 @@
   }
 
   @media (min-width: 64rem) {
-    .lg\:ml-0 {
-      margin-left: 0;
+    .lg\:col-span-2 {
+      grid-column: span 2 / span 2;
     }
 
     .lg\:block {
       display: block;
     }
 
-    .lg\:flex {
-      display: flex;
+    .lg\:hidden {
+      display: none;
     }
 
-    .lg\:inline {
-      display: inline;
-    }
-
-    .lg\:w-fit {
-      width: fit-content;
+    .lg\:grid-cols-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
     .lg\:grid-cols-\[1fr_280px\] {
       grid-template-columns: 1fr 280px;
     }
 
+    .lg\:grid-cols-\[160px_minmax\(0\,1fr\)_minmax\(0\,1fr\)\] {
+      grid-template-columns: 160px minmax(0, 1fr) minmax(0, 1fr);
+    }
+
+    .lg\:flex-row {
+      flex-direction: row;
+    }
+
+    .lg\:items-center {
+      align-items: center;
+    }
+
+    .lg\:justify-between {
+      justify-content: space-between;
+    }
+
     .lg\:gap-2 {
       gap: calc(var(--spacing) * 2);
+    }
+
+    :where(.lg\:space-y-8 > :not(:last-child)) {
+      --tw-space-y-reverse: 0;
+      margin-block-start: calc(calc(var(--spacing) * 8) * var(--tw-space-y-reverse));
+      margin-block-end: calc(calc(var(--spacing) * 8) * calc(1 - var(--tw-space-y-reverse)));
+    }
+
+    .lg\:p-6 {
+      padding: calc(var(--spacing) * 6);
+    }
+
+    .lg\:p-8 {
+      padding: calc(var(--spacing) * 8);
     }
 
     .lg\:px-6 {
@@ -4638,30 +4667,17 @@
     }
   }
 
-  @container card (min-width: 250px) {
-    .\@\[250px\]\/card\:text-3xl {
-      font-size: var(--text-3xl);
-      line-height: var(--tw-leading, var(--text-3xl--line-height));
-    }
-  }
-
-  @container card (min-width: 540px) {
-    .\@\[540px\]\/card\:block {
-      display: block;
+  @media (min-width: 80rem) {
+    .xl\:grid-cols-4 {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
     }
 
-    .\@\[540px\]\/card\:hidden {
-      display: none;
-    }
-  }
-
-  @container card (min-width: 767px) {
-    .\@\[767px\]\/card\:flex {
-      display: flex;
+    .xl\:grid-cols-\[0\.9fr_1\.1fr\] {
+      grid-template-columns: .9fr 1.1fr;
     }
 
-    .\@\[767px\]\/card\:hidden {
-      display: none;
+    .xl\:grid-cols-\[160px_minmax\(0\,640px\)_minmax\(0\,1fr\)\] {
+      grid-template-columns: 160px minmax(0, 640px) minmax(0, 1fr);
     }
   }
 
@@ -4684,28 +4700,6 @@
 
     :is(.\@md\/field-group\:\*\:data-\[slot\=field-label\]\:flex-auto > *)[data-slot="field-label"] {
       flex: auto;
-    }
-  }
-
-  @container main (min-width: 36rem) {
-    .\@xl\/main\:grid-cols-2 {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-  }
-
-  @container main (min-width: 56rem) {
-    .\@4xl\/main\:flex {
-      display: flex;
-    }
-
-    .\@4xl\/main\:hidden {
-      display: none;
-    }
-  }
-
-  @container main (min-width: 64rem) {
-    .\@5xl\/main\:grid-cols-4 {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
     }
   }
 
@@ -4738,14 +4732,6 @@
     }
   }
 
-  .dark\:bg-transparent:is(.dark *) {
-    background-color: #0000;
-  }
-
-  .dark\:fill-green-400:is(.dark *) {
-    fill: var(--color-green-400);
-  }
-
   .dark\:text-muted-foreground:is(.dark *) {
     color: var(--muted-foreground);
   }
@@ -4763,16 +4749,6 @@
     @supports (color: color-mix(in lab, red, red)) {
       .dark\:hover\:bg-destructive\/30:is(.dark *):hover {
         background-color: color-mix(in oklab, var(--destructive) 30%, transparent);
-      }
-    }
-
-    .dark\:hover\:bg-input\/30:is(.dark *):hover {
-      background-color: var(--input);
-    }
-
-    @supports (color: color-mix(in lab, red, red)) {
-      .dark\:hover\:bg-input\/30:is(.dark *):hover {
-        background-color: color-mix(in oklab, var(--input) 30%, transparent);
       }
     }
 
@@ -4798,16 +4774,6 @@
 
     .dark\:hover\:text-foreground:is(.dark *):hover {
       color: var(--foreground);
-    }
-  }
-
-  .dark\:focus-visible\:bg-input\/30:is(.dark *):focus-visible {
-    background-color: var(--input);
-  }
-
-  @supports (color: color-mix(in lab, red, red)) {
-    .dark\:focus-visible\:bg-input\/30:is(.dark *):focus-visible {
-      background-color: color-mix(in oklab, var(--input) 30%, transparent);
     }
   }
 
@@ -4871,10 +4837,6 @@
     }
   }
 
-  :is(.dark\:\*\:data-\[slot\=card\]\:bg-card:is(.dark *) > *)[data-slot="card"] {
-    background-color: var(--card);
-  }
-
   .dark\:data-\[variant\=destructive\]\:focus\:bg-destructive\/20:is(.dark *)[data-variant="destructive"]:focus {
     background-color: var(--destructive);
   }
@@ -4891,10 +4853,6 @@
 
   .data-open\:bg-accent:where([data-state="open"]), .data-open\:bg-accent:where([data-open]:not([data-open="false"])) {
     background-color: var(--accent);
-  }
-
-  .data-open\:bg-muted:where([data-state="open"]), .data-open\:bg-muted:where([data-open]:not([data-open="false"])) {
-    background-color: var(--muted);
   }
 
   .data-open\:text-accent-foreground:where([data-state="open"]), .data-open\:text-accent-foreground:where([data-open]:not([data-open="false"])) {
@@ -5970,6 +5928,12 @@
   initial-value: 0;
 }
 
+@property --tw-divide-y-reverse {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0;
+}
+
 @property --tw-border-style {
   syntax: "*";
   inherits: false;
@@ -6167,73 +6131,6 @@
   inherits: false
 }
 
-@property --tw-duration {
-  syntax: "*";
-  inherits: false
-}
-
-@property --tw-ease {
-  syntax: "*";
-  inherits: false
-}
-
-@property --tw-content {
-  syntax: "*";
-  inherits: false;
-  initial-value: "";
-}
-
-@property --tw-gradient-position {
-  syntax: "*";
-  inherits: false
-}
-
-@property --tw-gradient-from {
-  syntax: "<color>";
-  inherits: false;
-  initial-value: #0000;
-}
-
-@property --tw-gradient-via {
-  syntax: "<color>";
-  inherits: false;
-  initial-value: #0000;
-}
-
-@property --tw-gradient-to {
-  syntax: "<color>";
-  inherits: false;
-  initial-value: #0000;
-}
-
-@property --tw-gradient-stops {
-  syntax: "*";
-  inherits: false
-}
-
-@property --tw-gradient-via-stops {
-  syntax: "*";
-  inherits: false
-}
-
-@property --tw-gradient-from-position {
-  syntax: "<length-percentage>";
-  inherits: false;
-  initial-value: 0%;
-}
-
-@property --tw-gradient-via-position {
-  syntax: "<length-percentage>";
-  inherits: false;
-  initial-value: 50%;
-}
-
-@property --tw-gradient-to-position {
-  syntax: "<length-percentage>";
-  inherits: false;
-  initial-value: 100%;
-}
-
 @property --tw-backdrop-blur {
   syntax: "*";
   inherits: false
@@ -6277,6 +6174,22 @@
 @property --tw-backdrop-sepia {
   syntax: "*";
   inherits: false
+}
+
+@property --tw-duration {
+  syntax: "*";
+  inherits: false
+}
+
+@property --tw-ease {
+  syntax: "*";
+  inherits: false
+}
+
+@property --tw-content {
+  syntax: "*";
+  inherits: false;
+  initial-value: "";
 }
 
 @keyframes spin {
@@ -6665,13 +6578,15 @@
         @page { size: A4; margin: 0; }
         html, body { margin: 0; background: #fff !important; color: #000; }
         * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-      </style><div class="bg-white text-black"><div class="QuoteDocument-module__MAjgCW__document"><header class="QuoteDocumentHeader-module__SNWqGG__header"><div class="QuoteDocumentHeader-module__SNWqGG__brand"><div class="QuoteDocumentHeader-module__SNWqGG__companyInfo"><strong class="QuoteDocumentHeader-module__SNWqGG__companyName">Emanuele Impiantistica</strong><p class="QuoteDocumentHeader-module__SNWqGG__companyMeta">Via Talete di Mileto,7, 80126 Napoli (NA)</p><p class="QuoteDocumentHeader-module__SNWqGG__companyMeta">P.IVA <!-- -->43152850350<!-- --> &middot; C.F. NPLMNL92M22F839W</p><p class="QuoteDocumentHeader-module__SNWqGG__companyMeta">emanuele@gmail.com &middot; 3286208187</p></div></div><div class="QuoteDocumentHeader-module__SNWqGG__docMeta"><span class="QuoteDocumentHeader-module__SNWqGG__eyebrow">PREVENTIVO</span><p class="QuoteDocumentHeader-module__SNWqGG__number">N. <!-- -->PREV-2026-0013</p></div></header><section class="QuoteTitleBlock-module__nI-jxG__titleBlock"><h2>Riparazione Punto Luce Sala Pricipale</h2><p class="QuoteTitleBlock-module__nI-jxG__description">Riparazione Punto Luce Sala Pricipale</p></section><section class="QuoteRecipient-module__1G99kW__metaGrid"><div class="QuoteRecipient-module__1G99kW__clientSection"><h3 class="QuoteSectionTitle-module__937djq__title">Destinatario</h3><strong>Ristorante 'La Corrida'</strong><p>Via Chiaja, 80125 Napoli</p><p>lacorrida.restaurant@gmail.com</p><p>+390817262140</p></div><div class="QuoteRecipient-module__1G99kW__validity"><h3 class="QuoteSectionTitle-module__937djq__title">Valido fino al</h3><strong>29/11/2026</strong></div></section><section class="QuoteItemsTable-module__XyTzHq__itemsSection"><h3 class="QuoteSectionTitle-module__937djq__title">Dettaglio del preventivo</h3><table class="QuoteItemsTable-module__XyTzHq__table"><thead><tr><th>Descrizione</th><th class="QuoteItemsTable-module__XyTzHq__num">Qt&agrave;</th><th class="QuoteItemsTable-module__XyTzHq__num">Prezzo</th><th class="QuoteItemsTable-module__XyTzHq__num">Sconto</th><th class="QuoteItemsTable-module__XyTzHq__num">Importo</th></tr></thead><tbody><tr><td><span class="QuoteItemsTable-module__XyTzHq__itemName"></span><span class="QuoteItemsTable-module__XyTzHq__itemDesc">Manutenzione impianto elettrico
-Controllo e manutenzione ordinaria dell&rsquo;impianto.</span></td><td class="QuoteItemsTable-module__XyTzHq__num">2<!-- --> <!-- -->pz</td><td class="QuoteItemsTable-module__XyTzHq__num">38,00&nbsp;&euro;</td><td class="QuoteItemsTable-module__XyTzHq__num">&mdash;</td><td class="QuoteItemsTable-module__XyTzHq__num">76,00&nbsp;&euro;</td></tr><tr><td><span class="QuoteItemsTable-module__XyTzHq__itemName"></span><span class="QuoteItemsTable-module__XyTzHq__itemDesc">Installazione punto luce
-Installazione e collegamento di un punto luce.</span></td><td class="QuoteItemsTable-module__XyTzHq__num">1<!-- --> <!-- -->pz</td><td class="QuoteItemsTable-module__XyTzHq__num">55,00&nbsp;&euro;</td><td class="QuoteItemsTable-module__XyTzHq__num">&mdash;</td><td class="QuoteItemsTable-module__XyTzHq__num">55,00&nbsp;&euro;</td></tr><tr><td><span class="QuoteItemsTable-module__XyTzHq__itemName"></span><span class="QuoteItemsTable-module__XyTzHq__itemDesc">Uscita tecnico per sopralluogo
-Sopralluogo tecnico presso il cliente.</span></td><td class="QuoteItemsTable-module__XyTzHq__num">2<!-- --> <!-- -->pz</td><td class="QuoteItemsTable-module__XyTzHq__num">50,00&nbsp;&euro;</td><td class="QuoteItemsTable-module__XyTzHq__num">50,00&nbsp;&euro;</td><td class="QuoteItemsTable-module__XyTzHq__num">50,00&nbsp;&euro;</td></tr></tbody></table></section><section class="QuoteTotals-module__kW228q__totalsSection"><dl class="QuoteTotals-module__kW228q__totals"><div><dt>Imponibile</dt><dd>181,00&nbsp;&euro;</dd></div><div><dt>IVA (<!-- -->0<!-- -->%)</dt><dd>39,82&nbsp;&euro;</dd></div><div class="QuoteTotals-module__kW228q__grandTotal"><dt>Totale</dt><dd>220,82&nbsp;&euro;</dd></div></dl></section><section class="QuoteTextSection-module__Nh4JBa__termsSection"><strong>Note</strong><p>Il presente preventivo &egrave; stato elaborato sulla base delle informazioni e delle esigenze comunicate dal cliente. Per eventuali chiarimenti, variazioni o richieste aggiuntive, si invita a contattare l'azienda prima dell'accettazione.</p></section><section class="QuoteTextSection-module__Nh4JBa__termsSection"><strong>Condizioni</strong><p>Il presente preventivo ha una validit&agrave; di 30 giorni dalla data di emissione, salvo diversa indicazione. Prezzi, servizi e condizioni sono quelli riportati nel documento.
+      </style><div class="bg-white text-black"><div class="QuoteDocument-module__MAjgCW__document"><header class="QuoteDocumentHeader-module__SNWqGG__header"><div class="QuoteDocumentHeader-module__SNWqGG__brand"><img alt="Logo di En Web Developer" width="140" height="56" decoding="async" data-nimg="1" class="QuoteLogo-module__9EUGqW__logo" style="color:transparent" src="data:image/png;base64,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"><div class="QuoteDocumentHeader-module__SNWqGG__companyInfo"><strong class="QuoteDocumentHeader-module__SNWqGG__companyName">En Web Developer</strong><p class="QuoteDocumentHeader-module__SNWqGG__companyMeta">P.IVA 22068650583 &middot; C.F. NPLMNL92M22F839W</p></div></div><div class="QuoteDocumentHeader-module__SNWqGG__docMeta"><span class="QuoteDocumentHeader-module__SNWqGG__eyebrow">PREVENTIVO</span><p class="QuoteDocumentHeader-module__SNWqGG__number">N. <!-- -->PREV-2026-002</p></div></header><section class="QuoteTitleBlock-module__nI-jxG__titleBlock"><h2>Sito Vetrina</h2><p class="QuoteTitleBlock-module__nI-jxG__description">Creazione sito vetrina per Pippo srl</p></section><section class="QuoteRecipient-module__1G99kW__metaGrid"><div class="QuoteRecipient-module__1G99kW__clientSection"><h3 class="QuoteSectionTitle-module__937djq__title">Destinatario</h3><strong>Pippo SRL</strong><p>Vai Leopardi, 80100 Napoli</p><p>pippo@gmail.com</p><p>+393256323222</p></div><div class="QuoteRecipient-module__1G99kW__validity"><h3 class="QuoteSectionTitle-module__937djq__title">Valido fino al</h3><strong>08/12/2026</strong></div></section><section class="QuoteItemsTable-module__XyTzHq__itemsSection"><h3 class="QuoteSectionTitle-module__937djq__title">Dettaglio del preventivo</h3><table class="QuoteItemsTable-module__XyTzHq__table"><thead><tr><th>Descrizione</th><th class="QuoteItemsTable-module__XyTzHq__num">Qt&agrave;</th><th class="QuoteItemsTable-module__XyTzHq__num">Prezzo</th><th class="QuoteItemsTable-module__XyTzHq__num">Sconto</th><th class="QuoteItemsTable-module__XyTzHq__num">Importo</th></tr></thead><tbody><tr><td><span class="QuoteItemsTable-module__XyTzHq__itemName"></span><span class="QuoteItemsTable-module__XyTzHq__itemDesc">Hosting Gestito WordPress / Cloud (Annuale)
+Spazio hosting ottimizzato, veloce e sicuro su server dedicati.</span></td><td class="QuoteItemsTable-module__XyTzHq__num">1<!-- --> <!-- -->pz</td><td class="QuoteItemsTable-module__XyTzHq__num">240,00&nbsp;&euro;</td><td class="QuoteItemsTable-module__XyTzHq__num">&mdash;</td><td class="QuoteItemsTable-module__XyTzHq__num">240,00&nbsp;&euro;</td></tr><tr><td><span class="QuoteItemsTable-module__XyTzHq__itemName"></span><span class="QuoteItemsTable-module__XyTzHq__itemDesc">Configurazione DNS &amp; Dominio
+Gestione record DNS, configurazione domini e propagazione.</span></td><td class="QuoteItemsTable-module__XyTzHq__num">1<!-- --> <!-- -->pz</td><td class="QuoteItemsTable-module__XyTzHq__num">80,00&nbsp;&euro;</td><td class="QuoteItemsTable-module__XyTzHq__num">&mdash;</td><td class="QuoteItemsTable-module__XyTzHq__num">80,00&nbsp;&euro;</td></tr><tr><td><span class="QuoteItemsTable-module__XyTzHq__itemName"></span><span class="QuoteItemsTable-module__XyTzHq__itemDesc">Sviluppo Sito Web Vetrina (Landing Page)
+Realizzazione sito web monopagina responsive, ottimizzato SEO base.</span></td><td class="QuoteItemsTable-module__XyTzHq__num">1<!-- --> <!-- -->pz</td><td class="QuoteItemsTable-module__XyTzHq__num">850,00&nbsp;&euro;</td><td class="QuoteItemsTable-module__XyTzHq__num">15,00&nbsp;&euro;</td><td class="QuoteItemsTable-module__XyTzHq__num">835,00&nbsp;&euro;</td></tr></tbody></table></section><section class="QuoteTotals-module__kW228q__totalsSection"><dl class="QuoteTotals-module__kW228q__totals"><div><dt>Imponibile</dt><dd>1042,50&nbsp;&euro;</dd></div><div><dt>IVA (<!-- -->0<!-- -->%)</dt><dd>229,35&nbsp;&euro;</dd></div><div class="QuoteTotals-module__kW228q__grandTotal"><dt>Totale</dt><dd>1271,85&nbsp;&euro;</dd></div></dl></section><section class="QuotePaymentInfo-module__kHKliW__paymentSection"><strong>Pagamento</strong><p>Metodo: <!-- -->Bonifico bancario</p><p>Saldo a 30 giorni</p></section><section class="QuoteTextSection-module__Nh4JBa__termsSection"><strong>Note</strong><p>- Validit&agrave; dell'offerta: Il presente preventivo ha una validit&agrave; di 30 giorni dalla data di emissione; trascorso tale termine, i prezzi potrebbero subire variazioni.
 
-L'accettazione del preventivo conferma l'accordo sulle attivit&agrave;, sui costi e sulle condizioni indicate. Eventuali modifiche o richieste aggiuntive dovranno essere concordate tra le parti e potranno comportare variazioni di prezzo e delle tempistiche.
+- Materiali a carico del cliente: Testi, immagini, loghi e contenuti multimediali definitivi devono essere forniti dal cliente nei formati richiesti entro i tempi concordati per non accumulare ritardi sulla tabella di marcia.
 
-L'esecuzione dei lavori o la fornitura dei servizi avverr&agrave; secondo le modalit&agrave; e le tempistiche concordate con il cliente. Il pagamento sar&agrave; effettuato secondo le condizioni indicate nel presente preventivo.
+- Revisioni incluse: &Egrave; incluso nel prezzo il numero di revisioni specificato nel progetto (solitamente 2 cicli di modifiche per fase); eventuali richieste extra o modifiche strutturali successive saranno quotate a parte.</p></section><section class="QuoteTextSection-module__Nh4JBa__termsSection"><strong>Condizioni</strong><p>- Modalit&agrave; di pagamento: Salvo diversi accordi, il pagamento &egrave; suddiviso in acconto (solitamente 30% o 50% alla conferma dell'ordine) e saldo alla consegna o prima della messa online definitiva del sito.
 
-Per qualsiasi chiarimento o ulteriore informazione, il cliente pu&ograve; contattare l'azienda utilizzando i recapiti riportati nel documento.</p></section><footer class="QuoteDocument-module__MAjgCW__footer">Documento generato con Prevo</footer></div><!--$--><!--/$--></div></body></html>
+- Propriet&agrave; intellettuale: Il codice sviluppato e il sito web diventano di propriet&agrave; esclusiva del cliente solo ed esclusivamente dopo il saldo completo dell'importo totale pattuito.
+
+- Garanzia e supporto post-lancio: &Egrave; inclusa un'assistenza tecnica gratuita di 30 giorni dalla messa online per la risoluzione di eventuali bug o malfunzionamenti imputabili al lavoro svolto. Non sono inclusi interventi causati da manomissioni del cliente o aggiornamenti di terze parti.</p></section><footer class="QuoteDocument-module__MAjgCW__footer">Documento generato con Prevo</footer></div><!--$--><!--/$--></div></body></html>

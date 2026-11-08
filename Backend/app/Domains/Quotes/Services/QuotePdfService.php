@@ -76,15 +76,6 @@ class QuotePdfService
             $status = $response->status();
             $elapsedMs = (microtime(true) - $start) * 1000;
 
-            Log::info('[pdf] richiesta pagina di stampa', [
-                'quote_id' => $quote->id,
-                'company_slug' => $company->slug,
-                'url' => $url,
-                'has_signed_params' => !empty($query),
-                'status' => $status,
-                'elapsed_ms' => round($elapsedMs, 1),
-                'has_print_secret_header' => $secretConfigured,
-            ]);
 
             $html = $response->throw()->body();
 
@@ -132,10 +123,6 @@ class QuotePdfService
             throw new \RuntimeException('Pagina di stampa non valida (errore Next.js): controlla PRINT_SECRET e la firma.');
         }
 
-        Log::debug('[pdf] risposta pagina di stampa OK', [
-            'quote_id' => $quote->id,
-            'bytes' => strlen($html),
-        ]);
 
         return $this->prepare($html, $internal, $public);
     }

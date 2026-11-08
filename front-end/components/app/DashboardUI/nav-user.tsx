@@ -1,7 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import {
   EllipsisVerticalIcon,
   CircleUserRoundIcon,
@@ -60,6 +60,7 @@ function UserAvatar({
 export function NavUser({ user }: { user: SidebarUser }) {
   const { isMobile } = useSidebar();
   const router = useRouter();
+  const { slug } = useParams<{ slug: string }>();
   const [pending, startTransition] = useTransition();
 
   function handleLogOut() {
@@ -68,6 +69,10 @@ export function NavUser({ user }: { user: SidebarUser }) {
       router.replace("/login");
       router.refresh();
     });
+  }
+
+  function handleGoToAccount() {
+    router.push(`/${slug}/settings/profile`);
   }
 
   return (
@@ -112,7 +117,7 @@ export function NavUser({ user }: { user: SidebarUser }) {
             <DropdownMenuSeparator />
 
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={handleGoToAccount}>
                 <CircleUserRoundIcon />
                 Account
               </DropdownMenuItem>

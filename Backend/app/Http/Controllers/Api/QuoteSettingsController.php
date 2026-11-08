@@ -8,7 +8,6 @@ use App\Domains\Quotes\Models\QuoteSettings;
 use App\Domains\Quotes\Requests\QuoteSettingsRequest;
 use App\Domains\Quotes\Resources\QuoteSettingsResource;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Log;
 
 class QuoteSettingsController extends Controller
 {
@@ -26,10 +25,6 @@ class QuoteSettingsController extends Controller
             'company.emails',
             'company.phones',
             'company.addresses',
-        ]);
-
-        Log::debug('Quote settings loaded', [
-            'settings' => $settings->toArray(),
         ]);
 
         // refresh() serve: firstOrCreate restituisce il model solo con i campi

@@ -32,7 +32,6 @@ export default async function PrintQuotePage({ params, searchParams }: Props) {
 
   const url = `${process.env.API_URL}/api/companies/${encodeURIComponent(slug)}/quotes/${encodeURIComponent(id)}/print?${qs}`;
   const res = await serverApi.get(url, {
-    cache: "no-store",
     headers: { Accept: "application/json" },
   });
 

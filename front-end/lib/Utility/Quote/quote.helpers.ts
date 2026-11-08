@@ -47,6 +47,48 @@ export function discountFromApi(type: DiscountType, value: unknown): number {
 }
 
 // ============================================================================
+// HELPER: tipo di sconto (UI <-> backend)
+// Il backend accetta 'percentage' | 'fixed' ma restituisce i valori in
+// maiuscolo ("PERCENTAGE"): la conversione ignora maiuscole e minuscole.
+// ============================================================================
+
+const DISCOUNT_TYPE_ALIASES: Record<string, "percentage" | "fixed"> = {
+  "%": "percentage",
+  percentage: "percentage",
+  percent: "percentage",
+  "€": "fixed",
+  fixed: "fixed",
+  amount: "fixed",
+  currency: "fixed",
+};
+
+/** Riconosce il tipo di sconto da una stringa qualsiasi; null se non lo conosce. */
+export function normalizeDiscountType(
+  raw: string | null | undefined,
+): "percentage" | "fixed" | null {
+  if (!raw) return null;
+  return DISCOUNT_TYPE_ALIASES[String(raw).trim().toLowerCase()] ?? null;
+}
+
+/**
+ * Tipo di sconto restituito dal backend → tipo del form.
+ * Senza valore (nessuno sconto) è percentuale; un valore sconosciuto viene
+ * segnalato in console invece di diventare un importo in euro senza dirlo.
+ */
+export function discountTypeFromApi(
+  raw: string | null | undefined,
+): DiscountType {
+  if (!raw) return "percentage";
+
+  const type = normalizeDiscountType(raw);
+  if (!type) {
+    console.error(`[quote] tipo sconto sconosciuto dal backend: "${raw}"`);
+    return "percentage";
+  }
+  return type;
+}
+
+// ============================================================================
 // HELPER: contatti cliente
 // ============================================================================
 
@@ -91,9 +133,7 @@ export function quoteToHeader(q: QuoteDetail): QuoteHeaderValues {
 }
 
 export function quoteToTax(q: QuoteDetail): TaxQuoteValue {
-  const discountType: DiscountType = q.discount_type
-    ? API_TO_DISCOUNT_TYPE[q.discount_type]
-    : "percentage";
+  const discountType: DiscountType = discountTypeFromApi(q.discount_type)
 
   return {
     vat_rate: String(Number(q.vat_rate ?? 0)),
@@ -222,8 +262,22 @@ export function buildQuotePayload({
   };
 }
 
+/**
+ * Normalizza il tipo di sconto dell'UI nei valori attesi dal backend.
+ * Il backend accetta: 'percentage' | 'fixed' (visto CreateQuoteRequest).
+ * L'UI può inviare simboli (%) €) o stringhe alternative (percent, amount, …).
+ */
+
+
 /** Converte la riga del form nella riga del payload. */
 export function toQuotePayloadItem(item: QuoteItem): QuotePayloadItem {
+  const hasDiscount =
+    item.discount_value !== null &&
+    item.discount_value !== undefined &&
+    Number(item.discount_value) > 0;
+
+  const type = normalizeDiscountType(item.discount_type ?? null);
+
   return {
     product_id: item.product_id,
     // quote_items ha solo `description`: nome e descrizione vengono uniti.
@@ -233,12 +287,12 @@ export function toQuotePayloadItem(item: QuoteItem): QuotePayloadItem {
     unit: item.unit,
     quantity: item.quantity,
     unit_price: item.unit_price,
-    ...(item.discount_value > 0
+    ...(hasDiscount
       ? {
-          discount_type: DISCOUNT_TYPE_TO_API[item.discount_type],
-          discount_value: item.discount_value,
+          discount_type: type ?? "percentage", // default sicuro se manca il tipo
+          discount_value: Number(item.discount_value),
         }
-      : {}),
+      : {}), // senza sconto: entrambi i campi vengono omessi (null nel backend)
   };
 }
 
@@ -272,9 +326,7 @@ export function toQuoteItem(line: QuoteLine): QuoteItem {
     quantity: Number(line.quantity),
     unit: line.unit,
     unit_price: Number(line.unit_price),
-    discount_type: line.discount_type
-      ? API_TO_DISCOUNT_TYPE[line.discount_type]
-      : "percentage",
+    discount_type: discountTypeFromApi(line.discount_type),
     discount_value: Number(line.discount_value ?? 0),
   };
 }
@@ -299,7 +351,6 @@ export function getAppearanceDefaults(
       EMPTY_APPEARANCE.template,
     primaryColor:
       settings?.quote_primary_color ?? EMPTY_APPEARANCE.primaryColor,
-    accentColor:
-      settings?.quote_accent_color ?? EMPTY_APPEARANCE.accentColor,
+    accentColor: settings?.quote_accent_color ?? EMPTY_APPEARANCE.accentColor,
   };
 }

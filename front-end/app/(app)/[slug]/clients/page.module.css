@@ -131,8 +131,13 @@
 .tableWrap table {
   min-width: 760px;
 }
+.tableWrap th,
+.tableWrap td {
+  vertical-align: middle;
+  padding: 1rem 1rem;
+}
 .tableWrap th {
-  height: 44px;
+  height: auto;
   background: var(--ds-muted);
   color: var(--ds-muted-foreground);
   font-size: 11px;
@@ -140,12 +145,17 @@
   letter-spacing: 0.06em;
 }
 .tableWrap td {
-  height: 68px;
+  height: auto;
   font-size: 13px;
   color: var(--ds-foreground);
+  border-bottom: 1px solid var(--ds-border);
+}
+.tableWrap tr:last-child td {
+  border-bottom: none;
 }
 .tableWrap tr:hover {
   background: var(--ds-muted);
+  transition: background-color 0.15s ease;
 }
 .identity {
   display: flex;

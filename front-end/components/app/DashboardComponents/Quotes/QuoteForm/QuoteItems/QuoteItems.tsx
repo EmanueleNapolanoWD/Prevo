@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { calcLineTotal, parseNumber } from "@/lib/utils";
 import type { Product } from "@/types/product";
-import type { QuoteItem, DiscountType } from "@/types/quote";
+import type { QuoteItem, DiscountType } from "@/lib/Utility/Quote/quote.types";
 import ProductSearchBar from "./ProductSearchBar/ProductSearchBar";
 import { useQuoteItems } from "./useQuoteItems";
 import styles from "./quote-items.module.css";
@@ -220,11 +220,22 @@ export default function QuoteItems({
           </Field>
 
           <Field id={`${uid}-unit`} label="Unità">
-            <Input
+            <select
               id={`${uid}-unit`}
               value={draft.unit}
               onChange={(e) => setField("unit", e.target.value)}
-            />
+              className="w-full px-3 py-2 text-sm border rounded-md bg-background focus:ring-2 focus:ring-ring outline-none transition"
+            >
+              <option value="pz">Pezzo (pz)</option>
+              <option value="h">Ora (h)</option>
+              <option value="forfait">A corpo (forfait)</option>
+              <option value="m">Metro (m)</option>
+              <option value="m2">Metro quadro (m²)</option>
+              <option value="m3">Metro cubo (m³)</option>
+              <option value="kg">Chilogrammo (kg)</option>
+              <option value="l">Litro (l)</option>
+              <option value="gg">Giorno (gg)</option>
+            </select>
           </Field>
 
           <Field id={`${uid}-sale_price`} label="Prezzo unitario">

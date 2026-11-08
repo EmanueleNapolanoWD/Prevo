@@ -7,7 +7,6 @@ use App\Domains\Quotes\Models\Quote;
 use App\Domains\Quotes\Resources\QuoteResource;
 use App\Domains\Quotes\Resources\QuoteSettingsResource;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class BuildQuotePrintDataAction
@@ -68,7 +67,6 @@ class BuildQuotePrintDataAction
         $path = $company->logo_path;
 
         if (!$path) {
-            \Log::info('nessun logo path');
             return null;
         }
 

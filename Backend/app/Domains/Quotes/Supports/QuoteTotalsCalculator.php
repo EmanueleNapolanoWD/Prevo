@@ -6,7 +6,6 @@ use App\Domains\Quotes\Data\CalculatedLine;
 use App\Domains\Quotes\Data\QuoteItemData;
 use App\Domains\Quotes\Data\QuoteTotals;
 use App\Domains\Quotes\Enums\DiscountType;
-use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
 
 final class QuoteTotalsCalculator
@@ -189,16 +188,6 @@ final class QuoteTotalsCalculator
             taxTotal: $taxTotal,
             total: $total,
         );
-
-        Log::debug('QuoteTotalsCalculator: risultato del calcolo', [
-            'subtotal' => $res->subtotal,
-            'discountTotal' => $res->discountTotal,
-            'surcharge' => $res->surcharge,
-            'taxableAmount' => $res->taxableAmount,
-            'taxTotal' => $res->taxTotal,
-            'total' => $res->total,
-            'lines_count' => count($res->lines),
-        ]);
 
         return $res;
     }

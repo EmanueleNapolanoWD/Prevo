@@ -6,7 +6,6 @@ use App\Domains\Clients\Dtos\UpdateClientData;
 use App\Domains\Clients\Models\Client;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class UpdateClientAction
 {
@@ -31,20 +30,6 @@ class UpdateClientAction
 
     public function execute(Client $client, UpdateClientData $data)
     {
-
-        Log::debug('Aggiornamento cliente richiesto', [
-            'client_id' => $client->id,
-            'company_id' => $client->company_id,
-            'fields' => array_keys($data->attributes),
-            'relations' => array_values(array_filter([
-                $data->emailsProvided ? 'emails' : null,
-                $data->phonesProvided ? 'phones' : null,
-                $data->addressesProvided ? 'addresses' : null,
-                $data->groupIdsProvided ? 'group_ids' : null,
-            ])),
-        ]);
-
-
         return DB::transaction(function () use ($client, $data): Client {
             $fields = Arr::only($data->attributes, self::CLIENT_FIELDS);
 

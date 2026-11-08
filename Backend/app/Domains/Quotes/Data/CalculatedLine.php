@@ -28,8 +28,6 @@ final readonly class CalculatedLine
     /** @return array<string, mixed> Pronto per $quote->items()->create(). */
     public function toArray(): array
     {
-        \Log::info($this->discountType?->value);
-        \Log::info($this->discountType ? number_format($this->discountValue, 2, '.', '') : null);
 
         return [
             'product_id' => $this->productId,
