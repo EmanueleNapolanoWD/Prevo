@@ -4,11 +4,12 @@ import { useId, useMemo, useState, type ReactNode } from "react";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { calcLineTotal, parseNumber } from "@/lib/utils";
+import { parseNumber } from "@/lib/utils";
 import type { Product } from "@/types/product";
 import type { QuoteItem, DiscountType } from "@/lib/Utility/Quote/quote.types";
 import ProductSearchBar from "./ProductSearchBar/ProductSearchBar";
 import { useQuoteItems } from "./useQuoteItems";
+import { QuoteItemsTable } from "./QuoteItemsTable";
 import styles from "./quote-items.module.css";
 import {
   Select,
@@ -16,8 +17,6 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectLabel,
-  SelectSeparator,
   SelectValue,
 } from "@/components/ui/select";
 
@@ -99,11 +98,6 @@ export default function QuoteItems({
     [currency],
   );
 
-  const subtotal = useMemo(
-    () => items.reduce((sum, item) => sum + calcLineTotal(item), 0),
-    [items],
-  );
-
   function setField<K extends keyof Draft>(field: K, value: Draft[K]) {
     setDraft((d) => ({ ...d, [field]: value }));
     setFormError(null);
@@ -181,10 +175,6 @@ export default function QuoteItems({
 
     onItemsChange([...items, newItem]);
     resetComposer();
-  }
-
-  function handleRemove(id: string) {
-    onItemsChange(items.filter((item) => item.id !== id));
   }
 
   return (
@@ -301,77 +291,12 @@ export default function QuoteItems({
         </div>
       </div>
 
-      {/* Lista voci */}
-      {items.length === 0 ? (
-        <p className={styles.empty}>Nessuna voce inserita.</p>
-      ) : (
-        <div className={styles.tableWrap}>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>Voce</th>
-                <th className={styles.num}>Qtà</th>
-                <th className={styles.num}>Prezzo</th>
-                <th className={styles.num}>Sconto</th>
-                <th className={styles.num}>Totale</th>
-                <th>
-                  <span className={styles.srOnly}>Azioni</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((item) => (
-                <tr key={item.id}>
-                  <td>
-                    <div className={styles.itemName}>{item.name}</div>
-                    {item.description && (
-                      <div className={styles.itemDesc}>{item.description}</div>
-                    )}
-                  </td>
-                  <td className={styles.num}>
-                    {item.quantity} {item.unit}
-                  </td>
-                  <td className={styles.num}>
-                    {money.format(item.unit_price)}
-                  </td>
-                  <td className={styles.num}>
-                    {item.discount_value > 0
-                      ? item.discount_type === "percentage"
-                        ? `${item.discount_value}%`
-                        : money.format(item.discount_value)
-                      : "—"}
-                  </td>
-                  <td className={styles.num}>
-                    {money.format(calcLineTotal(item))}
-                  </td>
-                  <td className={styles.num}>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      aria-label={`Rimuovi ${item.name}`}
-                      onClick={() => handleRemove(item.id)}
-                    >
-                      Rimuovi
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-            <tfoot>
-              <tr>
-                <td colSpan={4} className={styles.num}>
-                  Subtotale voci
-                </td>
-                <td className={`${styles.num} ${styles.total}`}>
-                  {money.format(subtotal)}
-                </td>
-                <td />
-              </tr>
-            </tfoot>
-          </table>
-        </div>
-      )}
+      <QuoteItemsTable
+        items={items}
+        onItemsChange={onItemsChange}
+        currency={currency}
+        money={money}
+      />
     </div>
   );
 }

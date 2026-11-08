@@ -3,15 +3,16 @@
 namespace App\Domains\Quotes\Requests;
 
 use App\Domains\Companies\Models\Company;
-use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 class CreateQuoteRequest extends FormRequest
 {
 
 
     private const TEMPLATES = ['classic', 'modern', 'minimal'];
+    private const DISCOUNT_TYPES = ['percentage', 'fixed'];
 
     private ?Company $company = null;
 
@@ -41,7 +42,6 @@ class CreateQuoteRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
@@ -66,6 +66,21 @@ class CreateQuoteRequest extends FormRequest
             'vat_rate' => ['required', 'numeric', 'between:0,100', 'decimal:0,2'],
             'surcharge' => ['required', 'numeric', 'min:0', 'max:9999999', 'decimal:0,2'],
             'valid_until' => ['required', 'date', 'after_or_equal:today'],
+
+            'discount_type' => [
+                'nullable',
+                Rule::in(self::DISCOUNT_TYPES),
+                'required_with:discount_value',
+            ],
+            'discount_value' => [
+                'nullable',
+                'numeric',
+                'min:0',
+                'max:9999999',
+                'decimal:0,2',
+                'required_with:discount_type',
+            ],
+
 
             'appearance.template' => ['required', Rule::in(self::TEMPLATES)],
             'appearance.primary_color' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],
@@ -96,6 +111,32 @@ class CreateQuoteRequest extends FormRequest
             ],
         ];
     }
+
+    /** Uno sconto percentuale oltre il 100% renderebbe negativo il totale. */
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $validator) {
+            $message = 'Lo sconto percentuale non può superare il 100%.';
+
+            if (
+                $this->input('discount_type') === 'percentage'
+                && (float) $this->input('discount_value') > 100
+            ) {
+                $validator->errors()->add('discount_value', $message);
+            }
+
+            foreach ((array) $this->input('items', []) as $index => $item) {
+                if (
+                    is_array($item)
+                    && ($item['discount_type'] ?? null) === 'percentage'
+                    && (float) ($item['discount_value'] ?? 0) > 100
+                ) {
+                    $validator->errors()->add("items.{$index}.discount_value", $message);
+                }
+            }
+        });
+    }
+
 
     public function messages(): array
     {

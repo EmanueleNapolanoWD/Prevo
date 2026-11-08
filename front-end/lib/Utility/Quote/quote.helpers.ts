@@ -253,7 +253,10 @@ export function buildQuotePayload({
           discount_type: DISCOUNT_TYPE_TO_API[tax.discount_type],
           discount_value: discountToApi(tax.discount_type, discountValue),
         }
-      : {}),
+      : {
+          discount_type: "percentage", // nessun sconto attivo
+          discount_value: 0,           // inviato comunque: evita NULL su colonna NOT NULL
+        }),
     valid_until: tax.valid_until || null,
     notes: tax.notes.trim() || null,
     terms: tax.terms.trim() || null,
@@ -292,7 +295,10 @@ export function toQuotePayloadItem(item: QuoteItem): QuotePayloadItem {
           discount_type: type ?? "percentage", // default sicuro se manca il tipo
           discount_value: Number(item.discount_value),
         }
-      : {}), // senza sconto: entrambi i campi vengono omessi (null nel backend)
+      : {
+          discount_type: "percentage", // default sicuro: nessun sconto attivo
+          discount_value: 0,           // evita NULL su colonna NOT NULL del DB
+        }),
   };
 }
 

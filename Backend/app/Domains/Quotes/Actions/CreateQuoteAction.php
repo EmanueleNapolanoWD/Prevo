@@ -9,7 +9,6 @@ use App\Domains\Companies\Models\Company;
 use App\Domains\Quotes\Data\CalculatedLine;
 use App\Domains\Quotes\Data\CreateQuoteData;
 use App\Domains\Quotes\Enums\QuoteStatus;
-use App\Domains\Quotes\Jobs\GenerateQuotePdfJob;
 use App\Domains\Quotes\Models\Quote;
 use App\Domains\Quotes\Models\QuoteSettings;
 use App\Domains\Quotes\Supports\Money;
@@ -68,6 +67,7 @@ class CreateQuoteAction
                 'contact_phone' => $data->contact['phone'] ?? null,
                 'contact_address' => $data->contact['address'] ?? null,
                 'client_snapshot' => $this->clientSnapShot($client, $data),
+                'vat_rate' => $vatRate,
                 'subtotal' => Money::toDecimal($totals->subtotal),
                 'discount_total' => Money::toDecimal($totals->discountTotal),
                 'surcharge' => Money::toDecimal($data->surchargeCents),
@@ -107,6 +107,7 @@ class CreateQuoteAction
                         'notes',
                         'terms',
                         'currency',
+                        'vat_rate',
                         'template',
                         'primary_color',
                         'accent_color',
@@ -153,7 +154,7 @@ class CreateQuoteAction
             );
 
             // Generazione PDF se va tutto a buon fine
-            GenerateQuotePdfJob::dispatch($quote->id, $quote->version)->afterCommit();
+            //GenerateQuotePdfJob::dispatch($quote->id, $quote->version)->afterCommit();
 
             return $quote;
         });

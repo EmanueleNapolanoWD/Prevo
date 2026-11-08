@@ -29,7 +29,6 @@ import type {
 import {
   CLIENT_ERROR,
   DEFAULT_CURRENCY,
-  EMPTY_APPEARANCE,
   EMPTY_CONTACT,
   MONEY_LOCALE,
   PRODUCT_ERROR,
@@ -62,11 +61,11 @@ import type {
   UseQuoteFormReturn,
 } from "@/lib/Utility/Quote/quote.types";
 
-// debug
-import {
-  debugQuoteSource,
-  debugQuoteTotals,
-} from "@/lib/Utility/Quote/quote.debug";
+// // debug
+// import {
+//   debugQuoteSource,
+//   debugQuoteTotals,
+// } from "@/lib/Utility/Quote/quote.debug";
 
 // Re-export: chi importava i tipi da "useQuoteForm" continua a funzionare
 export type {
@@ -97,9 +96,9 @@ export function useQuoteForm({
     () => buildInitialValues(quote, initialClient),
     [quote, initialClient],
   );
-  useEffect(() => {
-    debugQuoteSource(quote, initial);
-  }, [quote, initial]);
+  // useEffect(() => {
+  //   debugQuoteSource(quote, initial);
+  // }, [quote, initial]);
 
   const sourceKey = getSourceKey(quote, initialClient);
 
@@ -174,10 +173,6 @@ export function useQuoteForm({
     [taxDefaults, taxEdits],
   );
 
-  // debug
-  // console.log("tax in useQuoteForm: ", tax);
-  // debug
-
   const appearance = useMemo(
     () => ({ ...appearanceDefaults, ...appearanceEdits }),
     [appearanceDefaults, appearanceEdits],
@@ -242,9 +237,9 @@ export function useQuoteForm({
     tax.discount_type,
     tax.discount_value,
   ]);
-  useEffect(() => {
-    debugQuoteTotals({ items, tax, totals });
-  }, [items, tax, totals]);
+  // useEffect(() => {
+  //   debugQuoteTotals({ items, tax, totals });
+  // }, [items, tax, totals]);
 
   // --------------------------------------------------------------------------
   // RICERCA E SELEZIONE PRODOTTI

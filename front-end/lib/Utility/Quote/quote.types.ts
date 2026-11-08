@@ -24,6 +24,8 @@ export interface QuoteItem {
   unit_price: number;
   discount_type: DiscountType;
   discount_value: number;
+  /** Ordine di visualizzazione della riga nel preventivo. */
+  sort_order?: number;
 }
 
 export const QUOTE_TEMPLATES = [

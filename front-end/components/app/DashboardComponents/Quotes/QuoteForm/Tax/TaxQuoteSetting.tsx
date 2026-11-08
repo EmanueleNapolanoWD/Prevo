@@ -3,19 +3,12 @@
 import { useId } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import type { TaxQuoteValue } from "@/lib/Utility/Quote/quote.types";
 import styles from "./tax-quote-settings.module.css";
 
-export interface TaxQuoteValues {
-  vat_rate: string;
-  valid_until: string;
-  surcharge: string;
-  notes: string;
-  terms: string;
-}
-
 interface TaxQuoteSettingsProps {
-  values: TaxQuoteValues;
-  onChange: (values: TaxQuoteValues) => void;
+  values: TaxQuoteValue;
+  onChange: (values: TaxQuoteValue) => void;
   defaultNotes?: string | null;
   defaultTerms?: string | null;
   disabled?: boolean;
@@ -30,9 +23,9 @@ export default function TaxQuoteSettings({
 }: TaxQuoteSettingsProps) {
   const uid = useId();
 
-  function setField<K extends keyof TaxQuoteValues>(
+  function setField<K extends keyof TaxQuoteValue>(
     field: K,
-    value: TaxQuoteValues[K],
+    value: TaxQuoteValue[K],
   ) {
     onChange({ ...values, [field]: value });
   }

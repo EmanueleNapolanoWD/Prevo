@@ -200,7 +200,7 @@ export default function QuoteRow({ quote, slug, onDelete }: QuoteRowProps) {
                   Eliminare il preventivo {quote.number}?
                 </AlertDialogTitle>
                 <AlertDialogDescription>
-                  L'operazione non può essere annullata.
+                  L&apos;operazione non può essere annullata.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>

@@ -20,7 +20,7 @@ return new class extends Migration {
             $table->string('primary_color', 7);
             $table->string('accent_color', 7);
             $table->string('number', 50);
-            $table->string('idempotency_key', 100)->nullable(); // se l’agent o la coda ritenta una richiesta, non crei due preventivi uguali.
+            $table->string('idempotency_key', 100)->nullable(); // se l'agent o la coda ritenta una richiesta, non crei due preventivi uguali.
             $table->unsignedInteger('version')->default(1);
             $table->string('status', 30)->default('DRAFT');
             $table->string('title', 255);
@@ -28,14 +28,23 @@ return new class extends Migration {
             $table->string('contact_email')->nullable();
             $table->string('contact_phone', 50)->nullable();
             $table->string('contact_address')->nullable();
+
+            // Importi calcolati
             $table->decimal('subtotal', 12, 2)->default(0);
             $table->decimal('discount_total', 12, 2)->default(0);
             $table->decimal('surcharge', 12, 2)->default(0);
             $table->decimal('taxable_amount', 12, 2)->default(0);
             $table->decimal('tax_total', 12, 2)->default(0);
-            $table->decimal('stamp_duty', 12, 2)->default(0); // 
+            $table->decimal('stamp_duty', 12, 2)->default(0); // imposta di bollo
             $table->decimal('total', 12, 2)->default(0);
+
+            // Sconto globale come l'ha inserito l'utente (discount_total è il risultato calcolato)
+            $table->string('discount_type', 20)->nullable(); // percentage | fixed
+            $table->decimal('discount_value', 12, 2)->default(0);
+
             $table->string('currency', 3)->default('EUR');
+            $table->decimal('vat_rate', 5, 2)->default(0); // aliquota IVA del preventivo, es. 22.00
+
             $table->timestamp('valid_until')->nullable();
             $table->date('issue_date')->nullable();
             $table->text('notes')->nullable();
@@ -45,12 +54,10 @@ return new class extends Migration {
             $table->timestamp('accepted_at')->nullable();
             $table->timestamp('rejected_at')->nullable();
             $table->json('client_snapshot')->nullable();
-            $table->string('pdf_path')->nullable();
-            $table->timestamp('pdf_generated_at')->nullable();
             $table->timestamps();
             $table->softDeletes();
 
-            //index
+            // index
             $table->unique(['company_id', 'idempotency_key']);
             $table->unique(['company_id', 'number']);
             $table->index(['company_id', 'status']);

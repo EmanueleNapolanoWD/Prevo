@@ -81,14 +81,15 @@ class UpdateQuoteAction
                 'title' => $data->title,
                 'description' => $data->description,
                 'valid_until' => $data->validUntil,
-                'discount_type' => $data->discountType,    // null se rimosso
-                'discount_value' => $data->discountValue,   // null se rimosso
+                'discount_type' => ($data->discountValue !== null && $data->discountValue > 0) ? $data->discountType : null,
+                'discount_value' => $data->discountValue ?? 0,
                 'notes' => $data->notes,
                 'terms' => $data->terms,
                 'contact' => $data->contact,
                 'appearance' => $data->appearance,
 
                 // totali (ADATTA: nomi e unità delle colonne)
+                'vat_rate' => $data->vatRate,
                 'subtotal' => Money::toDecimal($totals->subtotal),
                 'discount_total' => Money::toDecimal($totals->discountTotal),
                 'surcharge' => Money::toDecimal($totals->surcharge),

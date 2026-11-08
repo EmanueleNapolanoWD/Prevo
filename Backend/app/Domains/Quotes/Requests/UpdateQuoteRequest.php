@@ -11,6 +11,7 @@ class UpdateQuoteRequest extends CreateQuoteRequest
     {
         return [
             ...parent::rules(),
+            'valid_until' => ['required', 'date'],
             'version' => ['nullable', 'integer', 'min:1'],
         ];
     }

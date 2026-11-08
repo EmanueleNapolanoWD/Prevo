@@ -19,7 +19,6 @@ export default function FiscalSection({ values }: { values: CompanyValues }) {
         placeholder="IT 00000000000"
         defaultValue={values.vat_number}
         className={styles.emphasis}
-        required
       />
       <Field
         name="tax_code"

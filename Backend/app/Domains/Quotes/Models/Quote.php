@@ -44,6 +44,8 @@ class Quote extends Model
         'contact_address',
         'client_snapshot',
         'subtotal',
+        'discount_type',
+        'discount_value',
         'discount_total',
         'surcharge',
         'taxable_amount',
@@ -54,8 +56,8 @@ class Quote extends Model
         'viewed_at',
         'accepted_at',
         'rejected_at',
-        'pdf_path',
     ];
+
 
     protected function casts(): array
     {
@@ -66,6 +68,7 @@ class Quote extends Model
 
             'vat_rate' => 'decimal:2',
             'subtotal' => 'decimal:2',
+            'discount_value' => 'decimal:2',
             'discount_total' => 'decimal:2',
             'surcharge' => 'decimal:2',
             'taxable_amount' => 'decimal:2',
@@ -80,6 +83,7 @@ class Quote extends Model
         ];
     }
 
+
     /*
     |--------------------------------------------------------------------------
     | ACCESSOR
@@ -89,13 +93,13 @@ class Quote extends Model
     // Colore del testo leggibile sopra il colore primario (bianco o quasi nero)
     protected function textOnPrimary(): Attribute
     {
-        return Attribute::get(fn () => self::contrastColor($this->primary_color));
+        return Attribute::get(fn() => self::contrastColor($this->primary_color));
     }
 
     // Stesso calcolo per il colore di accento
     protected function textOnAccent(): Attribute
     {
-        return Attribute::get(fn () => self::contrastColor($this->accent_color));
+        return Attribute::get(fn() => self::contrastColor($this->accent_color));
     }
 
     private static function contrastColor(?string $hex): string
@@ -103,7 +107,7 @@ class Quote extends Model
         $rgb = sscanf((string) $hex, '#%02x%02x%02x');
 
         // colore non valido: valore sicuro su sfondo scuro
-        if (count(array_filter($rgb, fn ($v) => $v !== null)) < 3) {
+        if (count(array_filter($rgb, fn($v) => $v !== null)) < 3) {
             return '#FFFFFF';
         }
 
