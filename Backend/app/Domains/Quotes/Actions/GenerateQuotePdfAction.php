@@ -21,6 +21,17 @@ class GenerateQuotePdfAction
         $template = in_array($template, self::TEMPLATES, true) ? $template : 'classic';
 
         $items = $quote->items->sortBy('sort_order')->values();
+        // Convert Eloquent models to QuoteItemData DTOs so the calculator receives camelCase properties
+        $items = $items->map(fn($item) => \App\Domains\Quotes\Data\QuoteItemData::fromArray([
+            'product_id' => $item->product_id,
+            'description' => $item->description,
+            'unit' => $item->unit,
+            'quantity' => $item->quantity,
+            'unit_price' => $item->unit_price,
+            'discount_type' => $item->discount_type,
+            'discount_value' => $item->discount_value,
+            'vat_rate' => $item->vat_rate,
+        ]))->values()->toArray();
         $company = $quote->company;
         $settings = $company?->quoteSettings;
         $client = $this->clientSnapshot($quote);

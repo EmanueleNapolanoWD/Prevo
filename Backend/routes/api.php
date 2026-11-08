@@ -76,6 +76,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('dashboard/chart', [DashboardController::class, 'chart']);
             Route::get('dashboard/insights', [DashboardController::class, 'insights']);
 
+            // ROTTE PDF
             Route::get('quotes/{quoteId}/pdf', [QuotePdfController::class, 'show']);
             Route::get('quotes/{quoteId}/pdf/download', [QuotePdfController::class, 'download']);
 

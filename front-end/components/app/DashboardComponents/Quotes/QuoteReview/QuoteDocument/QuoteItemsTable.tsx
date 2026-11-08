@@ -1,4 +1,4 @@
-import type { QuoteItem } from "@/types/quote";
+import type { QuoteItem } from "@/lib/Utility/Quote/quote.types";
 import { calcLineTotal } from "@/lib/utils";
 
 import { QuoteSectionTitle } from "./QuoteSectionTitle";

@@ -1,6 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import type { QuoteItem, DiscountType } from "@/types/quote";
+import type { QuoteItem, DiscountType } from "@/lib/Utility/Quote/quote.types";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));

@@ -28,12 +28,44 @@ table { text-indent: 0; border-color: inherit; border-collapse: collapse; }
 /* ==========================================================================
    QuoteDocument (radice) + footer
    Differenze volute rispetto allo schermo: niente border-radius/box-shadow
+@verbatim
+<style>
+/* ==========================================================================
+   Reset equivalente al preflight di Tailwind 4 (l'app Next lo carica, quindi
+   l'anteprima React ne dipende: box-sizing, margini azzerati, h2/h3 senza
+   peso/dimensione propri, ecc.). Se in Prevo il preflight è disattivato,
+   elimina questo blocco.
+   ========================================================================== */
+*, ::after, ::before {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border: 0 solid;
+}
+html {
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+  tab-size: 4;
+  /* SOSTITUIRE con il font usato dall'app Next, se diverso dal default Tailwind */
+  font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+h1, h2, h3, h4, h5, h6 { font-size: inherit; font-weight: inherit; }
+strong, b { font-weight: bolder; }
+img { display: block; vertical-align: middle; max-width: 100%; height: auto; }
+table { text-indent: 0; border-color: inherit; border-collapse: collapse; }
+
+/* ==========================================================================
+   QuoteDocument (radice) + footer
+   Differenze volute rispetto allo schermo: niente border-radius/box-shadow
    (sono della "carta" nell'editor) e niente media query mobile (il PDF ha
    larghezza fissa).
    ========================================================================== */
 .qd {
-  --quote-primary: #1f2937;
-  --quote-accent: #2563eb;
+  --quote-primary: {{ $colors["primary"] ?? '#1f2937' }};
+  --quote-accent: {{ $colors["accent"] ?? '#3b82f6' }};
+</style>
+@endverbatim
 
   background: #fff;
   color: #111827;

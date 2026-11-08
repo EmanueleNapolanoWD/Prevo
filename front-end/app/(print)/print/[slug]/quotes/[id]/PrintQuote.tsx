@@ -4,7 +4,7 @@ import {
   QuoteDocument,
   QuoteDocumentProps,
 } from "@/components/app/DashboardComponents/Quotes/QuoteReview/QuoteDocument/QuoteDocument";
-import { Quote } from "@/types/quote";
+import { Quote } from "@/lib/Utility/Quote/quote.types";
 
 const money = new Intl.NumberFormat("it-IT", {
   style: "currency",
@@ -18,6 +18,19 @@ interface PrintQuoteDocument extends QuoteDocumentProps {
 export default function PrintQuote({ data }: { data: PrintQuoteDocument }) {
   const { quote, company, settings } = data;
 
+  const items = (quote.items ?? []).map((i) => {
+    const [name, ...rest] = String(i.description ?? "").split("\n");
+    return {
+      ...i,
+      name: i.name ?? name,
+      description: i.name ? i.description : rest.join("\n"),
+      discount_type:
+        String(i.discount_type).toLowerCase() === "percentage"
+          ? "percentage"
+          : "fixed",
+    };
+  });
+
   return (
     <QuoteDocument
       settings={settings}
@@ -25,7 +38,7 @@ export default function PrintQuote({ data }: { data: PrintQuoteDocument }) {
       header={{
         number: quote.number,
         title: quote.title,
-        description: quote?.description,
+        description: quote.description,
       }}
       tax={{
         vat_rate: quote.vat_rate,
@@ -35,13 +48,13 @@ export default function PrintQuote({ data }: { data: PrintQuoteDocument }) {
         terms: quote.terms,
       }}
       appearance={{
-        template: quote.template,
-        primaryColor: quote.primary_color,
-        accentColor: quote.accent_color,
+        template: quote.appearance?.template,
+        primaryColor: quote.appearance?.primary_color,
+        accentColor: quote.appearance?.accent_color,
       }}
       contact={quote.contact ?? {}}
       selectedClient={quote.client ?? null}
-      items={quote.items ?? []}
+      items={items}
       totals={{
         subtotal: Number(quote.taxable_amount ?? quote.subtotal),
         vat: Number(quote.tax_total),

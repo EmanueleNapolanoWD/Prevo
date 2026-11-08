@@ -40,5 +40,8 @@ export default async function PrintQuotePage({ params, searchParams }: Props) {
 
   const data = res.data; // { quote, company, settings }
 
+  console.log('quote items: ',data.quote)
+
+
   return <PrintQuote data={data} />;
 }

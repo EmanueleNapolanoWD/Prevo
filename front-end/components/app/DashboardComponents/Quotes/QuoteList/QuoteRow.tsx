@@ -3,12 +3,13 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Download, Edit3, FileText, Loader2, Trash2 } from "lucide-react";
-import type { Quote } from "@/types/quote";
+import type { Quote } from "@/lib/Utility/Quote/quote.types";
 import { deleteQuoteAction } from "@/lib/Api/Quote/quote.action";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { StatusBadge } from "@/components/app/shared/StatusBadge";
 import styles from "./quote-row.module.css";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -100,17 +101,13 @@ export default function QuoteRow({ quote, slug, onDelete }: QuoteRowProps) {
           >
             {quote.title}
           </Link>
-          <span className="text-xs text-muted-foreground">
-            {clientName}
-          </span>
+          <span className="text-xs text-muted-foreground">{clientName}</span>
         </div>
       </TableCell>
 
       {/* Cliente */}
       <TableCell className="text-sm">
-        <span className="text-muted-foreground">
-          {clientContact ?? "—"}
-        </span>
+        <span className="text-muted-foreground">{clientContact ?? "—"}</span>
       </TableCell>
 
       {/* Importo */}

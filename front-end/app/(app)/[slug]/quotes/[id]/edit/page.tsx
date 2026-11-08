@@ -24,8 +24,6 @@ export default async function EditQuotePage({ params }: EditQuotePageProps) {
       })())
     : null;
 
-    // console.log('quote in page edit quote: ',quote)
-
   return (
     <main className={styles.page}>
       <nav aria-label="Breadcrumb" className={styles.breadcrumb}>

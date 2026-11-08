@@ -168,7 +168,7 @@ export interface QuoteClientSnapshot {
 export interface QuoteLine {
   id: string;
   product_id: string | null;
-  description: string;
+  description: string | null;
   unit: string;
   quantity: number;
   unit_price: number;
