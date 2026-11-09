@@ -133,7 +133,7 @@ export function quoteToHeader(q: QuoteDetail): QuoteHeaderValues {
 }
 
 export function quoteToTax(q: QuoteDetail): TaxQuoteValue {
-  const discountType: DiscountType = discountTypeFromApi(q.discount_type)
+  const discountType: DiscountType = discountTypeFromApi(q.discount_type);
 
   return {
     vat_rate: String(Number(q.vat_rate ?? 0)),
@@ -255,7 +255,7 @@ export function buildQuotePayload({
         }
       : {
           discount_type: "percentage", // nessun sconto attivo
-          discount_value: 0,           // inviato comunque: evita NULL su colonna NOT NULL
+          discount_value: 0, // inviato comunque: evita NULL su colonna NOT NULL
         }),
     valid_until: tax.valid_until || null,
     notes: tax.notes.trim() || null,
@@ -271,7 +271,6 @@ export function buildQuotePayload({
  * L'UI può inviare simboli (%) €) o stringhe alternative (percent, amount, …).
  */
 
-
 /** Converte la riga del form nella riga del payload. */
 export function toQuotePayloadItem(item: QuoteItem): QuotePayloadItem {
   const hasDiscount =
@@ -283,10 +282,8 @@ export function toQuotePayloadItem(item: QuoteItem): QuotePayloadItem {
 
   return {
     product_id: item.product_id,
-    // quote_items ha solo `description`: nome e descrizione vengono uniti.
-    description: item.description
-      ? `${item.name}\n${item.description}`
-      : item.name,
+    name: item.name.trim(),
+    description: item.description.trim(),
     unit: item.unit,
     quantity: item.quantity,
     unit_price: item.unit_price,
@@ -297,7 +294,7 @@ export function toQuotePayloadItem(item: QuoteItem): QuotePayloadItem {
         }
       : {
           discount_type: "percentage", // default sicuro: nessun sconto attivo
-          discount_value: 0,           // evita NULL su colonna NOT NULL del DB
+          discount_value: 0, // evita NULL su colonna NOT NULL del DB
         }),
   };
 }

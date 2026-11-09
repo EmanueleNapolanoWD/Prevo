@@ -15,6 +15,7 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->foreignUuid('quote_id')->constrained()->restrictOnDelete();
             $table->foreignUuid('product_id')->nullable()->constrained()->nullOnDelete(); //nullabel poichè la riga del preventivo può essere inserita manualmente e quindi non avere un prodotto corrispondente nel catalogo
+            $table->string('name',255);
             $table->text('description');
             $table->string('unit',30);
             $table->decimal('quantity',12,3);

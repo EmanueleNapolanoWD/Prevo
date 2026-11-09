@@ -111,6 +111,7 @@ export const API_TO_DISCOUNT_TYPE: Record<QuoteDiscountType, DiscountType> = {
 /** Riga inviata al backend. Importi in euro; subtotale, IVA e totali li calcola il backend. */
 export interface QuotePayloadItem {
   product_id?: string | null;
+  name: string;
   description: string;
   unit?: string;
   quantity: number; // max 3 decimali
@@ -235,7 +236,6 @@ export type QuoteCompany = {
   phone: string;
   logo_url: string | null;
 };
-
 
 // Alias usato dal hook useQuoteForm
 export type QuoteDetail = Quote;
@@ -390,3 +390,35 @@ export interface UseQuoteFormReturn {
   resetForm: () => void;
   submit: () => Promise<SubmitResult>;
 }
+
+export type QuoteDraftItem = {
+  name: string;
+  description: string;
+  quantity: number;
+  unit_price_cents: number;
+  vat_rate: number | null;
+  product_id: string | null;
+};
+
+export type QuoteDraft = {
+  number: string;
+  title: string;
+  description: string | null;
+  notes: string | null;
+  valid_days: number;
+
+  client_id: string | null;
+  client_name: string | null;
+  client: ClientDetail | null;
+
+  items: QuoteDraftItem[];
+
+  totals: {
+    subtotal: number;
+    discount_total: number;
+    surcharge: number;
+    taxable_amount: number;
+    tax_total: number;
+    total: number;
+  };
+};

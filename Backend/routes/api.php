@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\Ai\QuoteAiController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ClientController;
 use App\Http\Controllers\Api\CompanyController;
@@ -79,6 +80,9 @@ Route::middleware('auth:sanctum')->group(function () {
             // ROTTE PDF
             Route::get('quotes/{quoteId}/pdf', [QuotePdfController::class, 'show']);
             Route::get('quotes/{quoteId}/pdf/download', [QuotePdfController::class, 'download']);
+
+            // ROTTE AI 
+            Route::post('quotes/ai-draft', [QuoteAiController::class, 'draft']);
 
         });
 });

@@ -33,7 +33,7 @@ export default function QuoteEditor({
   return (
     <div className={styles.layout}>
       <div className={styles.formColumn}>
-        <QuoteForm form={form} mode={mode} onSuccess={handleSuccess} />
+        <QuoteForm form={form} mode={mode} slug={slug} onSuccess={handleSuccess} />
       </div>
 
       <aside className={`${styles.previewColumn} position-sticky`}>

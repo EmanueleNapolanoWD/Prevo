@@ -8,6 +8,7 @@ import {
   fetchQuoteById,
   fetchQuotes,
   updateQuote,
+  generateQuoteAiDraft,
 } from "./quote.server";
 
 // ============================================================================
@@ -55,6 +56,27 @@ export async function deleteQuoteAction(slug: string, quoteId: string) {
   if (res.ok) {
     revalidatePath(`/${slug}/quotes`);
   }
+
+  return res;
+}
+
+// ============================================================================
+// AI: genera una bozza, non salva e non invalida nessuna cache
+// ============================================================================
+
+export async function generateQuoteDraftAction(slug: string, prompt: string) {
+  const text = prompt.trim();
+
+  // evita una chiamata inutile (e quota AI sprecata) per richieste troppo brevi
+  if (text.length < 10) {
+    return {
+      ok: false as const,
+      status: 422,
+      message: "Aggiungi qualche dettaglio in più (almeno 10 caratteri).",
+    };
+  }
+
+  const res = await generateQuoteAiDraft(slug, text);
 
   return res;
 }

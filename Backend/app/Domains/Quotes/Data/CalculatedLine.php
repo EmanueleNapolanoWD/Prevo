@@ -12,6 +12,7 @@ final readonly class CalculatedLine
     public function __construct(
         public int $sortOrder,
         public ?string $productId,
+        public string $name,
         public string $description,
         public string $unit,
         public float $quantity,
@@ -31,6 +32,7 @@ final readonly class CalculatedLine
 
         return [
             'product_id' => $this->productId,
+            'name' => $this->name,
             'description' => $this->description,
             'unit' => $this->unit,
             'quantity' => $this->quantity,

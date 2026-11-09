@@ -166,6 +166,7 @@ final class QuoteTotalsCalculator
             $lines[] = new CalculatedLine(
                 sortOrder: $i,
                 productId: $item->productId,
+                name: $item->name,
                 description: $item->description,
                 unit: $item->unit,
                 quantity: $item->quantity,

@@ -8,13 +8,14 @@ use App\Domains\Quotes\Supports\Money;
 final class QuoteItemData
 {
     public function __construct(
+        public string $name,
         public string $description,
         public float $quantity,
         public int $unitPriceCents,
         public string $unit = 'pz',
         public ?float $vatRate = null,
         public ?DiscountType $discountType = null,
-        public ?float $discountValue = null,
+        public ?float $discountValue = 0.0,
         public ?string $productId,
     ) {
     }
@@ -22,6 +23,7 @@ final class QuoteItemData
     public static function fromArray(array $v): self
     {
         return new self(
+            name: $v['name'] ?? trim((string) $v['description'] ?? ''),
             description: trim((string) $v['description']),
             quantity: (float) $v['quantity'],
             unitPriceCents: Money::toCents($v['unit_price']),

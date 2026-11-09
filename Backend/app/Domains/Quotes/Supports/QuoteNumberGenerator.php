@@ -11,18 +11,22 @@ use LogicException;
 
 final class QuoteNumberGenerator
 {
-    public function next(QuoteSettings $settings, ?CarbonInterface $date = null): string
-    {
+    public function next(
+        QuoteSettings $settings,
+        ?CarbonInterface $date = null
+    ): string {
         if (DB::transactionLevel() === 0) {
-            throw new LogicException('QuoteNumberGenerator::next() va chiamato dentro una transazione.');
+            throw new LogicException(
+                'QuoteNumberGenerator::next() va chiamato dentro una transazione.'
+            );
         }
 
+        $year = ($date ?? CarbonImmutable::now())
+            ->setTimezone($settings->timezone)
+            ->year;
 
-        $year = ($now ?? CarbonImmutable::now())->setTimezone($settings->timezone)->year;
-
-        //reset annuale solo se quote_number_reset_year è treu e anno diverso 
         if (
-            $settings->quote_number_reset_year !== null
+            $settings->quote_number_reset_year
             && $settings->quote_number_year !== $year
         ) {
             $settings->next_quote_number = $settings->quote_start_number;
@@ -34,15 +38,42 @@ final class QuoteNumberGenerator
         $settings->quote_number_year = $year;
         $settings->save();
 
+        return $this->format($settings, $year, $sequence);
+    }
+
+    public function preview(
+        QuoteSettings $settings,
+        ?CarbonInterface $date = null
+    ): string {
+        $year = ($date ?? CarbonImmutable::now())
+            ->setTimezone($settings->timezone)
+            ->year;
+
+        $sequence = (
+            $settings->quote_number_reset_year
+            && $settings->quote_number_year !== $year
+        )
+            ? $settings->quote_start_number
+            : $settings->next_quote_number;
+
+        return $this->format($settings, $year, $sequence);
+    }
+
+    private function format(
+        QuoteSettings $settings,
+        int $year,
+        int $sequence
+    ): string {
         return sprintf(
             '%s-%d-%s',
             $settings->quote_prefix,
             $year,
-            str_pad((string) $sequence, $settings->quote_number_padding, '0', STR_PAD_LEFT),
+            str_pad(
+                (string) $sequence,
+                $settings->quote_number_padding,
+                '0',
+                STR_PAD_LEFT
+            )
         );
     }
-
-
-
-
 }

@@ -1,7 +1,11 @@
 import "server-only";
 
 import { isAxiosError } from "axios";
-import type { Quote, QuotePayload } from "@/types/quote";
+import type {
+  Quote,
+  QuoteDraft,
+  QuotePayload,
+} from "@/lib/Utility/Quote/quote.types";
 import { authHeaders, serverApi } from "../Services/server-api";
 import { handleReadError } from "../Services/errors";
 import type { PrintQuoteData } from "./quote.mappers";
@@ -285,6 +289,29 @@ export async function deleteQuote(
     return toActionError(error, {
       forbidden: "Non hai i permessi per eliminare questo preventivo.",
       fallback: "Impossibile eliminare il preventivo.",
+    });
+  }
+}
+
+export async function generateQuoteAiDraft(
+  slug: string,
+  prompt: string,
+): Promise<ActionResult<QuoteDraft>> {
+  try {
+    const res = await serverApi.post(
+      `${quotesUrl(slug)}/ai-draft`,
+      { prompt },
+      {
+        headers: await authHeaders(),
+        timeout: 70_000,
+      },
+    );
+
+    return { ok: true, data: unwrap<QuoteDraft>(res.data) };
+  } catch (error) {
+    return toActionError(error, {
+      forbidden: "Non hai i permessi per creare preventivi in questa azienda!",
+      fallback: "Impossibile generare la bozza con l'AI.",
     });
   }
 }

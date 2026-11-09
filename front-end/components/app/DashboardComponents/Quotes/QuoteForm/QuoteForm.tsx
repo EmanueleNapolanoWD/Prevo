@@ -8,6 +8,7 @@ import QuoteItems from "./QuoteItems/QuoteItems";
 import TaxQuoteSettings from "@/components/app/DashboardComponents/Quotes/QuoteForm/Tax/TaxQuoteSetting";
 import { QuoteHeader } from "./QuoteHeader/QuoteHeader";
 import QuoteTemplate from "./QuoteTemplate/QuoteTemplate";
+import { QuoteAiSection } from "./QuoteAiSection/QuoteAiSection";
 import styles from "./quote-form.module.css";
 import type { UseQuoteFormReturn } from "../hooks/useQuoteForm";
 import { LoaderCircle, Save } from "lucide-react";
@@ -15,12 +16,14 @@ import { LoaderCircle, Save } from "lucide-react";
 type QuoteFormProps = {
   form: UseQuoteFormReturn;
   mode?: "create" | "edit";
+  slug: string;
   onSuccess?: () => void;
 };
 
 export default function QuoteForm({
   form,
   mode = "create",
+  slug,
   onSuccess,
 }: QuoteFormProps) {
   const isEdit = mode === "edit";
@@ -81,6 +84,9 @@ export default function QuoteForm({
 
   return (
     <div className={styles.form}>
+      {/* Genera con AI: prima sezione, disponibile solo in modalità create */}
+      <QuoteAiSection mode={mode} slug={slug} form={form} />
+
       {/* aspetto template preventivo */}
       <section className={styles.section}>
         <QuoteTemplate values={appearance} onChange={setAppearance} />
