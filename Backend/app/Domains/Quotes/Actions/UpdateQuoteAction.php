@@ -164,6 +164,7 @@ class UpdateQuoteAction
         return [
             'sort_order' => $line->sortOrder,
             'product_id' => $line->productId,
+            'name' => $line->name,
             'description' => $line->description,
             'unit' => $line->unit,
             'quantity' => $line->quantity,
@@ -216,6 +217,7 @@ class UpdateQuoteAction
                 ->sortBy('sort_order')
                 ->map(fn($i) => $i->only([
                     'product_id',
+                    'name',
                     'description',
                     'unit',
                     'quantity',
@@ -268,6 +270,7 @@ class UpdateQuoteAction
     {
         return [
             $item['product_id'] ?? null,
+            $item['name'] ?? null,
             $item['description'] ?? null,
             $item['unit'] ?? null,
             (string) ($item['quantity'] ?? 0),

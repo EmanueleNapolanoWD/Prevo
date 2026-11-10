@@ -203,6 +203,60 @@
 .heroCta { display: inline-flex; gap: 10px; padding: 15px 22px; color: var(--tertiary-foreground); background: var(--tertiary); border-radius: 999px; font-weight: 700; text-decoration: none; }
 .heroCta:hover, .heroCta:focus-visible { background: var(--primary); color: var(--primary-foreground); }
 
+/* Token tema Prevo (landing) */
+:root {
+  --prevo-primary: #0E8F4B;
+  --prevo-primary-hover: #0B7340;
+  --prevo-bg: #F1F8F3;
+  --prevo-dark: #0B3D26;
+  --prevo-dark-hover: #09311F;
+  --prevo-ink: #0B1B13;
+  --prevo-text: #5B6B63;
+  --prevo-border: #E4ECE9;
+  --prevo-shadow: 0 10px 40px -12px rgba(14, 143, 75, 0.07);
+  --prevo-nav-height: 76px;
+}
+
+/* Utilità tema (nessun colore sparso nel JSX) */
+.prevo-ink { color: var(--prevo-ink); }
+.prevo-text { color: var(--prevo-text); }
+.text-prevo { color: var(--prevo-primary); }
+.bg-prevo-primary { background-color: var(--prevo-primary); }
+.bg-prevo-primary-hover { background-color: var(--prevo-primary-hover); }
+.border-prevo-primary { border-color: var(--prevo-primary); }
+.prevo-bg { background-color: var(--prevo-bg); }
+.prevo-border { border-color: var(--prevo-border); }
+.prevo-dark { background-color: var(--prevo-dark); color: #FFFFFF; }
+.prevo-dark-hover { background-color: var(--prevo-dark-hover); }
+.prevo-shadow { box-shadow: var(--prevo-shadow); }
+
+/* Navigazione ancore con navbar sticky */
+html {
+  scroll-behavior: smooth;
+}
+.anchor-section {
+  scroll-margin-top: calc(var(--prevo-nav-height) + 4px);
+}
+/* Connettore tra i passi "Come funziona" (solo desktop) */
+.steps-connector {
+  position: relative;
+}
+.steps-connector::before {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  top: 20px;
+  height: 1px;
+  background-color: var(--prepo-border);
+  z-index: 0;
+}
+@media (max-width: 1023px) {
+  .steps-connector::before {
+    display: none;
+  }
+}
+
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -210,4 +264,14 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+/* FAQ: nascondo il marker nativo di <summary> e ruoto l'icona quando aperto */
+details summary {
+  list-style: none;
+}
+details summary::-webkit-details-marker {
+  display: none;
+}
+details[open] .faq-plus {
+  transform: rotate(45deg);
 }

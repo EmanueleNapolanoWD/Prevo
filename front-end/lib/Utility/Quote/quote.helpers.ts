@@ -283,7 +283,10 @@ export function toQuotePayloadItem(item: QuoteItem): QuotePayloadItem {
   return {
     product_id: item.product_id,
     name: item.name.trim(),
-    description: item.description.trim(),
+    description:
+      item.description.trim()
+        ? `${item.name.trim()}\n${item.description.trim()}`
+        : item.name.trim(),
     unit: item.unit,
     quantity: item.quantity,
     unit_price: item.unit_price,

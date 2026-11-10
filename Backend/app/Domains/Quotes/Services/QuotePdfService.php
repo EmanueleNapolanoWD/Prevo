@@ -168,10 +168,16 @@ class QuotePdfService
                 continue;
             }
 
-            $css = Http::timeout(15)->get($internal . $href)->body();
-            $css = str_replace(
-                ['url(/_next', 'url("/_next', "url('/_next"],
-                ["url({$public}/_next", "url(\"{$public}/_next", "url('{$public}/_next"],
+            $css = Http::timeout(15)->throw()->get($internal . $href)->body();
+            $cssBase = $public . rtrim(dirname($href), '/') . '/';
+
+            $css = preg_replace_callback(
+                '/url\(\s*([\'"]?)(?!data:|https?:|\/\/|#)([^\'")]+)\1\s*\)/',
+                function ($m) use ($cssBase, $public) {
+                    $u = $m[2];
+                    $abs = str_starts_with($u, '/') ? $public . $u : $cssBase . $u;
+                    return 'url("' . $abs . '")';
+                },
                 $css
             );
 
