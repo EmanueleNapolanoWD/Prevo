@@ -60,7 +60,7 @@ class QuotePdfController extends Controller
     private function respond(Quote $quote, string $disposition): Response
     {
         try {
-            $content = $this->pdf->content($quote);
+            $content = $this->pdf->render($quote);
         } catch (RuntimeException $e) {
             Log::warning('[pdf] errore generazione PDF', [
                 'quote_id' => $quote->id,

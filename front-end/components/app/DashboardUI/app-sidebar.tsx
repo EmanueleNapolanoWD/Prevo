@@ -1,5 +1,5 @@
-import * as React from "react"
-import Link from "next/link"
+import * as React from "react";
+import Link from "next/link";
 import {
   LayoutDashboardIcon,
   FileTextIcon,
@@ -10,17 +10,14 @@ import {
   UsersRoundIcon,
   PlugIcon,
   Settings2Icon,
-  CircleHelpIcon,
+  LifeBuoyIcon,
   SearchIcon,
-  DatabaseIcon,
-  FileChartColumnIcon,
-  FileIcon,
   CommandIcon,
-} from "lucide-react"
+} from "lucide-react";
 
-import { NavMain } from "@/components/app/DashboardUI/nav-main"
-import { NavSecondary } from "@/components/app/DashboardUI/nav-secondary"
-import { NavUser } from "@/components/app/DashboardUI/nav-user"
+import { NavMain } from "@/components/app/DashboardUI/nav-main";
+import { NavSecondary } from "@/components/app/DashboardUI/nav-secondary";
+import { NavUser } from "@/components/app/DashboardUI/nav-user";
 import {
   Sidebar,
   SidebarContent,
@@ -29,35 +26,39 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
-import type { SidebarCompany, SidebarUser } from "@/lib/Utility/Auth/auth.types"
+} from "@/components/ui/sidebar";
+import type {
+  SidebarCompany,
+  SidebarUser,
+} from "@/lib/Utility/Auth/auth.types";
 
 type AppSidebarProps = React.ComponentProps<typeof Sidebar> & {
-  slug: string
-  user: SidebarUser
-  company: SidebarCompany
-}
+  slug: string;
+  user: SidebarUser;
+  company: SidebarCompany;
+};
 
 export function AppSidebar({ slug, user, company, ...props }: AppSidebarProps) {
-  const base = `/${slug}`
+  const base = `/${slug}`;
 
   const navMain = [
     { title: "Dashboard", url: base, icon: <LayoutDashboardIcon /> },
     { title: "Preventivi", url: `${base}/quotes`, icon: <FileTextIcon /> },
     { title: "Clienti", url: `${base}/clients`, icon: <UsersIcon /> },
     { title: "Catalogo", url: `${base}/products`, icon: <PackageIcon /> },
-    { title: "Assistente AI", url: `${base}/assistente`, icon: <SparklesIcon /> },
-    { title: "Report", url: `${base}/report`, icon: <ChartBarIcon /> },
-    { title: "Team", url: `${base}/team`, icon: <UsersRoundIcon /> },
-    { title: "Integrazioni", url: `${base}/integrazioni`, icon: <PlugIcon /> },
-  ]
+    {
+      title: "Assistente AI",
+      url: `${base}/assistente`,
+      icon: <SparklesIcon />,
+    },
+    //{ title: "Team", url: `${base}/team`, icon: <UsersRoundIcon /> },
+    //{ title: "Integrazioni", url: `${base}/integrazioni`, icon: <PlugIcon /> },
+  ];
 
   const navSecondary = [
     { title: "Impostazioni", url: `${base}/settings`, icon: <Settings2Icon /> },
-    { title: "Aiuto", url: "#", icon: <CircleHelpIcon /> },
-    { title: "Cerca", url: "#", icon: <SearchIcon /> },
-  ]
-
+    { title: "Supporto", url: `${base}/help`, icon: <LifeBuoyIcon /> },
+  ];
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>
@@ -77,12 +78,12 @@ export function AppSidebar({ slug, user, company, ...props }: AppSidebarProps) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={navMain} slug={slug}/>
+        <NavMain items={navMain} slug={slug} />
         <NavSecondary items={navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={user} />
       </SidebarFooter>
     </Sidebar>
-  )
+  );
 }

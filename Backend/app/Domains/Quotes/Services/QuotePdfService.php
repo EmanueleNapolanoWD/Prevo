@@ -2,33 +2,34 @@
 
 namespace App\Domains\Quotes\Services;
 
+use App\Domains\Companies\Models\Company;
+use App\Domains\Quotes\Enums\QuoteTemplate;
 use App\Domains\Quotes\Models\Quote;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Mail\Attachment;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
-use Spatie\LaravelPdf\Facades\Pdf;
-use Spatie\LaravelPdf\PdfBuilder;
+use Throwable;
 
 class QuotePdfService
 {
-    public function builder(Quote $quote): PdfBuilder
+    private const LOGO_DISK = 'r2-logos';
+
+    /** Contenuto (byte) del PDF del preventivo, generato in locale senza servizi esterni. */
+    public function render(Quote $quote): string
     {
-        return Pdf::html($this->renderHtml($quote))
-            ->driver('cloudflare')
-            ->format('a4');
+        return Pdf::loadView('pdf.quote', $this->viewData($quote))
+            ->setPaper('a4')
+            // Incorpora solo i caratteri usati: il file resta leggero, adatto agli allegati email.
+            ->setOption('isFontSubsettingEnabled', true)
+            ->output();
     }
 
-    /** Byte del PDF. Cache breve, si invalida a ogni modifica del preventivo. */
-    public function content(Quote $quote): string
+    /** Allegato email pronto all'uso: in una Mailable `->attach($pdf->attachment($quote))`. */
+    public function attachment(Quote $quote): Attachment
     {
-        $key = "quote-pdf:{$quote->id}:{$quote->updated_at?->timestamp}";
-
-        return base64_decode(Cache::remember(
-            $key,
-            now()->addMinutes(15),
-            fn() => $this->builder($quote)->base64()
-        ));
+        return Attachment::fromData(fn () => $this->render($quote), $this->filename($quote))
+            ->withMime('application/pdf');
     }
 
     public function filename(Quote $quote): string
@@ -36,7 +37,7 @@ class QuotePdfService
         return "preventivo-{$quote->number}.pdf";
     }
 
-    /** Link pubblico temporaneo per WhatsApp / mail. */
+    /** Link pubblico temporaneo firmato (WhatsApp / mail). */
     public function publicUrl(Quote $quote, int $days = 7): string
     {
         $path = URL::temporarySignedRoute(
@@ -49,164 +50,88 @@ class QuotePdfService
         return rtrim(config('app.url'), '/') . $path;
     }
 
-    private function renderHtml(Quote $quote): string
+    /** @return array<string, mixed> */
+    private function viewData(Quote $quote): array
     {
+        $quote->loadMissing([
+            'items',
+            'company.primaryAddress',
+            'company.primaryEmail',
+            'company.primaryPhone',
+            'company.quoteSettings',
+        ]);
+
         $company = $quote->company;
-        $internal = rtrim(config('app.frontend_internal_url'), '/');
-        $public = rtrim(config('app.frontend_public_url'), '/');
+        $settings = $company->quoteSettings;
+        $vatRates = $quote->items->map(fn ($item) => (float) $item->vat_rate)->unique();
 
-        $signed = URL::temporarySignedRoute(
-            'quotes.print-data',
-            now()->addMinutes(2),
-            ['company' => $company->slug, 'quoteId' => $quote->id],
-            absolute: false,
-        );
-        parse_str((string) parse_url($signed, PHP_URL_QUERY), $query);
-
-        $url = "{$internal}/print/{$company->slug}/quotes/{$quote->id}";
-        $secretConfigured = filled(config('services.print.secret'));
-
-        $start = microtime(true);
-
-        try {
-            $response = Http::withHeaders(['X-Print-Secret' => config('services.print.secret')])
-                ->timeout(30)
-                ->get($url, $query);
-
-            $status = $response->status();
-            $elapsedMs = (microtime(true) - $start) * 1000;
-
-
-            $html = $response->throw()->body();
-
-        } catch (\Illuminate\Http\Client\RequestException $e) {
-            $status = $e->response?->status() ?? null;
-            $elapsedMs = (microtime(true) - $start) * 1000;
-
-            Log::error('[pdf] errore HTTP pagina di stampa', [
-                'quote_id' => $quote->id,
-                'company_slug' => $company->slug,
-                'url' => $url,
-                'status' => $status,
-                'elapsed_ms' => round($elapsedMs, 1),
-                'has_print_secret_header' => $secretConfigured,
-                'message' => $e->getMessage(),
-            ]);
-
-            throw new \RuntimeException(
-                'Pagina di stampa non raggiungibile (HTTP ' . ($status ?? 'sconosciuto') . ').',
-                previous: $e,
-            );
-        } catch (\Throwable $e) {
-            $elapsedMs = (microtime(true) - $start) * 1000;
-
-            Log::error('[pdf] errore imprevisto richiesta pagina di stampa', [
-                'quote_id' => $quote->id,
-                'company_slug' => $company->slug,
-                'url' => $url,
-                'elapsed_ms' => round($elapsedMs, 1),
-                'has_print_secret_header' => $secretConfigured,
-                'message' => $e->getMessage(),
-            ]);
-
-            throw $e;
-        }
-
-        if (str_contains($html, 'name="next-error"') || str_contains($html, 'NEXT_HTTP_ERROR_FALLBACK')) {
-            Log::warning('[pdf] risposta pagina di stampa contiene errore Next.js', [
-                'quote_id' => $quote->id,
-                'company_slug' => $company->slug,
-                'url' => $url,
-                'bytes' => strlen($html),
-            ]);
-
-            throw new \RuntimeException('Pagina di stampa non valida (errore Next.js): controlla PRINT_SECRET e la firma.');
-        }
-
-
-        return $this->prepare($html, $internal, $public);
+        return [
+            'quote' => $quote,
+            'company' => $company,
+            'settings' => $settings,
+            'template' => QuoteTemplate::tryFrom((string) $quote->template)?->value ?? QuoteTemplate::Classic->value,
+            // I colori finiscono dentro un tag <style>: sono ammessi solo valori esadecimali.
+            'primary' => $this->safeColor($quote->primary_color, '#1F2937'),
+            'accent' => $this->safeColor($quote->accent_color, '#2563EB'),
+            'logo' => $this->logoDataUri($company),
+            'companyLines' => $this->companyLines($company),
+            'clientName' => data_get($quote->client_snapshot, 'display_name'),
+            'clientLines' => array_filter([$quote->contact_address, $quote->contact_email, $quote->contact_phone]),
+            'validUntil' => $quote->valid_until?->format($settings?->date_format ?: 'd/m/Y'),
+            // L'aliquota viene mostrata solo se è la stessa su tutte le righe.
+            'vatRate' => $vatRates->count() > 1 ? null : ($vatRates->first() ?? (float) $quote->vat_rate),
+        ];
     }
 
-    private function prepare(string $html, string $internal, string $public): string
+    /** @return list<string> */
+    private function companyLines(Company $company): array
     {
-        $previous = libxml_use_internal_errors(true);
+        $address = $company->primaryAddress;
+        $cityLine = $address ? trim("{$address->postal_code} {$address->city}") : '';
 
-        $dom = new \DOMDocument();
-        $dom->loadHTML('<?xml encoding="UTF-8">' . $html, LIBXML_NOWARNING | LIBXML_NOERROR);
-
-        foreach ($dom->childNodes as $node) {            // rimuove il PI xml aggiunto per la codifica
-            if ($node->nodeType === XML_PI_NODE) {
-                $dom->removeChild($node);
-                break;
-            }
+        if ($address?->province) {
+            $cityLine .= " ({$address->province})";
         }
 
-        $xp = new \DOMXPath($dom);
+        $join = fn (array $parts, string $glue) => implode($glue, array_filter($parts));
 
-        // 1. Suspense: porta il contenuto dal blocco nascosto al suo posto
-        foreach ($xp->query('//template[starts-with(@id,"B:")]') as $template) {
-            $id = 'S:' . substr($template->getAttribute('id'), 2);
-            $source = $xp->query("//div[@id='{$id}']")->item(0);
+        return array_values(array_filter([
+            strcasecmp(trim((string) $company->legal_name), trim((string) $company->name)) !== 0 ? $company->legal_name : null,
+            $join([$address?->address, $address?->address_extra, $cityLine], ', '),
+            $join([
+                $company->vat_number ? "P.IVA {$company->vat_number}" : null,
+                $company->tax_code ? "C.F. {$company->tax_code}" : null,
+            ], ' · '),
+            $company->tax_regime ? "Regime fiscale: {$company->tax_regime}" : null,
+            $join([
+                $company->sdi_code ? "Codice SDI {$company->sdi_code}" : null,
+                $company->pec ? "PEC {$company->pec}" : null,
+            ], ' · '),
+            $join([$company->primaryEmail?->email, $company->primaryPhone?->phone], ' · '),
+        ]));
+    }
 
-            if (!$source) {
-                continue;
-            }
-
-            while ($source->firstChild) {
-                $template->parentNode->insertBefore($source->firstChild, $template);
-            }
-
-            $template->parentNode->removeChild($template);
-            $source->parentNode->removeChild($source);
+    /** Il logo viene incorporato come data URI; un errore dello storage non deve bloccare il PDF. */
+    private function logoDataUri(Company $company): ?string
+    {
+        if (! $company->logo_path) {
+            return null;
         }
 
-        // 2. CSS inline, scaricato dalla rete interna
-        foreach (iterator_to_array($xp->query('//link[@rel="stylesheet"]')) as $link) {
-            $href = $link->getAttribute('href');
+        try {
+            $disk = Storage::disk(self::LOGO_DISK);
+            $mime = $disk->mimeType($company->logo_path) ?: 'image/png';
 
-            if (!str_starts_with($href, '/')) {
-                continue;
-            }
+            return "data:{$mime};base64," . base64_encode($disk->get($company->logo_path));
+        } catch (Throwable $e) {
+            report($e);
 
-            $css = Http::timeout(15)->throw()->get($internal . $href)->body();
-            $cssBase = $public . rtrim(dirname($href), '/') . '/';
-
-            $css = preg_replace_callback(
-                '/url\(\s*([\'"]?)(?!data:|https?:|\/\/|#)([^\'")]+)\1\s*\)/',
-                function ($m) use ($cssBase, $public) {
-                    $u = $m[2];
-                    $abs = str_starts_with($u, '/') ? $public . $u : $cssBase . $u;
-                    return 'url("' . $abs . '")';
-                },
-                $css
-            );
-
-            $style = $dom->createElement('style');
-            $style->appendChild($dom->createTextNode($css));
-            $link->parentNode->replaceChild($style, $link);
+            return null;
         }
+    }
 
-        // 3. Via script e preload: il PDF è HTML statico
-        foreach (iterator_to_array($xp->query('//script | //link[@rel="preload" or @rel="prefetch" or @rel="modulepreload"]')) as $node) {
-            $node->parentNode->removeChild($node);
-        }
-
-        // 4. Asset rimasti relativi (immagini, font) verso l'URL pubblico
-        if ($head = $xp->query('//head')->item(0)) {
-            $base = $dom->createElement('base');
-            $base->setAttribute('href', $public . '/');
-            $head->insertBefore($base, $head->firstChild);
-        }
-
-        $result = $dom->saveHTML();
-
-        libxml_clear_errors();
-        libxml_use_internal_errors($previous);
-
-        if (config('app.debug')) {
-            file_put_contents(storage_path('app/debug-quote.html'), $result);   // TEMPORANEO, da togliere
-        }
-
-        return $result;
+    private function safeColor(?string $color, string $fallback): string
+    {
+        return preg_match('/^#[0-9a-fA-F]{6}$/', (string) $color) ? $color : $fallback;
     }
 }

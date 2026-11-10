@@ -26,11 +26,11 @@ export function NavMain({ items, slug }: NavMainProps) {
 
   const handleClick = () => {
     if (!slug) {
-      console.error("ATTENZIONE: Lo slug è vuoto o undefined!")
-      return
+      console.error("ATTENZIONE: Lo slug è vuoto o undefined!");
+      return;
     }
-    router.push(`/${slug}/quotes/create`)
-  }
+    router.push(`/${slug}/quotes/create`);
+  };
 
   return (
     <SidebarGroup>
@@ -39,20 +39,12 @@ export function NavMain({ items, slug }: NavMainProps) {
           <SidebarMenuItem className="flex items-center gap-2">
             <SidebarMenuButton
               tooltip="Quick Create"
-              className="min-w-8 bg-primary text-primary-foreground duration-200 ease-linear hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground"
+              className="min-w-10 rounded-md bg-primary text-primary-foreground font-medium duration-200 ease-linear hover:bg-primary/80 hover:text-primary-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 active:bg-primary/80 active:text-primary-foreground"
               onClick={handleClick}
             >
               <CirclePlusIcon />
               <span>Crea Preventivo</span>
             </SidebarMenuButton>
-            <Button
-              size="icon"
-              className="size-8 group-data-[collapsible=icon]:opacity-0"
-              variant="outline"
-            >
-              <MailIcon />
-              <span className="sr-only">Inbox</span>
-            </Button>
           </SidebarMenuItem>
         </SidebarMenu>
         <SidebarMenu>
